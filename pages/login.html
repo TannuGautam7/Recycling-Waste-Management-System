@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Login / Register | EcoRecycle</title>
+  <meta name="description" content="Access your personalized EcoRecycle user dashboard or system administrator control portal.">
+  
+  <link rel="stylesheet" href="../css/style.css">
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <style>
+    .auth-container {
+      min-height: calc(100vh - 160px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 3rem 1.5rem;
+    }
+
+    .auth-card {
+      background-color: var(--white);
+      border-radius: var(--radius-xl);
+      border: 1px solid var(--border-green);
+      box-shadow: var(--shadow-lg);
+      max-width: 460px;
+      width: 100%;
+      padding: 2.5rem;
+    }
+
+    .auth-tabs {
+      display: flex;
+      border-bottom: 2px solid var(--border-light);
+      margin-bottom: 2rem;
+    }
+
+    .auth-tab {
+      flex: 1;
+      text-align: center;
+      padding: 0.75rem 0;
+      font-weight: 700;
+      font-size: 1.1rem;
+      color: var(--secondary-text);
+      cursor: pointer;
+      position: relative;
+    }
+
+    .auth-tab.active {
+      color: var(--primary-green);
+    }
+
+    .auth-tab.active::after {
+      content: '';
+      position: absolute;
+      bottom: -2px;
+      left: 0;
+      width: 100%;
+      height: 3px;
+      background-color: var(--main-green);
+      border-radius: var(--radius-full);
+    }
+
+    .auth-form {
+      display: none;
+    }
+
+    .auth-form.active {
+      display: flex;
+      flex-direction: column;
+      gap: 1.25rem;
+    }
+  </style>
+</head>
+<body style="background-color: var(--soft-green);">
+
+  <!-- PUBLIC NAVBAR -->
+  <nav class="navbar">
+    <div class="container nav-container">
+      <a href="../index.html" class="brand-logo">
+        <div class="logo-icon-box">
+          <i data-lucide="recycle"></i>
+        </div>
+        <div class="brand-text">
+          <span class="brand-name">EcoRecycle</span>
+          <span class="brand-subtitle">Smart Waste. Better Future.</span>
+        </div>
+      </a>
+
+      <ul class="nav-menu" id="navMenu">
+        <li><a href="../index.html" class="nav-link">Home</a></li>
+        <li><a href="waste-search.html" class="nav-link">Waste Search</a></li>
+        <li><a href="recycling-guide.html" class="nav-link">Recycling Guide</a></li>
+        <li><a href="locations.html" class="nav-link">Recycling Locations</a></li>
+        <li><a href="contact.html" class="nav-link">Contact Us</a></li>
+      </ul>
+
+      <div class="nav-actions">
+        <a href="login.html" class="btn btn-primary btn-sm">Start Recycling</a>
+      </div>
+    </div>
+  </nav>
+
+  <!-- AUTH SECTION -->
+  <div class="auth-container">
+    <div class="auth-card">
+      
+      <!-- Brand Header -->
+      <div style="text-align: center; margin-bottom: 2rem;">
+        <div style="width: 56px; height: 56px; background-color: var(--light-green); color: var(--primary-green); border-radius: var(--radius-md); display: inline-flex; align-items: center; justify-content: center; font-size: 1.75rem; margin-bottom: 0.75rem;">
+          <i data-lucide="user-check"></i>
+        </div>
+        <h2 style="font-size: 1.75rem;">Account Sign In</h2>
+        <p style="color: var(--secondary-text); font-size: 0.95rem;">Access your EcoRecycle account or system portal.</p>
+      </div>
+
+      <!-- Tab Switcher -->
+      <div class="auth-tabs">
+        <div class="auth-tab active" onclick="switchAuthTab('login', this)">Login</div>
+        <div class="auth-tab" onclick="switchAuthTab('register', this)">Register</div>
+      </div>
+
+      <!-- LOGIN FORM -->
+      <form id="loginForm" class="auth-form active">
+        <div class="form-group">
+          <label class="form-label" for="loginEmail">Email Address</label>
+          <input type="email" id="loginEmail" class="form-control" placeholder="Enter your email address..." required>
+        </div>
+
+        <div class="form-group">
+          <div style="display: flex; justify-content: space-between; align-items: center;">
+            <label class="form-label" for="loginPassword">Password</label>
+            <a href="#" onclick="showToast('Password reset link sent to your email.'); return false;" style="font-size: 0.8rem; color: var(--main-green); font-weight: 600;">Forgot Password?</a>
+          </div>
+          <input type="password" id="loginPassword" class="form-control" placeholder="Enter your password..." required>
+        </div>
+
+        <div style="display: flex; justify-content: space-between; align-items: center; font-size: 0.875rem;">
+          <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer;">
+            <input type="checkbox" checked style="accent-color: var(--main-green);"> Remember me
+          </label>
+        </div>
+
+        <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 0.5rem;">
+          <i data-lucide="log-in"></i> Sign In
+        </button>
+      </form>
+
+      <!-- REGISTER FORM -->
+      <form id="registerForm" class="auth-form">
+        <div class="form-group">
+          <label class="form-label" for="regName">Full Name</label>
+          <input type="text" id="regName" class="form-control" placeholder="e.g. Alex Johnson" required>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="regEmail">Email Address</label>
+          <input type="email" id="regEmail" class="form-control" placeholder="e.g. resident@example.com" required>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="regPass">Password</label>
+          <input type="password" id="regPass" class="form-control" placeholder="At least 8 characters" required minlength="8">
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="regConfirmPass">Confirm Password</label>
+          <input type="password" id="regConfirmPass" class="form-control" placeholder="Repeat password" required>
+        </div>
+
+        <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 0.5rem;">
+          <i data-lucide="user-plus"></i> Create Account
+        </button>
+      </form>
+
+    </div>
+  </div>
+
+  <!-- FOOTER -->
+  <footer class="footer">
+    <div class="container">
+      <div class="footer-bottom" style="border-top: none; padding-top: 0;">
+        <div>&copy; 2026 EcoRecycle Australia. Recycling & Waste Management System Prototype.</div>
+        <div>DAT709 Capstone Project Prototype</div>
+      </div>
+    </div>
+  </footer>
+
+  <script src="../js/script.js"></script>
+  <script>
+    function switchAuthTab(tab, element) {
+      document.querySelectorAll('.auth-tab').forEach(t => t.classList.remove('active'));
+      document.querySelectorAll('.auth-form').forEach(f => f.classList.remove('active'));
+
+      element.classList.add('active');
+      if (tab === 'login') {
+        document.getElementById('loginForm').classList.add('active');
+      } else {
+        document.getElementById('registerForm').classList.add('active');
+      }
+    }
+
+    if (window.location.hash === '#register') {
+      const regTab = document.querySelectorAll('.auth-tab')[1];
+      if (regTab) switchAuthTab('register', regTab);
+    }
+  </script>
+</body>
+</html>

@@ -1,0 +1,561 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dashboard | EcoRecycle</title>
+  <meta name="description" content="Personalized EcoRecycle portal for tracking household recycling activity, bin collection schedules, and administrative waste database controls.">
+  
+  <link rel="stylesheet" href="../css/style.css">
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <style>
+    .auth-lock-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      background: rgba(15, 23, 42, 0.75);
+      backdrop-filter: blur(8px);
+      z-index: 4000;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 1.5rem;
+    }
+  </style>
+</head>
+<body style="background-color: var(--bg-main);">
+
+  <!-- AUTHENTICATION REQUIRED LOCK OVERLAY -->
+  <div id="authLockOverlay" class="auth-lock-overlay" style="display: none;">
+    <div class="card" style="max-width: 460px; width: 100%; text-align: center; padding: 2.5rem; border: 2px solid var(--border-green);">
+      <div style="width: 64px; height: 64px; background-color: var(--light-green); color: var(--primary-green); border-radius: var(--radius-full); display: inline-flex; align-items: center; justify-content: center; font-size: 2rem; margin-bottom: 1rem;">
+        <i data-lucide="lock"></i>
+      </div>
+      <h2 style="font-size: 1.8rem; margin-bottom: 0.5rem;">Sign In Required</h2>
+      <p style="color: var(--secondary-text); margin-bottom: 2rem;">
+        Please sign in with your email address to access your user dashboard.
+      </p>
+
+      <a href="login.html" class="btn btn-primary" style="width: 100%;">
+        <i data-lucide="log-in"></i> Go to Sign In Page
+      </a>
+    </div>
+  </div>
+
+  <div class="dashboard-wrapper">
+    
+    <!-- SIDEBAR -->
+    <aside class="sidebar" id="dashboardSidebar">
+      <div class="sidebar-header">
+        <a href="../index.html" class="brand-logo">
+          <div class="logo-icon-box">
+            <i data-lucide="recycle"></i>
+          </div>
+          <div class="brand-text">
+            <span class="brand-name">EcoRecycle</span>
+            <span class="brand-subtitle">Smart Portal</span>
+          </div>
+        </a>
+      </div>
+
+      <!-- RESIDENT NAVIGATION MENU -->
+      <nav class="sidebar-nav" id="residentSidebarNav">
+        <a href="javascript:void(0)" class="sidebar-link active" onclick="switchDashboardTab('overview-tab', this)">
+          <i data-lucide="layout-dashboard"></i> Overview & Impact
+        </a>
+        <a href="javascript:void(0)" class="sidebar-link" onclick="switchDashboardTab('schedule-tab', this)">
+          <i data-lucide="calendar"></i> Household Bin Schedule
+        </a>
+        <a href="javascript:void(0)" class="sidebar-link" onclick="switchDashboardTab('activity-tab', this)">
+          <i data-lucide="history"></i> Recycling History Log
+        </a>
+        <a href="javascript:void(0)" class="sidebar-link" onclick="switchDashboardTab('saved-tab', this)">
+          <i data-lucide="bookmark"></i> Saved Drop-off Hubs
+        </a>
+        <a href="javascript:void(0)" class="sidebar-link" onclick="switchDashboardTab('notifications-tab', this)">
+          <i data-lucide="bell"></i> Notifications & Alerts
+        </a>
+        <a href="javascript:void(0)" class="sidebar-link" onclick="switchDashboardTab('settings-tab', this)">
+          <i data-lucide="settings"></i> Account Settings
+        </a>
+      </nav>
+
+      <!-- ADMIN NAVIGATION MENU -->
+      <nav class="sidebar-nav" id="adminSidebarNav" style="display: none;">
+        <a href="javascript:void(0)" class="sidebar-link active" onclick="switchDashboardTab('admin-tab', this)">
+          <i data-lucide="shield-check"></i> System Control Center
+        </a>
+        <a href="javascript:void(0)" class="sidebar-link" onclick="switchDashboardTab('admin-directory-tab', this)">
+          <i data-lucide="database"></i> Master Waste Directory
+        </a>
+        <a href="javascript:void(0)" class="sidebar-link" onclick="switchDashboardTab('admin-pending-tab', this)">
+          <i data-lucide="inbox"></i> Pending Citizen Requests
+        </a>
+      </nav>
+
+      <div class="sidebar-footer">
+        <div class="user-avatar" id="sidebarAvatar">AJ</div>
+        <div class="user-info">
+          <div class="user-info-name">Alex Johnson</div>
+          <div class="user-info-role">Resident • Suburb Zone 4</div>
+        </div>
+        <button onclick="logoutUser()" style="margin-left: auto; color: var(--error);" title="Logout">
+          <i data-lucide="log-out"></i>
+        </button>
+      </div>
+    </aside>
+
+    <!-- DASHBOARD MAIN CONTENT -->
+    <main class="dashboard-main">
+      
+      <!-- TOPBAR WITH EXPLICIT "Dashboard" TITLE -->
+      <div class="dashboard-topbar">
+        <div>
+          <h1 style="font-size: 2.4rem; color: var(--dark-text);" id="welcomeHeading">Dashboard</h1>
+          <p style="color: var(--secondary-text); font-size: 1.05rem;" id="welcomeSub">Managing waste separation and collection schedules.</p>
+        </div>
+
+        <div style="display: flex; gap: 1rem; align-items: center;">
+          <div id="topActionBtn">
+            <button class="btn btn-primary" onclick="openModal('addActivityModal')">
+              <i data-lucide="plus"></i> Log Recycled Item
+            </button>
+          </div>
+          <a href="../index.html" class="btn btn-secondary" title="Public Site">
+            <i data-lucide="globe"></i> Public Website
+          </a>
+        </div>
+      </div>
+
+      <!-- RESIDENT MODULE 1: OVERVIEW & IMPACT -->
+      <div id="overview-tab" class="dash-module">
+        <div class="card" style="padding: 1.5rem 2rem; margin-bottom: 2rem; background: linear-gradient(135deg, var(--soft-green), var(--white)); border: 1px solid var(--border-green);">
+          <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
+            <div>
+              <span class="badge badge-recyclable" style="margin-bottom: 0.35rem;">Verified Member Account</span>
+              <h2 style="font-size: 1.5rem; color: var(--primary-green);">Alex Johnson — Suburb Zone 4</h2>
+              <p style="color: var(--secondary-text); font-size: 0.9rem;">Address: 142 Greenpoint Avenue • Account ID: ECO-88421 • Member Since Jan 2026</p>
+            </div>
+            <a href="contact.html" class="btn btn-sm btn-secondary"><i data-lucide="phone"></i> Contact Australia Support</a>
+          </div>
+        </div>
+
+        <div class="dashboard-stats-grid">
+          <div class="dash-stat-card">
+            <div>
+              <div style="font-size: 0.85rem; color: var(--secondary-text); font-weight: 700; text-transform: uppercase;">Items Scanned & Checked</div>
+              <div class="dash-stat-val">42</div>
+            </div>
+            <div class="dash-stat-icon"><i data-lucide="search"></i></div>
+          </div>
+
+          <div class="dash-stat-card">
+            <div>
+              <div style="font-size: 0.85rem; color: var(--secondary-text); font-weight: 700; text-transform: uppercase;">Recyclable Items</div>
+              <div class="dash-stat-val" style="color: var(--main-green);">31</div>
+            </div>
+            <div class="dash-stat-icon" style="background-color: var(--light-green);"><i data-lucide="check-circle-2"></i></div>
+          </div>
+
+          <div class="dash-stat-card">
+            <div>
+              <div style="font-size: 0.85rem; color: var(--secondary-text); font-weight: 700; text-transform: uppercase;">Waste Diverted</div>
+              <div class="dash-stat-val">24.5 kg</div>
+            </div>
+            <div class="dash-stat-icon"><i data-lucide="recycle"></i></div>
+          </div>
+
+          <div class="dash-stat-card">
+            <div>
+              <div style="font-size: 0.85rem; color: var(--secondary-text); font-weight: 700; text-transform: uppercase;">Eco Score</div>
+              <div class="dash-stat-val" style="color: var(--primary-green);">86% <span style="font-size: 0.75rem; color: var(--main-green); font-weight: 600;">(Level 3 Champion)</span></div>
+            </div>
+            <div class="dash-stat-icon" style="background-color: var(--light-green);"><i data-lucide="award"></i></div>
+          </div>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; margin-bottom: 2.5rem;">
+          <div style="background-color: var(--soft-green); padding: 2rem; border-radius: var(--radius-lg); border: 1px solid var(--border-green);">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem;">
+              <span class="badge badge-recyclable">Next Pickup Tomorrow</span>
+              <span style="font-size: 0.85rem; color: var(--secondary-text);">Zone 4 • Greenpoint</span>
+            </div>
+            <h3 style="font-size: 1.6rem; color: var(--primary-green); margin-bottom: 0.5rem;">🟢 Kerbside Recycling & 🟤 Organics</h3>
+            <p style="color: var(--dark-text); font-weight: 600; margin-bottom: 1.25rem;">
+              Friday, 10 October 2026 • Place bins kerbside by 7:00 AM
+            </p>
+            <button class="btn btn-sm btn-primary" onclick="showToast('Bin collection alert set for 7:00 PM tonight!')">
+              <i data-lucide="bell"></i> Set Evening Push Reminder
+            </button>
+          </div>
+
+          <div class="card" style="padding: 2rem; display: flex; flex-direction: column; justify-content: space-between;">
+            <div>
+              <h3 style="font-size: 1.35rem; margin-bottom: 0.5rem;">Quick Waste Verification</h3>
+              <p style="color: var(--secondary-text); font-size: 0.95rem; margin-bottom: 1.25rem;">
+                Not sure if an item goes into your regular kerbside bin? Use the instant search lookup.
+              </p>
+            </div>
+            <div style="display: flex; gap: 0.75rem; flex-wrap: wrap;">
+              <a href="waste-search.html" class="btn btn-secondary btn-sm"><i data-lucide="search"></i> Lookup Item Disposal Rules</a>
+              <button class="btn btn-primary btn-sm" onclick="openModal('addActivityModal')"><i data-lucide="plus"></i> Log Household Recycling</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="table-wrapper">
+          <div class="table-header-box">
+            <div>
+              <h3 style="font-size: 1.35rem;">My Recent Recycling History Log</h3>
+              <p style="font-size: 0.875rem; color: var(--secondary-text);">Items verified and placed into proper disposal channels this month.</p>
+            </div>
+            <span class="badge badge-recyclable">6 Logged Entries</span>
+          </div>
+
+          <div style="overflow-x: auto;">
+            <table class="custom-table">
+              <thead>
+                <tr>
+                  <th>Item Name</th>
+                  <th>Category</th>
+                  <th>Disposal Channel</th>
+                  <th>Date Logged</th>
+                  <th>Status</th>
+                </tr>
+              </thead>
+              <tbody id="activityTableBody"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- RESIDENT MODULE 2: HOUSEHOLD BIN SCHEDULE -->
+      <div id="schedule-tab" class="dash-module" style="display: none;">
+        <div class="card" style="padding: 2.5rem; margin-bottom: 2rem;">
+          <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 1.5rem;">
+            <div>
+              <span class="badge badge-recyclable" style="margin-bottom: 0.5rem;">Address: 142 Greenpoint Avenue</span>
+              <h2 style="font-size: 1.8rem;">Household Waste Collection Schedule</h2>
+              <p style="color: var(--secondary-text);">Suburb Zone 4 • City Environmental Waste Management Service</p>
+            </div>
+            <button class="btn btn-primary" onclick="showToast('Schedule synced with phone calendar!')">
+              <i data-lucide="calendar"></i> Sync with Phone Calendar
+            </button>
+          </div>
+
+          <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.5rem; margin-bottom: 2rem;">
+            <div style="background-color: var(--soft-green); padding: 1.5rem; border-radius: var(--radius-md); border: 1px solid var(--border-green);">
+              <div style="color: var(--primary-green); font-weight: 700; text-transform: uppercase; font-size: 0.8rem; margin-bottom: 0.35rem;">Next Pickup</div>
+              <h3 style="font-size: 1.4rem; color: var(--primary-green);">🟢 Recycling</h3>
+              <p style="font-size: 0.95rem; font-weight: 600; margin-top: 0.5rem;">Friday, 10 Oct (8:00 AM)</p>
+            </div>
+
+            <div style="background-color: #FEF3C7; padding: 1.5rem; border-radius: var(--radius-md); border: 1px solid #FDE68A;">
+              <div style="color: #92400E; font-weight: 700; text-transform: uppercase; font-size: 0.8rem; margin-bottom: 0.35rem;">Organics Pickup</div>
+              <h3 style="font-size: 1.4rem; color: #854D0E;">🟤 Food & Garden</h3>
+              <p style="font-size: 0.95rem; font-weight: 600; margin-top: 0.5rem;">Friday, 10 Oct (8:00 AM)</p>
+            </div>
+
+            <div style="background-color: #F1F5F9; padding: 1.5rem; border-radius: var(--radius-md); border: 1px solid #E2E8F0;">
+              <div style="color: #475569; font-weight: 700; text-transform: uppercase; font-size: 0.8rem; margin-bottom: 0.35rem;">Landfill Pickup</div>
+              <h3 style="font-size: 1.4rem; color: #334155;">⚫ General Waste</h3>
+              <p style="font-size: 0.95rem; font-weight: 600; margin-top: 0.5rem;">Friday, 17 Oct (8:00 AM)</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- RESIDENT MODULE 3: RECYCLING HISTORY LOG -->
+      <div id="activity-tab" class="dash-module" style="display: none;">
+        <div class="card" style="padding: 2rem;">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+            <div>
+              <h2 style="font-size: 1.75rem;">Full Personal Recycling Log</h2>
+              <p style="color: var(--secondary-text);">Complete record of scanned and logged household waste items.</p>
+            </div>
+            <button class="btn btn-primary btn-sm" onclick="openModal('addActivityModal')"><i data-lucide="plus"></i> Add Item Entry</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- RESIDENT MODULE 4: SAVED DROP-OFF HUBS -->
+      <div id="saved-tab" class="dash-module" style="display: none;">
+        <div class="card" style="padding: 2rem;">
+          <h2 style="font-size: 1.75rem; margin-bottom: 1.5rem;">My Saved Drop-off Hubs</h2>
+          <div class="location-list">
+            <div class="location-card">
+              <div class="location-card-header">
+                <h4 class="location-name">GreenPoint Community Recycling Centre</h4>
+                <span class="location-distance">1.8 km</span>
+              </div>
+              <p class="location-meta"><i data-lucide="map-pin"></i> 142 Environmental Way, Greenpoint</p>
+              <p class="location-meta"><i data-lucide="clock"></i> Mon–Sat: 8:00 AM – 5:00 PM</p>
+              <p class="location-meta"><i data-lucide="phone"></i> (02) 9876 54321</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- RESIDENT MODULE 5: NOTIFICATIONS & ALERTS -->
+      <div id="notifications-tab" class="dash-module" style="display: none;">
+        <div class="card" style="padding: 2rem;">
+          <h2 style="font-size: 1.75rem; margin-bottom: 1.5rem;">Notifications & Household Alerts</h2>
+          <div style="display: flex; flex-direction: column; gap: 1rem;">
+            <div style="padding: 1.25rem; background-color: var(--soft-green); border-radius: var(--radius-md); border-left: 4px solid var(--main-green);">
+              <strong>Collection Reminder:</strong> Your recycling and organic bins are scheduled for collection tomorrow morning.
+            </div>
+            <div style="padding: 1.25rem; background-color: var(--soft-green); border-radius: var(--radius-md); border-left: 4px solid var(--primary-green);">
+              <strong>Recycling Contamination Tip:</strong> Remember to tear off greasy pizza box bottoms before recycling the clean cardboard lids.
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- RESIDENT MODULE 6: ACCOUNT SETTINGS -->
+      <div id="settings-tab" class="dash-module" style="display: none;">
+        <div class="card" style="padding: 2rem;">
+          <h2 style="font-size: 1.75rem; margin-bottom: 1.5rem;">Account Settings & Preferences</h2>
+          <form onsubmit="event.preventDefault(); showToast('Preferences updated successfully.');">
+            <div class="form-group" style="margin-bottom: 1rem;">
+              <label class="form-label">Full Name</label>
+              <input type="text" class="form-control" value="Alex Johnson">
+            </div>
+            <div class="form-group" style="margin-bottom: 1.5rem;">
+              <label class="form-label">Email Address</label>
+              <input type="email" class="form-control" value="alex.johnson@example.com">
+            </div>
+            <button type="submit" class="btn btn-primary">Save Changes</button>
+          </form>
+        </div>
+      </div>
+
+      <!-- ADMINISTRATOR MODULE 1: SYSTEM OVERVIEW & CONTROL CENTER (Tanu Admin) -->
+      <div id="admin-tab" class="dash-module" style="display: none;">
+        <div class="card" style="padding: 2.5rem; border: 2px solid var(--primary-green); margin-bottom: 2.5rem;">
+          
+          <div style="margin-bottom: 1.5rem;">
+            <span class="badge badge-recyclable" style="margin-bottom: 0.5rem;"><i data-lucide="shield-check"></i> System Administrator Portal</span>
+            <h2 style="font-size: 2rem; color: var(--primary-green);">City Recycling Control & Database Registry</h2>
+            <p style="color: var(--secondary-text);">Authorized Account: admin@ecorecycle.org (Tanu • City Environmental Protection Services).</p>
+          </div>
+
+          <!-- ADMIN ANALYTICS CARDS -->
+          <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 1.25rem; margin-bottom: 2.25rem;">
+            <div style="background-color: var(--soft-green); padding: 1.25rem; border-radius: var(--radius-md); border: 1px solid var(--border-green);">
+              <div style="font-size: 0.75rem; font-weight: 700; color: var(--secondary-text); text-transform: uppercase;">System Waste Rules</div>
+              <div style="font-size: 1.75rem; font-weight: 800; color: var(--primary-green);">120 Items</div>
+            </div>
+            <div style="background-color: #FEF3C7; padding: 1.25rem; border-radius: var(--radius-md); border: 1px solid #FDE68A;">
+              <div style="font-size: 0.75rem; font-weight: 700; color: #92400E; text-transform: uppercase;">Pending Citizen Submissions</div>
+              <div style="font-size: 1.75rem; font-weight: 800; color: #B45309;" id="pendingCountBadge">4 Items</div>
+            </div>
+            <div style="background-color: #E0F2FE; padding: 1.25rem; border-radius: var(--radius-md); border: 1px solid #BAE6FD;">
+              <div style="font-size: 0.75rem; font-weight: 700; color: #0369A1; text-transform: uppercase;">Active City Residents</div>
+              <div style="font-size: 1.75rem; font-weight: 800; color: #0284C7;">1,420 Users</div>
+            </div>
+            <div style="background-color: var(--light-green); padding: 1.25rem; border-radius: var(--radius-md); border: 1px solid var(--border-green);">
+              <div style="font-size: 0.75rem; font-weight: 700; color: var(--primary-green); text-transform: uppercase;">City Waste Diverted</div>
+              <div style="font-size: 1.75rem; font-weight: 800; color: var(--primary-green);">74.2 Tons</div>
+            </div>
+          </div>
+
+          <!-- PENDING CITIZEN SUBMISSIONS QUEUE -->
+          <div style="margin-bottom: 2.5rem;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+              <h3 style="font-size: 1.35rem; color: var(--dark-text);">Pending Resident Guidance Requests (Action Required)</h3>
+              <span class="badge badge-special">Citizen Moderation Queue</span>
+            </div>
+            <p style="font-size: 0.9rem; color: var(--secondary-text); margin-bottom: 1rem;">
+              Items requested by residents that require official council classification before publishing to the public waste search database.
+            </p>
+            <div id="adminPendingQueueContainer" style="display: flex; flex-direction: column; gap: 1rem;"></div>
+          </div>
+
+          <!-- MASTER SYSTEM DIRECTORY TABLE -->
+          <div class="table-wrapper">
+            <div class="table-header-box">
+              <h3 style="font-size: 1.25rem;">Published Master Waste Rule Directory</h3>
+              <span class="badge badge-info">Admin Write Authority Active</span>
+            </div>
+
+            <table class="custom-table">
+              <thead>
+                <tr>
+                  <th>Item Name</th>
+                  <th>Category</th>
+                  <th>Disposal Channel</th>
+                  <th>System Status</th>
+                  <th>Admin Action</th>
+                </tr>
+              </thead>
+              <tbody id="adminWasteTableBody"></tbody>
+            </table>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- ADMINISTRATOR MODULE 2: MASTER WASTE DIRECTORY MODULE -->
+      <div id="admin-directory-tab" class="dash-module" style="display: none;">
+        <div class="card" style="padding: 2.5rem; margin-bottom: 2rem;">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+            <div>
+              <h2 style="font-size: 1.75rem; color: var(--primary-green);">Master Waste Directory Registry</h2>
+              <p style="color: var(--secondary-text);">View, edit, or remove official city waste sorting guidelines.</p>
+            </div>
+            <button class="btn btn-primary" onclick="openModal('addAdminItemModal')">
+              <i data-lucide="plus-circle"></i> Publish Waste Rule
+            </button>
+          </div>
+
+          <div class="table-wrapper">
+            <table class="custom-table">
+              <thead>
+                <tr>
+                  <th>Item Name</th>
+                  <th>Category</th>
+                  <th>Disposal Channel</th>
+                  <th>System Status</th>
+                  <th>Admin Action</th>
+                </tr>
+              </thead>
+              <tbody id="adminWasteTableBody2"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- ADMINISTRATOR MODULE 3: PENDING CITIZEN REQUESTS MODULE -->
+      <div id="admin-pending-tab" class="dash-module" style="display: none;">
+        <div class="card" style="padding: 2.5rem; margin-bottom: 2rem;">
+          <h2 style="font-size: 1.75rem; color: var(--primary-green); margin-bottom: 0.5rem;">Citizen Guidance Requests Queue</h2>
+          <p style="color: var(--secondary-text); margin-bottom: 1.5rem;">Approve or reject unindexed waste items requested by city residents.</p>
+          
+          <div id="adminPendingQueueContainer2" style="display: flex; flex-direction: column; gap: 1rem;"></div>
+        </div>
+      </div>
+
+    </main>
+  </div>
+
+  <!-- ADD ACTIVITY MODAL -->
+  <div id="addActivityModal" class="modal-overlay">
+    <div class="modal-box">
+      <span class="modal-close" onclick="closeModal('addActivityModal')">&times;</span>
+      <h3 style="font-size: 1.5rem; margin-bottom: 1rem;">Log Household Recycling Entry</h3>
+      
+      <form onsubmit="event.preventDefault(); addNewActivityRow(); closeModal('addActivityModal');">
+        <div class="form-group" style="margin-bottom: 1rem;">
+          <label class="form-label">Item Name</label>
+          <input type="text" id="modalItemName" class="form-control" placeholder="e.g. Glass Jam Jar" required>
+        </div>
+
+        <div class="form-group" style="margin-bottom: 1rem;">
+          <label class="form-label">Waste Category</label>
+          <select id="modalItemCategory" class="form-control">
+            <option value="Plastic">Plastic</option>
+            <option value="Paper & Cardboard">Paper & Cardboard</option>
+            <option value="Glass">Glass</option>
+            <option value="Metal">Metal</option>
+            <option value="E-Waste">E-Waste</option>
+            <option value="General Waste">General Waste</option>
+          </select>
+        </div>
+
+        <div class="form-group" style="margin-bottom: 1.5rem;">
+          <label class="form-label">Disposal Bin / Location</label>
+          <input type="text" id="modalItemDisposal" class="form-control" placeholder="e.g. Yellow Recycling Bin" required>
+        </div>
+
+        <button type="submit" class="btn btn-primary" style="width: 100%;">
+          <i data-lucide="plus"></i> Add Item to Activity Log
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <!-- ADD ADMIN ITEM MODAL -->
+  <div id="addAdminItemModal" class="modal-overlay">
+    <div class="modal-box">
+      <span class="modal-close" onclick="closeModal('addAdminItemModal')">&times;</span>
+      <h3 style="font-size: 1.5rem; margin-bottom: 1rem;">Publish New Master Waste Rule</h3>
+      
+      <form onsubmit="addAdminWasteItem(event)">
+        <div class="form-group" style="margin-bottom: 1rem;">
+          <label class="form-label">Item Name</label>
+          <input type="text" id="adminNewName" class="form-control" placeholder="e.g. Aluminium Foil Tray" required>
+        </div>
+
+        <div class="form-group" style="margin-bottom: 1rem;">
+          <label class="form-label">Category</label>
+          <select id="adminNewCategory" class="form-control">
+            <option value="Metal">Metal</option>
+            <option value="Plastic">Plastic</option>
+            <option value="Paper & Cardboard">Paper & Cardboard</option>
+            <option value="Glass">Glass</option>
+            <option value="E-Waste">E-Waste</option>
+            <option value="General Waste">General Waste</option>
+          </select>
+        </div>
+
+        <div class="form-group" style="margin-bottom: 1.5rem;">
+          <label class="form-label">Disposal Channel</label>
+          <input type="text" id="adminNewDisposal" class="form-control" placeholder="e.g. Yellow Recycling Bin" required>
+        </div>
+
+        <button type="submit" class="btn btn-primary" style="width: 100%;">
+          <i data-lucide="shield-check"></i> Publish Waste Rule to System (Admin)
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <!-- EDIT ADMIN ITEM MODAL -->
+  <div id="editAdminItemModal" class="modal-overlay">
+    <div class="modal-box">
+      <span class="modal-close" onclick="closeModal('editAdminItemModal')">&times;</span>
+      <h3 style="font-size: 1.5rem; margin-bottom: 1rem;">Edit Master Waste Rule</h3>
+      
+      <form onsubmit="saveEditedAdminWasteItem(event)">
+        <div class="form-group" style="margin-bottom: 1rem;">
+          <label class="form-label">Item Name</label>
+          <input type="text" id="editAdminName" class="form-control" required>
+        </div>
+
+        <div class="form-group" style="margin-bottom: 1rem;">
+          <label class="form-label">Category</label>
+          <select id="editAdminCategory" class="form-control">
+            <option value="Metal">Metal</option>
+            <option value="Plastic">Plastic</option>
+            <option value="Paper & Cardboard">Paper & Cardboard</option>
+            <option value="Glass">Glass</option>
+            <option value="E-Waste">E-Waste</option>
+            <option value="General Waste">General Waste</option>
+          </select>
+        </div>
+
+        <div class="form-group" style="margin-bottom: 1.5rem;">
+          <label class="form-label">Disposal Channel</label>
+          <input type="text" id="editAdminDisposal" class="form-control" required>
+        </div>
+
+        <button type="submit" class="btn btn-primary" style="width: 100%;">
+          <i data-lucide="save"></i> Save Changes to Waste Rule
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <script src="../js/script.js"></script>
+  <script>
+    function addNewActivityRow() {
+      const name = document.getElementById('modalItemName').value;
+      const category = document.getElementById('modalItemCategory').value;
+      const disposal = document.getElementById('modalItemDisposal').value;
+      logSearchToActivity(name, category, disposal);
+    }
+  </script>
+</body>
+</html>

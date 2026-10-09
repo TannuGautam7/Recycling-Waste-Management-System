@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Contact Us | EcoRecycle Australia</title>
+  <meta name="description" content="Contact EcoRecycle Australia for recycling inquiries, council waste schedules, local drop-off hub information, and community support.">
+  
+  <link rel="stylesheet" href="../css/style.css">
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <style>
+    .contact-grid {
+      display: grid;
+      grid-template-columns: 1fr 1.2fr;
+      gap: 3.5rem;
+      align-items: start;
+    }
+
+    .contact-info-card {
+      background-color: var(--white);
+      border-radius: var(--radius-lg);
+      border: 1px solid var(--border-light);
+      padding: 2.25rem;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .info-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 1.25rem;
+      margin-bottom: 1.75rem;
+    }
+
+    .info-icon {
+      width: 48px;
+      height: 48px;
+      background-color: var(--light-green);
+      color: var(--primary-green);
+      border-radius: var(--radius-md);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      font-size: 1.25rem;
+    }
+
+    .state-branch-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem;
+      margin-top: 1.5rem;
+    }
+
+    .state-branch-card {
+      background-color: var(--soft-green);
+      border: 1px solid var(--border-green);
+      border-radius: var(--radius-md);
+      padding: 1rem;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- PUBLIC NAVBAR (Without Dashboard link - Section 3) -->
+  <nav class="navbar">
+    <div class="container nav-container">
+      <a href="../index.html" class="brand-logo">
+        <div class="logo-icon-box">
+          <i data-lucide="recycle"></i>
+        </div>
+        <div class="brand-text">
+          <span class="brand-name">EcoRecycle</span>
+          <span class="brand-subtitle">Smart Waste. Better Future.</span>
+        </div>
+      </a>
+
+      <ul class="nav-menu" id="navMenu">
+        <li><a href="../index.html" class="nav-link">Home</a></li>
+        <li><a href="waste-search.html" class="nav-link">Waste Search</a></li>
+        <li><a href="recycling-guide.html" class="nav-link">Recycling Guide</a></li>
+        <li><a href="locations.html" class="nav-link">Recycling Locations</a></li>
+        <li><a href="contact.html" class="nav-link active">Contact Us</a></li>
+      </ul>
+
+      <div class="nav-actions">
+        <a href="login.html" class="nav-login-btn">Login / Register</a>
+        <a href="waste-search.html" class="btn btn-primary btn-sm">Start Recycling</a>
+      </div>
+
+      <button class="mobile-toggle" id="mobileMenuToggle">
+        <i data-lucide="menu"></i>
+      </button>
+    </div>
+  </nav>
+
+  <!-- PAGE HEADER -->
+  <section class="section section-bg" style="padding: 3.5rem 0;">
+    <div class="container">
+      <div class="section-header" style="margin-bottom: 0;">
+        <span class="section-badge"><i data-lucide="map-pin"></i> Australia National Support</span>
+        <h1 class="section-title">Contact EcoRecycle Australia</h1>
+        <p class="section-subtitle">Get in touch with our Australian environmental support team, report unlisted waste items, or request local council bin collection assistance.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- MAIN CONTACT SECTION -->
+  <section class="section">
+    <div class="container contact-grid">
+      
+      <!-- Australian Headquarters & Contact Information -->
+      <div>
+        <div class="contact-info-card" style="margin-bottom: 2rem;">
+          <h2 style="font-size: 1.75rem; margin-bottom: 1.5rem; color: var(--primary-green);">Australia National Headquarters</h2>
+
+          <!-- Address -->
+          <div class="info-item">
+            <div class="info-icon"><i data-lucide="map-pin"></i></div>
+            <div>
+              <h4 style="font-size: 1.05rem; margin-bottom: 0.25rem;">Head Office Address</h4>
+              <p style="color: var(--secondary-text); font-size: 0.95rem; line-height: 1.5;">
+                Level 14, International Towers<br>
+                200 George Street, Sydney NSW 2000<br>
+                Australia
+              </p>
+            </div>
+          </div>
+
+          <!-- Hotline -->
+          <div class="info-item">
+            <div class="info-icon"><i data-lucide="phone-call"></i></div>
+            <div>
+              <h4 style="font-size: 1.05rem; margin-bottom: 0.25rem;">Australia Waste Hotline</h4>
+              <p style="color: var(--primary-green); font-size: 1.15rem; font-weight: 800; margin-bottom: 0.25rem;">
+                1300 326 732 <span style="font-size: 0.85rem; font-weight: 500; color: var(--secondary-text);">(1300 ECO REC)</span>
+              </p>
+              <p style="color: var(--secondary-text); font-size: 0.85rem;">Mon – Fri: 8:00 AM – 6:00 PM AEST</p>
+            </div>
+          </div>
+
+          <!-- Email -->
+          <div class="info-item" style="margin-bottom: 0;">
+            <div class="info-icon"><i data-lucide="mail"></i></div>
+            <div>
+              <h4 style="font-size: 1.05rem; margin-bottom: 0.25rem;">Support Email</h4>
+              <p style="color: var(--secondary-text); font-size: 0.95rem;">
+                <a href="mailto:support@ecorecycle.org.au" style="color: var(--main-green); font-weight: 600;">support@ecorecycle.org.au</a>
+              </p>
+              <p style="color: var(--secondary-text); font-size: 0.85rem;">Average response time: Within 24 hours</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Australian State Operations Hubs -->
+        <h3 style="font-size: 1.35rem; margin-bottom: 1rem;">State & Territory Resource Hubs</h3>
+        <div class="state-branch-grid">
+          <div class="state-branch-card">
+            <strong style="font-size: 0.95rem; color: var(--primary-green);">Sydney, NSW (HQ)</strong>
+            <p style="font-size: 0.85rem; color: var(--secondary-text); margin-top: 0.25rem;">George St Operational Hub</p>
+          </div>
+          <div class="state-branch-card">
+            <strong style="font-size: 0.95rem; color: var(--primary-green);">Melbourne, VIC</strong>
+            <p style="font-size: 0.85rem; color: var(--secondary-text); margin-top: 0.25rem;">Collins St Circular Office</p>
+          </div>
+          <div class="state-branch-card">
+            <strong style="font-size: 0.95rem; color: var(--primary-green);">Brisbane, QLD</strong>
+            <p style="font-size: 0.85rem; color: var(--secondary-text); margin-top: 0.25rem;">Eagle St Recovery Hub</p>
+          </div>
+          <div class="state-branch-card">
+            <strong style="font-size: 0.95rem; color: var(--primary-green);">Perth, WA</strong>
+            <p style="font-size: 0.85rem; color: var(--secondary-text); margin-top: 0.25rem;">St Georges Tce Centre</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Australian Contact Form -->
+      <div class="card" style="padding: 2.5rem; border: 2px solid var(--border-green);">
+        <h2 style="font-size: 1.75rem; margin-bottom: 0.5rem;">Send Us a Message</h2>
+        <p style="color: var(--secondary-text); font-size: 0.95rem; margin-bottom: 2rem;">
+          Have a question about Australian kerbside bin rules, local council pickup schedules, or e-waste drop-off locations? Fill out the form below.
+        </p>
+
+        <form onsubmit="event.preventDefault(); showToast('Thank you! Your message has been sent to EcoRecycle Australia.'); this.reset();">
+          <div class="form-group" style="margin-bottom: 1.25rem;">
+            <label class="form-label">Full Name</label>
+            <input type="text" class="form-control" placeholder="e.g. Alex Johnson" required>
+          </div>
+
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1.25rem;">
+            <div class="form-group">
+              <label class="form-label">Email Address</label>
+              <input type="email" class="form-control" placeholder="alex@example.com.au" required>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Phone Number (Optional)</label>
+              <input type="tel" class="form-control" placeholder="e.g. 0412 345 678">
+            </div>
+          </div>
+
+          <div style="display: grid; grid-template-columns: 1.5fr 1fr; gap: 1rem; margin-bottom: 1.25rem;">
+            <div class="form-group">
+              <label class="form-label">Suburb / Postcode</label>
+              <input type="text" class="form-control" placeholder="e.g. Greenpoint 2000" required>
+            </div>
+            <div class="form-group">
+              <label class="form-label">State / Territory</label>
+              <select class="form-control" required>
+                <option value="NSW">NSW</option>
+                <option value="VIC">VIC</option>
+                <option value="QLD">QLD</option>
+                <option value="WA">WA</option>
+                <option value="SA">SA</option>
+                <option value="TAS">TAS</option>
+                <option value="ACT">ACT</option>
+                <option value="NT">NT</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="form-group" style="margin-bottom: 1.25rem;">
+            <label class="form-label">Inquiry Category</label>
+            <select class="form-control" required>
+              <option value="Disposal Rules">Item Disposal & Bin Sorting Guidance</option>
+              <option value="Collection Schedule">Household Bin Collection Schedule</option>
+              <option value="Drop-off Centre">Recycling Drop-off Hub Location</option>
+              <option value="Missing Item">Request New Unlisted Waste Item Rule</option>
+              <option value="General">General Inquiry / Council Feedback</option>
+            </select>
+          </div>
+
+          <div class="form-group" style="margin-bottom: 1.75rem;">
+            <label class="form-label">Message Details</label>
+            <textarea class="form-control" rows="4" placeholder="How can EcoRecycle Australia assist you today?..." required></textarea>
+          </div>
+
+          <button type="submit" class="btn btn-primary btn-lg" style="width: 100%;">
+            <i data-lucide="send"></i> Submit Message to EcoRecycle Australia
+          </button>
+        </form>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer class="footer">
+    <div class="container">
+      <div class="footer-grid">
+        <div class="footer-brand">
+          <div class="brand-logo">
+            <div class="logo-icon-box">
+              <i data-lucide="recycle"></i>
+            </div>
+            <div class="brand-text">
+              <span class="brand-name" style="color: var(--white);">EcoRecycle</span>
+              <span class="brand-subtitle" style="color: #94A3B8;">Smart Waste. Better Future.</span>
+            </div>
+          </div>
+          <p>Making recycling information simple, accessible, and useful for communities across Australia.</p>
+        </div>
+
+        <div>
+          <h4 class="footer-title">Platform</h4>
+          <ul class="footer-links">
+            <li><a href="waste-search.html">Waste Search</a></li>
+            <li><a href="recycling-guide.html">Recycling Guide</a></li>
+            <li><a href="locations.html">Recycling Locations</a></li>
+            <li><a href="contact.html">Contact Us</a></li>
+          </ul>
+        </div>
+
+        <div>
+          <h4 class="footer-title">Information</h4>
+          <ul class="footer-links">
+            <li><a href="recycling-guide.html">About EcoRecycle</a></li>
+            <li><a href="recycling-guide.html">Recycling Tips</a></li>
+            <li><a href="contact.html">State Branches</a></li>
+            <li><a href="contact.html">Support Hotline</a></li>
+          </ul>
+        </div>
+
+        <div>
+          <h4 class="footer-title">Account</h4>
+          <ul class="footer-links">
+            <li><a href="login.html">Login</a></li>
+            <li><a href="login.html#register">Register</a></li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="footer-bottom">
+        <div>&copy; 2026 EcoRecycle Australia. Recycling & Waste Management System Prototype.</div>
+        <div>DAT709 Capstone Project Prototype</div>
+      </div>
+    </div>
+  </footer>
+
+  <script src="../js/script.js"></script>
+</body>
+</html>

@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Recycling Locations & Drop-off Hubs | EcoRecycle</title>
+  <meta name="description" content="Locate community recycling centres, battery drop-offs, e-waste hubs, and hazardous material collection points near you in Australia.">
+  
+  <link rel="stylesheet" href="../css/style.css">
+  <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+<body>
+
+  <!-- PUBLIC NAVBAR -->
+  <nav class="navbar">
+    <div class="container nav-container">
+      <a href="../index.html" class="brand-logo">
+        <div class="logo-icon-box">
+          <i data-lucide="recycle"></i>
+        </div>
+        <div class="brand-text">
+          <span class="brand-name">EcoRecycle</span>
+          <span class="brand-subtitle">Smart Waste. Better Future.</span>
+        </div>
+      </a>
+
+      <ul class="nav-menu" id="navMenu">
+        <li><a href="../index.html" class="nav-link">Home</a></li>
+        <li><a href="waste-search.html" class="nav-link">Waste Search</a></li>
+        <li><a href="recycling-guide.html" class="nav-link">Recycling Guide</a></li>
+        <li><a href="locations.html" class="nav-link active">Recycling Locations</a></li>
+        <li><a href="contact.html" class="nav-link">Contact Us</a></li>
+      </ul>
+
+      <div class="nav-actions">
+        <a href="login.html" class="nav-login-btn">Login / Register</a>
+        <a href="waste-search.html" class="btn btn-primary btn-sm">Start Recycling</a>
+      </div>
+
+      <button class="mobile-toggle" id="mobileMenuToggle">
+        <i data-lucide="menu"></i>
+      </button>
+    </div>
+  </nav>
+
+  <!-- PAGE HEADER -->
+  <section class="section section-bg" style="padding: 3.5rem 0;">
+    <div class="container">
+      <div class="section-header" style="margin-bottom: 0;">
+        <span class="section-badge"><i data-lucide="map-pin"></i> Australia Drop-off Locator</span>
+        <h1 class="section-title">Find a Recycling Location</h1>
+        <p class="section-subtitle">Find suitable recycling locations for items that cannot be placed in your regular household recycling bin.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- MAIN LOCATIONS CONTENT -->
+  <section class="section">
+    <div class="container">
+      
+      <!-- Filter Form -->
+      <div class="location-filter-box">
+        <div class="filter-form-grid">
+          <div class="form-group">
+            <label class="form-label" for="locationSearchInput">Search Location</label>
+            <input type="text" id="locationSearchInput" class="form-control" placeholder="Enter suburb, postcode or state (e.g. Greenpoint, Sydney)...">
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="wasteTypeSelect">Waste Type Filter</label>
+            <select id="wasteTypeSelect" class="form-control">
+              <option value="All">All Waste Types</option>
+              <option value="General Recycling">General Recycling</option>
+              <option value="E-Waste">E-Waste</option>
+              <option value="Batteries">Batteries</option>
+              <option value="Glass">Glass</option>
+              <option value="Metal">Metal</option>
+              <option value="Plastic">Plastic</option>
+            </select>
+          </div>
+
+          <button id="findLocationsBtn" class="btn btn-primary" style="height: 48px;">
+            <i data-lucide="search"></i> Find Locations
+          </button>
+        </div>
+      </div>
+
+      <!-- Layout: List + Interactive Mock Map -->
+      <div class="location-layout">
+        <!-- Location List Container -->
+        <div>
+          <h3 style="margin-bottom: 1rem; font-size: 1.25rem;">Nearby Drop-off Hubs (4 Found)</h3>
+          <div id="locationListContainer" class="location-list"></div>
+        </div>
+
+        <!-- Interactive Map Visual -->
+        <div>
+          <h3 style="margin-bottom: 1rem; font-size: 1.25rem;">Interactive Map View</h3>
+          <div class="mock-map-container" style="min-height: 540px;">
+            <div class="mock-map-bg"></div>
+            
+            <!-- Map Pins with Click handlers -->
+            <div class="map-pin" style="top: 25%; left: 35%;" onclick="openDirectionsModal('GreenPoint Community Recycling Centre')">
+              <i data-lucide="recycle"></i> GreenPoint Centre (1.8km)
+            </div>
+
+            <div class="map-pin" style="top: 55%; left: 65%;" onclick="openDirectionsModal('EcoHub E-Waste & Battery Depot')">
+              <i data-lucide="laptop"></i> EcoHub E-Waste (3.2km)
+            </div>
+
+            <div class="map-pin" style="top: 40%; left: 20%;" onclick="openDirectionsModal('Metro Glass & Organics Drop-off')">
+              <i data-lucide="wine"></i> Metro Glass (4.5km)
+            </div>
+
+            <div class="map-pin" style="top: 70%; left: 45%;" onclick="openDirectionsModal('Northside Hazardous Waste Facility')">
+              <i data-lucide="alert-triangle"></i> Northside Chemical (6.1km)
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer class="footer">
+    <div class="container">
+      <div class="footer-bottom" style="border-top: none; padding-top: 0;">
+        <div>&copy; 2026 EcoRecycle Australia. Recycling & Waste Management System Prototype.</div>
+        <div>DAT709 Capstone Project Prototype</div>
+      </div>
+    </div>
+  </footer>
+
+  <script src="../js/script.js"></script>
+</body>
+</html>

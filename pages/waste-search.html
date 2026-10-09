@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Waste Search & Disposal Lookup | EcoRecycle</title>
+  <meta name="description" content="Search any household waste item to discover correct bin placement, recycling instructions, and local drop-off rules.">
+  
+  <link rel="stylesheet" href="../css/style.css">
+  <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+<body>
+
+  <!-- PUBLIC NAVBAR (Dashboard removed from main menu - Section 3) -->
+  <nav class="navbar">
+    <div class="container nav-container">
+      <a href="../index.html" class="brand-logo">
+        <div class="logo-icon-box">
+          <i data-lucide="recycle"></i>
+        </div>
+        <div class="brand-text">
+          <span class="brand-name">EcoRecycle</span>
+          <span class="brand-subtitle">Smart Waste. Better Future.</span>
+        </div>
+      </a>
+
+      <ul class="nav-menu" id="navMenu">
+        <li><a href="../index.html" class="nav-link">Home</a></li>
+        <li><a href="waste-search.html" class="nav-link active">Waste Search</a></li>
+        <li><a href="recycling-guide.html" class="nav-link">Recycling Guide</a></li>
+        <li><a href="locations.html" class="nav-link">Recycling Locations</a></li>
+        <li><a href="contact.html" class="nav-link">Contact Us</a></li>
+      </ul>
+
+      <div class="nav-actions">
+        <a href="login.html" class="nav-login-btn">Login / Register</a>
+        <a href="waste-search.html" class="btn btn-primary btn-sm">Start Recycling</a>
+      </div>
+
+      <button class="mobile-toggle" id="mobileMenuToggle">
+        <i data-lucide="menu"></i>
+      </button>
+    </div>
+  </nav>
+
+  <!-- SEARCH HEADER SECTION -->
+  <section class="section section-bg" style="padding: 3.5rem 0;">
+    <div class="container">
+      <div class="section-header" style="margin-bottom: 2rem;">
+        <span class="section-badge"><i data-lucide="search"></i> Waste Search Engine</span>
+        <h1 class="section-title">Where Does My Waste Go?</h1>
+        <p class="section-subtitle">Search for an item or filter by category to find instant, verified disposal instructions.</p>
+      </div>
+
+      <div class="search-bar-container" style="max-width: 800px;">
+        <div class="search-input-wrapper">
+          <i data-lucide="search" class="search-icon"></i>
+          <input type="text" id="wasteSearchInput" class="search-input" placeholder='Search any item (e.g. "plastic bottle", "battery", "pizza box", "milk carton")...' aria-label="Search waste items">
+          <button id="wasteSearchBtn" class="btn btn-primary">
+            <i data-lucide="search"></i> Search
+          </button>
+        </div>
+
+        <div class="popular-searches">
+          <span class="popular-label">Popular Searches:</span>
+          <button class="search-chip" data-search="plastic bottle">Plastic Bottle</button>
+          <button class="search-chip" data-search="cardboard">Cardboard</button>
+          <button class="search-chip" data-search="glass bottle">Glass Bottle</button>
+          <button class="search-chip" data-search="battery">Battery</button>
+          <button class="search-chip" data-search="pizza box">Pizza Box</button>
+          <button class="search-chip" data-search="smartphone">Electronics</button>
+        </div>
+      </div>
+
+      <div id="searchResultContainer" class="search-result-container"></div>
+    </div>
+  </section>
+
+  <!-- EXTENDED CATALOGUE GRID -->
+  <section class="section">
+    <div class="container">
+      <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 2rem; flex-wrap: wrap; gap: 1rem;">
+        <div>
+          <h2 style="font-size: 1.75rem;">Recycling Directory Catalogue</h2>
+          <p style="color: var(--secondary-text);">Verified disposal guide maintained by EcoRecycle environmental team.</p>
+        </div>
+
+        <!-- Filter controls -->
+        <div style="display: flex; gap: 0.75rem; flex-wrap: wrap;">
+          <button class="btn btn-sm btn-primary filter-cat-btn active" onclick="filterCatalogue('all', this)">All Items</button>
+          <button class="btn btn-sm btn-secondary filter-cat-btn" onclick="filterCatalogue('Plastic', this)">Plastic</button>
+          <button class="btn btn-sm btn-secondary filter-cat-btn" onclick="filterCatalogue('Paper & Cardboard', this)">Paper</button>
+          <button class="btn btn-sm btn-secondary filter-cat-btn" onclick="filterCatalogue('Glass', this)">Glass</button>
+          <button class="btn btn-sm btn-secondary filter-cat-btn" onclick="filterCatalogue('Metal', this)">Metal</button>
+          <button class="btn btn-sm btn-secondary filter-cat-btn" onclick="filterCatalogue('E-Waste', this)">E-Waste</button>
+        </div>
+      </div>
+
+      <!-- Item Directory Grid -->
+      <div id="catalogueGrid" class="categories-grid" style="grid-template-columns: repeat(3, 1fr);"></div>
+    </div>
+  </section>
+
+  <!-- SUGGEST ITEM / ADMIN MAINTAINED BANNER -->
+  <section class="section section-bg">
+    <div class="container" style="max-width: 800px; text-align: center;">
+      <span class="section-badge"><i data-lucide="shield-check"></i> Administrator Managed Directory</span>
+      <h2 class="section-title">Can't Find an Item?</h2>
+      <p class="section-subtitle" style="margin-bottom: 2rem;">
+        Our recycling system database is continuously maintained and updated by EcoRecycle waste administrators. Submit a suggestion and we will review and add disposal guidelines.
+      </p>
+
+      <form onsubmit="event.preventDefault(); showToast('Thank you! Item suggestion submitted for EcoRecycle admin review.'); this.reset();" style="display: flex; gap: 1rem; max-width: 600px; margin: 0 auto; flex-wrap: wrap;">
+        <input type="text" class="form-control" placeholder="Enter missing item name (e.g., Aerosol Can)..." required style="flex-grow: 1;">
+        <button type="submit" class="btn btn-primary"><i data-lucide="plus-circle"></i> Submit Item</button>
+      </form>
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer class="footer">
+    <div class="container">
+      <div class="footer-bottom" style="border-top: none; padding-top: 0;">
+        <div>&copy; 2026 EcoRecycle Australia. Recycling & Waste Management System Prototype.</div>
+        <div>DAT709 Capstone Project Prototype</div>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Scripts -->
+  <script src="../js/script.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      renderFullCatalogue('all');
+    });
+
+    function renderFullCatalogue(catFilter) {
+      const grid = document.getElementById('catalogueGrid');
+      if (!grid) return;
+
+      const items = catFilter === 'all' 
+        ? WASTE_DATABASE 
+        : WASTE_DATABASE.filter(item => item.category === catFilter);
+
+      grid.innerHTML = items.map(item => {
+        let statusBadge = item.recyclable === true 
+          ? `<span class="badge badge-recyclable"><i data-lucide="check"></i> Recyclable</span>`
+          : item.recyclable === 'special' 
+          ? `<span class="badge badge-special"><i data-lucide="alert-triangle"></i> Drop-off</span>`
+          : `<span class="badge badge-non-recyclable"><i data-lucide="x"></i> General Waste</span>`;
+
+        return `
+          <div class="card" style="display: flex; flex-direction: column; justify-content: space-between;">
+            <div>
+              <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 0.75rem;">
+                <h3 style="font-size: 1.25rem;">${item.name}</h3>
+                ${statusBadge}
+              </div>
+              <p style="font-size: 0.85rem; color: var(--secondary-text); margin-bottom: 1rem;">
+                <strong>Category:</strong> ${item.category}<br>
+                <strong>Bin:</strong> ${item.disposalMethod}
+              </p>
+              <p style="font-size: 0.9rem; color: var(--dark-text); line-height: 1.5; margin-bottom: 1.25rem;">
+                ${item.instructions[0]}
+              </p>
+            </div>
+            <button class="btn btn-sm btn-secondary" onclick="renderSearchResult(WASTE_DATABASE.find(i=>i.id==='${item.id}'))">
+              <i data-lucide="info"></i> View Detailed Rules
+            </button>
+          </div>
+        `;
+      }).join('');
+
+      if (window.lucide) lucide.createIcons();
+    }
+
+    function filterCatalogue(category, btnElement) {
+      document.querySelectorAll('.filter-cat-btn').forEach(btn => {
+        btn.classList.remove('active', 'btn-primary');
+        btn.classList.add('btn-secondary');
+      });
+      btnElement.classList.add('active', 'btn-primary');
+      btnElement.classList.remove('btn-secondary');
+      renderFullCatalogue(category);
+    }
+  </script>
+</body>
+</html>

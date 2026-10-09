@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Comprehensive Recycling Guide | EcoRecycle</title>
+  <meta name="description" content="Simple, step-by-step guidance for sorting plastic, paper, glass, metal, and e-waste correctly across Australia.">
+  
+  <link rel="stylesheet" href="../css/style.css">
+  <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+<body>
+
+  <!-- PUBLIC NAVBAR -->
+  <nav class="navbar">
+    <div class="container nav-container">
+      <a href="../index.html" class="brand-logo">
+        <div class="logo-icon-box">
+          <i data-lucide="recycle"></i>
+        </div>
+        <div class="brand-text">
+          <span class="brand-name">EcoRecycle</span>
+          <span class="brand-subtitle">Smart Waste. Better Future.</span>
+        </div>
+      </a>
+
+      <ul class="nav-menu" id="navMenu">
+        <li><a href="../index.html" class="nav-link">Home</a></li>
+        <li><a href="waste-search.html" class="nav-link">Waste Search</a></li>
+        <li><a href="recycling-guide.html" class="nav-link active">Recycling Guide</a></li>
+        <li><a href="locations.html" class="nav-link">Recycling Locations</a></li>
+        <li><a href="contact.html" class="nav-link">Contact Us</a></li>
+      </ul>
+
+      <div class="nav-actions">
+        <a href="login.html" class="nav-login-btn">Login / Register</a>
+        <a href="waste-search.html" class="btn btn-primary btn-sm">Start Recycling</a>
+      </div>
+
+      <button class="mobile-toggle" id="mobileMenuToggle">
+        <i data-lucide="menu"></i>
+      </button>
+    </div>
+  </nav>
+
+  <!-- PAGE HEADER -->
+  <section class="section section-bg" style="padding: 3.5rem 0;">
+    <div class="container">
+      <div class="section-header" style="margin-bottom: 0;">
+        <span class="section-badge"><i data-lucide="book-open"></i> Complete Sorting Handbook</span>
+        <h1 class="section-title">Recycling Guide</h1>
+        <p class="section-subtitle">Simple guidance for sorting everyday waste correctly into kerbside bins and drop-off hubs.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- RECYCLING GUIDE SECTIONS -->
+  <section class="section">
+    <div class="container" style="display: flex; flex-direction: column; gap: 4rem;">
+      
+      <!-- 1. PLASTIC SECTION -->
+      <div id="plastic" class="card" style="padding: 2.5rem; border-left: 6px solid var(--main-green);">
+        <div style="display: flex; align-items: center; gap: 1rem; margin-bottom: 1.5rem;">
+          <div style="width: 52px; height: 52px; background-color: var(--light-green); color: var(--primary-green); border-radius: var(--radius-md); display: flex; align-items: center; justify-content: center; font-size: 1.5rem;">
+            <i data-lucide="package"></i>
+          </div>
+          <div>
+            <h2 style="font-size: 2rem;">Plastic Waste Guide</h2>
+            <p style="color: var(--secondary-text);">Sorting rigid plastic containers vs soft film plastic.</p>
+          </div>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; margin-bottom: 2rem;">
+          <div style="background-color: var(--soft-green); padding: 1.5rem; border-radius: var(--radius-md); border: 1px solid var(--border-green);">
+            <h4 style="color: var(--primary-green); margin-bottom: 1rem; display: flex; align-items: center; gap: 0.5rem;">
+              <i data-lucide="check-circle-2"></i> What CAN Be Recycled
+            </h4>
+            <ul style="list-style: none; display: flex; flex-direction: column; gap: 0.5rem; font-size: 0.95rem;">
+              <li>• Plastic water & soda bottles (PET #1)</li>
+              <li>• Milk jugs & detergent bottles (HDPE #2)</li>
+              <li>• Rigid plastic food containers & punnets</li>
+              <li>• Shampoo & body wash bottles (rinsed)</li>
+            </ul>
+          </div>
+
+          <div style="background-color: var(--error-bg); padding: 1.5rem; border-radius: var(--radius-md); border: 1px solid #FCA5A5;">
+            <h4 style="color: var(--error-text); margin-bottom: 1rem; display: flex; align-items: center; gap: 0.5rem;">
+              <i data-lucide="x-circle"></i> What CANNOT Be Recycled (Kerbside)
+            </h4>
+            <ul style="list-style: none; display: flex; flex-direction: column; gap: 0.5rem; font-size: 0.95rem; color: var(--error-text);">
+              <li>• Plastic grocery bags & soft wrappers</li>
+              <li>• Polystyrene / Styrofoam food boxes</li>
+              <li>• Plastic cutlery & straws</li>
+              <li>• Garden hoses & PVC piping</li>
+            </ul>
+          </div>
+        </div>
+
+        <div style="background-color: #F8FAF8; padding: 1.25rem 1.5rem; border-radius: var(--radius-md); font-size: 0.95rem; border: 1px solid var(--border-light);">
+          <strong>Preparation Tip:</strong> Always empty liquids, rinse food residue, and leave caps screwed on tight so they don't fall through sorting screens.
+        </div>
+      </div>
+
+      <!-- 2. PAPER & CARDBOARD SECTION -->
+      <div id="paper" class="card" style="padding: 2.5rem; border-left: 6px solid var(--primary-green);">
+        <div style="display: flex; align-items: center; gap: 1rem; margin-bottom: 1.5rem;">
+          <div style="width: 52px; height: 52px; background-color: var(--light-green); color: var(--primary-green); border-radius: var(--radius-md); display: flex; align-items: center; justify-content: center; font-size: 1.5rem;">
+            <i data-lucide="file-text"></i>
+          </div>
+          <div>
+            <h2 style="font-size: 2rem;">Paper & Cardboard Guide</h2>
+            <p style="color: var(--secondary-text);">Proper handling of clean paper, boxes, and cartons.</p>
+          </div>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; margin-bottom: 2rem;">
+          <div style="background-color: var(--soft-green); padding: 1.5rem; border-radius: var(--radius-md); border: 1px solid var(--border-green);">
+            <h4 style="color: var(--primary-green); margin-bottom: 1rem; display: flex; align-items: center; gap: 0.5rem;">
+              <i data-lucide="check-circle-2"></i> Recyclable Examples
+            </h4>
+            <ul style="list-style: none; display: flex; flex-direction: column; gap: 0.5rem; font-size: 0.95rem;">
+              <li>• Flattened shipping boxes & cereal boxes</li>
+              <li>• Newspapers, magazines & office paper</li>
+              <li>• Milk & juice cartons (liquid paperboard)</li>
+              <li>• Paper bags & greeting cards</li>
+            </ul>
+          </div>
+
+          <div style="background-color: var(--error-bg); padding: 1.5rem; border-radius: var(--radius-md); border: 1px solid #FCA5A5;">
+            <h4 style="color: var(--error-text); margin-bottom: 1rem; display: flex; align-items: center; gap: 0.5rem;">
+              <i data-lucide="x-circle"></i> Non-Recyclable Examples
+            </h4>
+            <ul style="list-style: none; display: flex; flex-direction: column; gap: 0.5rem; font-size: 0.95rem; color: var(--error-text);">
+              <li>• Greasy pizza box bottoms & food wrappers</li>
+              <li>• Used paper towels, napkins & tissues</li>
+              <li>• Waxed paper & thermal receipt paper</li>
+              <li>• Shredded paper (unless bagged properly)</li>
+            </ul>
+          </div>
+        </div>
+
+        <div style="background-color: #F8FAF8; padding: 1.25rem 1.5rem; border-radius: var(--radius-md); font-size: 0.95rem; border: 1px solid var(--border-light);">
+          <strong>Preparation Tip:</strong> Flatten cardboard boxes completely. Keep paper dry; wet paper fibers break down and cannot be remanufactured.
+        </div>
+      </div>
+
+      <!-- 3. GLASS SECTION -->
+      <div id="glass" class="card" style="padding: 2.5rem; border-left: 6px solid var(--main-green);">
+        <div style="display: flex; align-items: center; gap: 1rem; margin-bottom: 1.5rem;">
+          <div style="width: 52px; height: 52px; background-color: var(--light-green); color: var(--primary-green); border-radius: var(--radius-md); display: flex; align-items: center; justify-content: center; font-size: 1.5rem;">
+            <i data-lucide="wine"></i>
+          </div>
+          <div>
+            <h2 style="font-size: 2rem;">Glass Bottles & Jars Guide</h2>
+            <p style="color: var(--secondary-text);">Sorting glass food and beverage containers safely.</p>
+          </div>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; margin-bottom: 2rem;">
+          <div style="background-color: var(--soft-green); padding: 1.5rem; border-radius: var(--radius-md); border: 1px solid var(--border-green);">
+            <h4 style="color: var(--primary-green); margin-bottom: 1rem;">Recyclable Containers</h4>
+            <p style="font-size: 0.95rem; line-height: 1.6;">
+              Clear, green, and brown glass drink bottles, condiment jars, and glass sauce containers.
+            </p>
+          </div>
+
+          <div style="background-color: var(--warning-bg); padding: 1.5rem; border-radius: var(--radius-md); border: 1px solid #FDE68A;">
+            <h4 style="color: var(--warning-text); margin-bottom: 1rem; display: flex; align-items: center; gap: 0.5rem;">
+              <i data-lucide="alert-triangle"></i> Broken Glass & Non-Container Glass Warning
+            </h4>
+            <p style="font-size: 0.95rem; color: var(--warning-text); line-height: 1.6;">
+              Do NOT place drinking glasses, window glass, mirrors, Pyrex cookware, or broken light bulbs in recycling bins. They melt at different temperatures and ruin recycled glass batches.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <!-- 4. METAL SECTION -->
+      <div id="metal" class="card" style="padding: 2.5rem; border-left: 6px solid var(--primary-green);">
+        <div style="display: flex; align-items: center; gap: 1rem; margin-bottom: 1.5rem;">
+          <div style="width: 52px; height: 52px; background-color: var(--light-green); color: var(--primary-green); border-radius: var(--radius-md); display: flex; align-items: center; justify-content: center; font-size: 1.5rem;">
+            <i data-lucide="shield"></i>
+          </div>
+          <div>
+            <h2 style="font-size: 2rem;">Metal & Aluminium Guide</h2>
+            <p style="color: var(--secondary-text);">Aluminium cans, steel tins, and clean foil.</p>
+          </div>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem;">
+          <div style="background-color: var(--soft-green); padding: 1.5rem; border-radius: var(--radius-md); border: 1px solid var(--border-green);">
+            <h4 style="color: var(--primary-green); margin-bottom: 0.75rem;">Accepted Metals</h4>
+            <ul style="list-style: none; display: flex; flex-direction: column; gap: 0.5rem; font-size: 0.95rem;">
+              <li>• Aluminium beverage cans (soda, beer, sparkling water)</li>
+              <li>• Steel & tin food cans (soup, pet food, vegetables)</li>
+              <li>• Clean aluminium foil scrunched into a golf ball size</li>
+            </ul>
+          </div>
+          <div style="background-color: var(--soft-green); padding: 1.5rem; border-radius: var(--radius-md); border: 1px solid var(--border-green);">
+            <h4 style="color: var(--primary-green); margin-bottom: 0.75rem;">Preparation & Tips</h4>
+            <p style="font-size: 0.95rem; line-height: 1.6;">
+              Empty liquids completely. Rinse steel food tins to prevent odor. Pull-tabs can stay attached to cans.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <!-- 5. E-WASTE SECTION -->
+      <div id="ewaste" class="card" style="padding: 2.5rem; border-left: 6px solid var(--warning);">
+        <div style="display: flex; align-items: center; gap: 1rem; margin-bottom: 1.5rem;">
+          <div style="width: 52px; height: 52px; background-color: var(--warning-bg); color: var(--warning-text); border-radius: var(--radius-md); display: flex; align-items: center; justify-content: center; font-size: 1.5rem;">
+            <i data-lucide="laptop"></i>
+          </div>
+          <div>
+            <h2 style="font-size: 2rem;">E-Waste & Electronics Guide</h2>
+            <p style="color: var(--secondary-text);">Batteries, phones, computers, and electrical appliances.</p>
+          </div>
+        </div>
+
+        <p style="font-size: 1.05rem; line-height: 1.7; margin-bottom: 1.5rem;">
+          Electronic waste contains valuable metals (gold, copper, silver) alongside hazardous substances (lithium, lead, mercury). <strong>Never put electronic waste or batteries in regular household bins!</strong>
+        </p>
+
+        <div style="display: flex; gap: 1rem; flex-wrap: wrap;">
+          <a href="locations.html?type=E-Waste" class="btn btn-primary"><i data-lucide="map-pin"></i> Find Nearby E-Waste Drop-off Hub</a>
+          <a href="locations.html?type=Batteries" class="btn btn-secondary"><i data-lucide="battery-charging"></i> Find Battery Drop-off Points</a>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer class="footer">
+    <div class="container">
+      <div class="footer-bottom" style="border-top: none; padding-top: 0;">
+        <div>&copy; 2026 EcoRecycle Australia. Recycling & Waste Management System Prototype.</div>
+        <div>DAT709 Capstone Project Prototype</div>
+      </div>
+    </div>
+  </footer>
+
+  <script src="../js/script.js"></script>
+</body>
+</html>

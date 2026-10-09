@@ -1,0 +1,552 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>EcoRecycle | Smart Waste. Better Future.</title>
+  <meta name="description" content="EcoRecycle helps you quickly find correct waste disposal methods, understand recycling rules, and locate local recycling centres across Australia.">
+  
+  <!-- CSS Design System -->
+  <link rel="stylesheet" href="css/style.css">
+
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+<body>
+
+  <!-- PUBLIC NAVIGATION BAR (Dashboard removed from main nav list - Section 3) -->
+  <nav class="navbar" id="mainNavbar">
+    <div class="container nav-container">
+      <!-- Logo & Brand Name -->
+      <a href="index.html" class="brand-logo">
+        <div class="logo-icon-box">
+          <i data-lucide="recycle"></i>
+        </div>
+        <div class="brand-text">
+          <span class="brand-name">EcoRecycle</span>
+          <span class="brand-subtitle">Smart Waste. Better Future.</span>
+        </div>
+      </a>
+
+      <!-- Public Navigation Links (No Dashboard in public menu list) -->
+      <ul class="nav-menu" id="navMenu">
+        <li><a href="index.html" class="nav-link active">Home</a></li>
+        <li><a href="pages/waste-search.html" class="nav-link">Waste Search</a></li>
+        <li><a href="pages/recycling-guide.html" class="nav-link">Recycling Guide</a></li>
+        <li><a href="pages/locations.html" class="nav-link">Recycling Locations</a></li>
+        <li><a href="pages/contact.html" class="nav-link">Contact Us</a></li>
+      </ul>
+
+      <!-- Action Buttons -->
+      <div class="nav-actions">
+        <a href="pages/login.html" class="nav-login-btn">Login / Register</a>
+        <a href="pages/waste-search.html" class="btn btn-primary btn-sm">Start Recycling</a>
+      </div>
+
+      <!-- Mobile Hamburger Button -->
+      <button class="mobile-toggle" id="mobileMenuToggle" aria-label="Toggle Navigation">
+        <i data-lucide="menu"></i>
+      </button>
+    </div>
+  </nav>
+
+  <!-- HERO SECTION (Section 4) -->
+  <section class="hero">
+    <div class="container hero-grid">
+      <div class="hero-content">
+        <div class="hero-badge">
+          <i data-lucide="sparkles"></i> Sustainable Capstone Prototype
+        </div>
+        <h1 class="hero-title">
+          Recycle Smarter. <br><span>Dispose Better.</span>
+        </h1>
+        <p class="hero-text">
+          Not sure where your waste belongs? EcoRecycle helps you quickly find the correct disposal method, understand recycling rules, and discover nearby recycling locations across Australia.
+        </p>
+        <div class="hero-actions">
+          <a href="pages/waste-search.html" class="btn btn-primary btn-lg">
+            <i data-lucide="search"></i> Start Recycling
+          </a>
+          <a href="pages/recycling-guide.html" class="btn btn-secondary btn-lg">
+            <i data-lucide="book-open"></i> Explore Recycling Guide
+          </a>
+        </div>
+      </div>
+
+      <div class="hero-visual">
+        <div class="hero-blob"></div>
+        <div class="hero-image-wrapper">
+          <img src="https://images.unsplash.com/photo-1532996122724-e3c354a0b15b?auto=format&fit=crop&w=1000&q=80" alt="Person sorting recyclable waste into clean bins" class="hero-image">
+        </div>
+        <div class="hero-floating-card">
+          <div class="hero-floating-icon">
+            <i data-lucide="check-circle-2"></i>
+          </div>
+          <div>
+            <div class="hero-floating-title">Instant Verification</div>
+            <div class="hero-floating-val">100+ Waste Items</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- PROBLEM SECTION (Section 5) -->
+  <section class="section section-bg">
+    <div class="container">
+      <div class="section-header">
+        <span class="section-badge"><i data-lucide="help-circle"></i> The Waste Challenge</span>
+        <h2 class="section-title">Recycling Shouldn't Be Confusing</h2>
+        <p class="section-subtitle">Understanding proper waste separation is the first step toward a cleaner community and reducing landfill contamination.</p>
+      </div>
+
+      <div class="problem-grid">
+        <!-- Problem 1 -->
+        <div class="problem-card">
+          <div class="problem-icon-box">
+            <i data-lucide="help-circle"></i>
+          </div>
+          <h3 class="problem-card-title">Don't Know Where It Goes</h3>
+          <p class="problem-card-desc">Many everyday items are difficult to classify correctly, leaving residents unsure about regular bin vs drop-off centre placement.</p>
+        </div>
+
+        <!-- Problem 2 -->
+        <div class="problem-card">
+          <div class="problem-icon-box">
+            <i data-lucide="alert-triangle"></i>
+          </div>
+          <h3 class="problem-card-title">Recycling Contamination</h3>
+          <p class="problem-card-desc">Incorrect items placed in recycling bins can contaminate entire batches of recyclable materials, routing them straight to landfills.</p>
+        </div>
+
+        <!-- Problem 3 -->
+        <div class="problem-card">
+          <div class="problem-icon-box">
+            <i data-lucide="file-search"></i>
+          </div>
+          <h3 class="problem-card-title">Information Is Scattered</h3>
+          <p class="problem-card-desc">Residents often need to search through different local government sources to find simple, reliable disposal instructions.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- WASTE SEARCH FEATURE (Section 6) -->
+  <section class="section" id="search-section">
+    <div class="container">
+      <div class="search-feature-box">
+        <div class="section-header" style="margin-bottom: 2rem;">
+          <span class="section-badge"><i data-lucide="search"></i> Instant Search Engine</span>
+          <h2 class="section-title">Where Does My Waste Go?</h2>
+          <p class="section-subtitle">Search for an item to find out how it should be disposed of.</p>
+        </div>
+
+        <div class="search-bar-container">
+          <div class="search-input-wrapper">
+            <i data-lucide="search" class="search-icon"></i>
+            <input type="text" id="wasteSearchInput" class="search-input" placeholder='Try "plastic bottle", "battery", "pizza box"...' aria-label="Search waste item">
+            <button id="wasteSearchBtn" class="btn btn-primary">
+              <i data-lucide="search"></i> Search
+            </button>
+          </div>
+
+          <div class="popular-searches">
+            <span class="popular-label">Popular Searches:</span>
+            <button class="search-chip" data-search="plastic bottle">Plastic Bottle</button>
+            <button class="search-chip" data-search="cardboard box">Cardboard</button>
+            <button class="search-chip" data-search="glass bottle">Glass Bottle</button>
+            <button class="search-chip" data-search="battery">Battery</button>
+            <button class="search-chip" data-search="pizza box">Food Container</button>
+            <button class="search-chip" data-search="smartphone">Electronics</button>
+          </div>
+        </div>
+
+        <!-- Dynamic Mock Search Result Display -->
+        <div id="searchResultContainer" class="search-result-container"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- WASTE CATEGORIES (Section 7) - High Resolution Verified Environmental Photos -->
+  <section class="section section-bg">
+    <div class="container">
+      <div class="section-header">
+        <span class="section-badge"><i data-lucide="layers"></i> Waste Categories</span>
+        <h2 class="section-title">Explore Waste Categories</h2>
+        <p class="section-subtitle">Browse through common waste streams to learn specific sorting guidelines and preparations.</p>
+      </div>
+
+      <div class="categories-grid">
+        <!-- Category 1: Plastic (Fixed Photo) -->
+        <div class="category-card">
+          <div class="category-img-wrapper">
+            <img src="https://images.unsplash.com/photo-1595278069441-2cf29f8005a4?auto=format&fit=crop&w=800&q=80" alt="Plastic water bottles recycling" class="category-img">
+          </div>
+          <div class="category-card-body">
+            <div class="category-top">
+              <h3 class="category-card-title">Plastic</h3>
+              <i data-lucide="package" style="color: var(--main-green);"></i>
+            </div>
+            <p class="category-card-desc">Learn how common plastic bottles, rigid containers, and caps should be sorted.</p>
+            <div class="category-card-footer">
+              <span class="item-count-tag">28 Items Covered</span>
+              <a href="pages/recycling-guide.html#plastic" class="btn btn-sm btn-secondary">Explore <i data-lucide="arrow-right"></i></a>
+            </div>
+          </div>
+        </div>
+
+        <!-- Category 2: Paper & Cardboard (Fixed Photo) -->
+        <div class="category-card">
+          <div class="category-img-wrapper">
+            <img src="https://images.unsplash.com/photo-1530587191325-3db32d826c18?auto=format&fit=crop&w=800&q=80" alt="Stacked paper and cardboard recycling" class="category-img">
+          </div>
+          <div class="category-card-body">
+            <div class="category-top">
+              <h3 class="category-card-title">Paper & Cardboard</h3>
+              <i data-lucide="file-text" style="color: var(--main-green);"></i>
+            </div>
+            <p class="category-card-desc">Find out which paper products, newspapers, and cardboard boxes can be recycled.</p>
+            <div class="category-card-footer">
+              <span class="item-count-tag">24 Items Covered</span>
+              <a href="pages/recycling-guide.html#paper" class="btn btn-sm btn-secondary">Explore <i data-lucide="arrow-right"></i></a>
+            </div>
+          </div>
+        </div>
+
+        <!-- Category 3: Glass (Fixed Photo) -->
+        <div class="category-card">
+          <div class="category-img-wrapper">
+            <img src="https://images.unsplash.com/photo-1572021335469-31706a17aaef?auto=format&fit=crop&w=800&q=80" alt="Glass recycling bottles and jars" class="category-img">
+          </div>
+          <div class="category-card-body">
+            <div class="category-top">
+              <h3 class="category-card-title">Glass</h3>
+              <i data-lucide="wine" style="color: var(--main-green);"></i>
+            </div>
+            <p class="category-card-desc">Learn how to correctly dispose of beverage bottles and glass food jars safely.</p>
+            <div class="category-card-footer">
+              <span class="item-count-tag">18 Items Covered</span>
+              <a href="pages/recycling-guide.html#glass" class="btn btn-sm btn-secondary">Explore <i data-lucide="arrow-right"></i></a>
+            </div>
+          </div>
+        </div>
+
+        <!-- Category 4: Metal -->
+        <div class="category-card">
+          <div class="category-img-wrapper">
+            <img src="https://images.unsplash.com/photo-1558618666-fcd25c85cd64?auto=format&fit=crop&w=800&q=80" alt="Metal aluminium cans" class="category-img">
+          </div>
+          <div class="category-card-body">
+            <div class="category-top">
+              <h3 class="category-card-title">Metal</h3>
+              <i data-lucide="shield" style="color: var(--main-green);"></i>
+            </div>
+            <p class="category-card-desc">Discover recyclable aluminium drink cans, steel food tins, and metal foil materials.</p>
+            <div class="category-card-footer">
+              <span class="item-count-tag">15 Items Covered</span>
+              <a href="pages/recycling-guide.html#metal" class="btn btn-sm btn-secondary">Explore <i data-lucide="arrow-right"></i></a>
+            </div>
+          </div>
+        </div>
+
+        <!-- Category 5: E-Waste -->
+        <div class="category-card">
+          <div class="category-img-wrapper">
+            <img src="https://images.unsplash.com/photo-1550009158-9ebf69173e03?auto=format&fit=crop&w=800&q=80" alt="E-waste electronics" class="category-img">
+          </div>
+          <div class="category-card-body">
+            <div class="category-top">
+              <h3 class="category-card-title">E-Waste</h3>
+              <i data-lucide="laptop" style="color: var(--main-green);"></i>
+            </div>
+            <p class="category-card-desc">Find safe drop-off disposal options for batteries, phones, chargers, and appliances.</p>
+            <div class="category-card-footer">
+              <span class="item-count-tag">30 Items Covered</span>
+              <a href="pages/recycling-guide.html#ewaste" class="btn btn-sm btn-secondary">Explore <i data-lucide="arrow-right"></i></a>
+            </div>
+          </div>
+        </div>
+
+        <!-- Category 6: General Waste -->
+        <div class="category-card">
+          <div class="category-img-wrapper">
+            <img src="https://images.unsplash.com/photo-1611284446314-60a58ac0deb9?auto=format&fit=crop&w=800&q=80" alt="General waste bin sorting" class="category-img">
+          </div>
+          <div class="category-card-body">
+            <div class="category-top">
+              <h3 class="category-card-title">General Waste</h3>
+              <i data-lucide="trash-2" style="color: var(--main-green);"></i>
+            </div>
+            <p class="category-card-desc">Understand what belongs in general landfill waste and how to minimize contamination.</p>
+            <div class="category-card-footer">
+              <span class="item-count-tag">20 Items Covered</span>
+              <a href="pages/recycling-guide.html#general" class="btn btn-sm btn-secondary">Explore <i data-lucide="arrow-right"></i></a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- RECYCLING RULES (Section 9) -->
+  <section class="section">
+    <div class="container">
+      <div class="section-header">
+        <span class="section-badge"><i data-lucide="check-square"></i> Essential Guidelines</span>
+        <h2 class="section-title">Simple Recycling Rules</h2>
+        <p class="section-subtitle">Follow these four basic steps to make sure your recyclable items are processed successfully.</p>
+      </div>
+
+      <div class="rules-grid">
+        <!-- Rule 01 -->
+        <div class="rule-card">
+          <div class="rule-number">01</div>
+          <h3 class="rule-title">Check</h3>
+          <p class="rule-desc">Check whether the item is accepted in your local kerbside recycling bin or drop-off centre.</p>
+        </div>
+
+        <!-- Rule 02 -->
+        <div class="rule-card">
+          <div class="rule-number">02</div>
+          <h3 class="rule-title">Empty</h3>
+          <p class="rule-desc">Empty all food and liquid contents from bottles, jars, and food containers completely.</p>
+        </div>
+
+        <!-- Rule 03 -->
+        <div class="rule-card">
+          <div class="rule-number">03</div>
+          <h3 class="rule-title">Clean</h3>
+          <p class="rule-desc">Rinse recyclable containers lightly where required so grease doesn't contaminate paper.</p>
+        </div>
+
+        <!-- Rule 04 -->
+        <div class="rule-card">
+          <div class="rule-number">04</div>
+          <h3 class="rule-title">Sort</h3>
+          <p class="rule-desc">Place materials into the correct bin category loose, without bagging them in plastic.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- RECYCLING LOCATIONS PREVIEW (Section 10) -->
+  <section class="section section-bg" id="locations-section">
+    <div class="container">
+      <div class="section-header">
+        <span class="section-badge"><i data-lucide="map-pin"></i> Drop-off Hubs</span>
+        <h2 class="section-title">Find a Recycling Location</h2>
+        <p class="section-subtitle">Find suitable recycling locations for items that cannot be placed in your regular household recycling.</p>
+      </div>
+
+      <div class="location-filter-box">
+        <div class="filter-form-grid">
+          <div class="form-group">
+            <label class="form-label" for="locationSearchInput">Search Location</label>
+            <input type="text" id="locationSearchInput" class="form-control" placeholder="Enter suburb, postcode or area...">
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="wasteTypeSelect">Waste Type</label>
+            <select id="wasteTypeSelect" class="form-control">
+              <option value="All">All Waste Types</option>
+              <option value="General Recycling">General Recycling</option>
+              <option value="E-Waste">E-Waste</option>
+              <option value="Batteries">Batteries</option>
+              <option value="Glass">Glass</option>
+              <option value="Metal">Metal</option>
+              <option value="Plastic">Plastic</option>
+            </select>
+          </div>
+
+          <button id="findLocationsBtn" class="btn btn-primary" style="height: 48px;">
+            <i data-lucide="search"></i> Find Locations
+          </button>
+        </div>
+      </div>
+
+      <div class="location-layout">
+        <!-- Location List Container -->
+        <div id="locationListContainer" class="location-list"></div>
+
+        <!-- Interactive Visual Mock Map -->
+        <div class="mock-map-container">
+          <div class="mock-map-bg"></div>
+          
+          <!-- Pins -->
+          <div class="map-pin" style="top: 25%; left: 35%;" onclick="openDirectionsModal('GreenPoint Community Recycling Centre')">
+            <i data-lucide="recycle"></i> GreenPoint Hub
+          </div>
+          <div class="map-pin" style="top: 55%; left: 65%;" onclick="openDirectionsModal('EcoHub E-Waste Depot')">
+            <i data-lucide="laptop"></i> EcoHub E-Waste
+          </div>
+          <div class="map-pin" style="top: 40%; left: 20%;" onclick="openDirectionsModal('Metro Glass Drop-off')">
+            <i data-lucide="wine"></i> Metro Glass
+          </div>
+          <div class="map-pin" style="top: 70%; left: 45%;" onclick="openDirectionsModal('Northside Hazmat Centre')">
+            <i data-lucide="alert-triangle"></i> Northside Chemical
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- WASTE COLLECTION INFORMATION (Section 11) -->
+  <section class="section">
+    <div class="container">
+      <div class="section-header">
+        <span class="section-badge"><i data-lucide="calendar"></i> Collection Schedule</span>
+        <h2 class="section-title">Waste Collection Calendar</h2>
+        <p class="section-subtitle">Stay up-to-date with your local household waste bin schedules and never miss a collection day.</p>
+      </div>
+
+      <div class="calendar-widget-grid">
+        <div class="calendar-card">
+          <div class="calendar-header">
+            <h3 class="calendar-month-title"><i data-lucide="calendar" style="color: var(--main-green)"></i> October 2026</h3>
+            <span class="badge badge-recyclable">Suburb Zone 4</span>
+          </div>
+
+          <div class="calendar-legend">
+            <div class="legend-item"><span class="dot dot-recycling"></span> 🟢 Recycling</div>
+            <div class="legend-item"><span class="dot dot-organic"></span> 🟤 Organic</div>
+            <div class="legend-item"><span class="dot dot-general"></span> ⚫ General Waste</div>
+          </div>
+
+          <div class="upcoming-collection-box">
+            <div>
+              <div class="collection-info-title">Next Collection</div>
+              <div class="collection-info-type">🟢 Recycling & Organics</div>
+              <div class="collection-info-time"><i data-lucide="clock" style="vertical-align: middle;"></i> Friday, 10 October • 8:00 AM – 12:00 PM</div>
+            </div>
+            <button class="btn btn-sm btn-primary" onclick="showToast('Reminder added! You will be notified on Oct 09.')">
+              <i data-lucide="bell"></i> Set Reminder
+            </button>
+          </div>
+        </div>
+
+        <div style="background-color: var(--soft-green); padding: 2.5rem; border-radius: var(--radius-lg); border: 1px solid var(--border-green);">
+          <h3 style="font-size: 1.5rem; margin-bottom: 1rem; color: var(--primary-green);">Never Miss Bin Day</h3>
+          <p style="color: var(--secondary-text); margin-bottom: 1.5rem; line-height: 1.6;">
+            Log into your EcoRecycle account to sync your household address, receive automated email/SMS reminders, and export bin collection schedules directly to your personal phone calendar.
+          </p>
+          <a href="pages/login.html" class="btn btn-primary">
+            <i data-lucide="user"></i> Access Collection Calendar via Portal
+          </a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- EDUCATIONAL SECTION (Section 18) -->
+  <section class="section section-bg">
+    <div class="container impact-grid">
+      <div>
+        <span class="section-badge"><i data-lucide="trending-up"></i> Community Footprint</span>
+        <h2 class="section-title">Small Changes. Big Impact.</h2>
+        <p style="font-size: 1.1rem; color: var(--secondary-text); margin-bottom: 1.5rem;">
+          By providing clear, easily accessible recycling guidance, EcoRecycle empowers individuals to make informed disposal decisions that protect local ecosystems and conserve natural resources.
+        </p>
+
+        <div class="stat-counter-grid">
+          <div class="stat-box">
+            <div class="stat-number">100+</div>
+            <div class="stat-label">Waste Items Explained</div>
+          </div>
+          <div class="stat-box">
+            <div class="stat-number">6</div>
+            <div class="stat-label">Major Waste Categories</div>
+          </div>
+          <div class="stat-box">
+            <div class="stat-number">24/7</div>
+            <div class="stat-label">Recycling Guidance</div>
+          </div>
+        </div>
+      </div>
+
+      <div style="border-radius: var(--radius-xl); overflow: hidden; box-shadow: var(--shadow-md); border: 4px solid var(--white);">
+        <img src="https://images.unsplash.com/photo-1441974231531-c6227db76b6e?auto=format&fit=crop&w=1000&q=80" alt="Clean green community environment" style="width: 100%; height: 380px; object-fit: cover;">
+      </div>
+    </div>
+  </section>
+
+  <!-- CALL TO ACTION (Section 19) -->
+  <section class="section">
+    <div class="container">
+      <div class="cta-banner">
+        <h2 class="cta-title">Ready to Recycle Smarter?</h2>
+        <p class="cta-desc">Find out where your waste belongs and make better disposal decisions today for a cleaner environment.</p>
+        <div class="cta-buttons">
+          <a href="pages/waste-search.html" class="btn btn-primary btn-lg" style="background-color: var(--white); color: var(--primary-green);">
+            <i data-lucide="search"></i> Search Waste
+          </a>
+          <a href="pages/recycling-guide.html" class="btn btn-secondary btn-lg" style="background-color: rgba(255,255,255,0.15); color: var(--white); border-color: rgba(255,255,255,0.3);">
+            <i data-lucide="book-open"></i> Explore Guide
+          </a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- FOOTER (Section 20) -->
+  <footer class="footer">
+    <div class="container">
+      <div class="footer-grid">
+        <!-- Brand Info -->
+        <div class="footer-brand">
+          <div class="brand-logo">
+            <div class="logo-icon-box">
+              <i data-lucide="recycle"></i>
+            </div>
+            <div class="brand-text">
+              <span class="brand-name" style="color: var(--white);">EcoRecycle Australia</span>
+              <span class="brand-subtitle" style="color: #94A3B8;">Smart Waste. Better Future.</span>
+            </div>
+          </div>
+          <p>Making recycling information simple, accessible, and useful for everyone across Australia.</p>
+        </div>
+
+        <!-- Platform Links -->
+        <div>
+          <h4 class="footer-title">Platform</h4>
+          <ul class="footer-links">
+            <li><a href="pages/waste-search.html">Waste Search</a></li>
+            <li><a href="pages/recycling-guide.html">Recycling Guide</a></li>
+            <li><a href="pages/locations.html">Recycling Locations</a></li>
+            <li><a href="pages/contact.html">Contact Us</a></li>
+          </ul>
+        </div>
+
+        <!-- Information Links -->
+        <div>
+          <h4 class="footer-title">Information</h4>
+          <ul class="footer-links">
+            <li><a href="pages/recycling-guide.html">About EcoRecycle</a></li>
+            <li><a href="pages/recycling-guide.html">Recycling Tips</a></li>
+            <li><a href="pages/contact.html">State Branches</a></li>
+            <li><a href="pages/contact.html">Hotline: 1300 326 732</a></li>
+          </ul>
+        </div>
+
+        <!-- Account Links -->
+        <div>
+          <h4 class="footer-title">Account</h4>
+          <ul class="footer-links">
+            <li><a href="pages/login.html">Login</a></li>
+            <li><a href="pages/login.html#register">Register</a></li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="footer-bottom">
+        <div>&copy; 2026 EcoRecycle Australia. Recycling & Waste Management System Prototype.</div>
+        <div style="display: flex; gap: 1rem;">
+          <span>DAT709 Capstone Project Prototype</span>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Scripts -->
+  <script src="js/script.js"></script>
+</body>
+</html>
