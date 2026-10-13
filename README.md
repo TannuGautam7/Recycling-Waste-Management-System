@@ -15,21 +15,25 @@ Many residents across Australia struggle with conflicting rules regarding everyd
 
 ---
 
-## ✨ 2. Comprehensive Feature Breakdown
+## ✨ 2. Core Features & Functional Architecture
 
-### 🔍 A. Instant Waste Search Engine & Lookup Directory
-- **Real-Time Instant Search**: Dynamic filtering across household items (e.g., *Plastic Water Bottles*, *Clean Cardboard*, *Greasy Pizza Boxes*, *Glass Bottles*, *AA Lithium Batteries*, *Aluminium Cans*).
-- **Recyclability Status Badges**: Clear color-coded badges indicating whether an item is:
-  - 🟢 **Recyclable** (Kerbside Yellow Bin acceptable)
-  - 🔴 **Not Recyclable** (General Landfill Waste)
-  - 🟠 **Special Drop-off** (Requires designated drop-off facility or hazardous waste center)
-- **Step-by-Step Disposal Instructions**: Clear preparation guidelines for every item (e.g., rinse containers, flatten boxes, tape battery terminals).
-- **Quick Category Filter Chips**: One-click filtering tags for fast navigation across major material categories.
-- **Citizen Request Submission**: When searching for an unlisted item, users can submit a request directly to the **Admin Operations Queue** for municipal review.
+### 🌟 Primary Core Feature: Instant Waste Search & Disposal Rule Engine
+The cornerstone of **EcoRecycle Australia** is its intelligent waste search and decision engine, specifically engineered to eliminate household recycling contamination at the source and eliminate confusion around kerbside disposal rules:
+- **Real-Time Instant Search**: Dynamic, multi-attribute filtering across household items (e.g., *Plastic Water Bottles*, *Clean Cardboard*, *Greasy Pizza Boxes*, *Glass Bottles*, *AA Lithium Batteries*, *Aluminium Cans*).
+- **Recyclability Status Badges**: High-contrast, color-coded badges providing immediate disposal classification:
+  - 🟢 **Recyclable**: Yellow Kerbside Bin acceptable.
+  - 🔴 **Not Recyclable**: General Landfill Waste / Red Bin.
+  - 🟠 **Special Drop-off**: Requires a designated council drop-off depot, e-waste hub, or hazardous chemical station.
+- **Step-by-Step Preparation Rules**: Precise handling instructions for every item (e.g., rinse liquid residue, tear off soiled cardboard lids, tape lithium battery terminals).
+- **Quick Category Filter Chips**: One-touch pills for instant navigation across major material streams.
+- **Citizen Request Submission Queue**: When residents search for an unlisted item, they can submit an item request directly to the **Admin Operations Queue** for municipal review and one-click database publishing.
+- **Core Implementation**: Accessible on `index.html` & `pages/waste-search.html`, powered by the dynamic master database in `js/script.js`.
 
 ---
 
-### 📖 B. Material Sorting & Educational Recycling Guide
+### 🛠️ Supporting Core Modules
+
+#### 📖 A. Material Sorting & Educational Recycling Guide (`pages/recycling-guide.html`)
 - **5 Core Material Category Directories**:
   - 🥤 **Plastics**: PET #1, HDPE #2, Soft Plastics advisory, rigid plastics guide.
   - 📦 **Paper & Cardboard**: Clean boxes vs. food-contaminated paper, milk cartons, glossy paper.
@@ -41,7 +45,7 @@ Many residents across Australia struggle with conflicting rules regarding everyd
 
 ---
 
-### 📍 C. Recycling Location & Drop-off Centre Finder
+#### 📍 B. Recycling Location & Drop-off Centre Finder (`pages/locations.html`)
 - **Suburb & Postcode Search**: Locate nearby drop-off hubs, community recycling centers, and battery depots.
 - **Waste Category Filter Dropdown**: Filter centers by accepted waste streams (Plastic, Glass, Metal, Paper, E-Waste, Batteries).
 - **Distance & Facility Info**: View real-time distance calculations (e.g., *1.8 km away*), street addresses, operating hours, and contact phone numbers.
@@ -51,7 +55,7 @@ Many residents across Australia struggle with conflicting rules regarding everyd
 
 ---
 
-### 👤 D. Personal Resident User Dashboard & Impact Tracker
+#### 👤 C. Personal Resident User Dashboard & Impact Tracker (`pages/dashboard.html`)
 - **Personal Eco Statistics Overview**:
   - 📦 **Total Items Recycled**: Real-time counter (e.g., *42 Items*).
   - ⚖️ **Landfill Waste Diverted**: Weight measurement in kg (e.g., *24.5 kg Diverted*).
@@ -66,7 +70,7 @@ Many residents across Australia struggle with conflicting rules regarding everyd
 
 ---
 
-### 🛡️ E. Administrator Operations Control Portal
+#### 🛡️ D. Administrator Operations Control Portal (`pages/dashboard.html`)
 *(Accessible via `admin@ecorecycle.org` / `AdminPassword123!`)*
 - **City Operations Analytics**: High-level overview metrics (e.g., *74.2 City Tons Diverted*, *Active Waste Rules*, *Pending Citizen Items*).
 - **Master Waste Rule Registry**:
@@ -81,7 +85,7 @@ Many residents across Australia struggle with conflicting rules regarding everyd
 
 ---
 
-### 🔑 F. Security, Authentication & User Management
+#### 🔑 E. Security, Authentication & User Management (`pages/login.html`)
 - **Role-Based Authentication Engine**: Built-in state management supporting two primary user roles:
   - 👤 **Resident Role** (`alex.johnson@example.com`)
   - 🛡️ **Administrator Role** (`admin@ecorecycle.org`)
@@ -93,7 +97,7 @@ Many residents across Australia struggle with conflicting rules regarding everyd
 
 ---
 
-### 🇦🇺 G. Australian Support & State Branch Directory
+#### 🇦🇺 F. Australian Support & State Branch Directory (`pages/contact.html`)
 - **National Hotline & Emergency Contacts**: Sydney HQ details, hotline (`1300 326 732`), and state branch contacts across NSW, VIC, QLD, and WA.
 - **Citizen Inquiry Form**: Interactive support form with category selection (General Inquiry, Kerbside Service, Report Contamination, Missed Collection) and instant confirmation notifications.
 
