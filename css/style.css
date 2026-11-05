@@ -444,6 +444,7 @@ svg { flex-shrink: 0; }
 .form-hint { font-size: var(--fs-xs); color: var(--secondary-text); }
 .form-control {
   width: 100%;
+  min-height: 48px;
   padding: 0.75rem 1rem;
   border: 1px solid var(--border-control);
   border-radius: var(--radius-md);

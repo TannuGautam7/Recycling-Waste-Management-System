@@ -1020,6 +1020,172 @@ function renderNavActions() {
 }
 
 /* ==========================================================================
+   7. SCHEDULE
+   Suburb Zone 4: yellow and green bins every Tuesday, red bin on alternate
+   Tuesdays. Dates are worked out from today, so the calendar never goes stale.
+   ========================================================================== */
+
+const COLLECTION_WEEKDAY = 2; // Tuesday
+const RED_BIN_ANCHOR = new Date(2026, 0, 6); // a Tuesday with a red bin collection
+
+const BIN_INFO = {
+  yellow: { label: 'Yellow Recycling', dot: 'dot-yellow' },
+  green: { label: 'Green Organics (FOGO)', dot: 'dot-green' },
+  red: { label: 'Red General Waste', dot: 'dot-red' },
+};
+
+function binsOn(date) {
+  if (date.getDay() !== COLLECTION_WEEKDAY) return [];
+  const weeks = Math.round((date - RED_BIN_ANCHOR) / (7 * 24 * 60 * 60 * 1000));
+  return weeks % 2 === 0 ? ['yellow', 'green', 'red'] : ['yellow', 'green'];
+}
+
+/** Next collection day. Today counts until noon, when trucks have finished. */
+function nextCollectionDate(from = new Date()) {
+  const date = new Date(from.getFullYear(), from.getMonth(), from.getDate());
+  let days = (COLLECTION_WEEKDAY - date.getDay() + 7) % 7;
+  if (days === 0 && from.getHours() >= 12) days = 7;
+  date.setDate(date.getDate() + days);
+  return date;
+}
+
+function upcomingCollections(count) {
+  const first = nextCollectionDate();
+  return Array.from({ length: count }, (_, index) => {
+    const date = new Date(first.getFullYear(), first.getMonth(), first.getDate() + index * 7);
+    return { date, bins: binsOn(date) };
+  });
+}
+
+function nextDateForBin(bin) {
+  return upcomingCollections(4).find((collection) => collection.bins.includes(bin)).date;
+}
+
+const LONG_DATE = { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' };
+const SHORT_DATE = { weekday: 'short', day: 'numeric', month: 'short' };
+const formatDateObj = (date, options) => date.toLocaleDateString('en-AU', options);
+
+function collectionRelativeLabel(date) {
+  const today = new Date(new Date().getFullYear(), new Date().getMonth(), new Date().getDate());
+  const days = Math.round((date - today) / (24 * 60 * 60 * 1000));
+  if (days === 0) return 'Today';
+  if (days === 1) return 'Tomorrow';
+  return `In ${days} days`;
+}
+
+function binDots(bins) {
+  return bins.map((bin) => `<span class="dot ${BIN_INFO[bin].dot}" aria-hidden="true"></span>`).join('');
+}
+
+function binNames(bins) {
+  return bins.map((bin) => `<span><span class="dot ${BIN_INFO[bin].dot}" aria-hidden="true"></span>${esc(BIN_INFO[bin].label)}</span>`).join('');
+}
+
+/* ---- Reminders ---- */
+
+const reminderOwner = () => {
+  const user = currentUser();
+  return user ? user.id : GUEST_KEY;
+};
+
+function reminderButtonHtml(iso) {
+  const active = getReminders(reminderOwner()).includes(iso);
+  return `<button type="button" class="btn btn-sm ${active ? 'btn-secondary' : 'btn-primary'}" data-action="toggle-reminder" data-date="${iso}" aria-pressed="${active}">
+    <i data-lucide="${active ? 'bell-ring' : 'bell'}"></i> ${active ? 'Reminder Set' : 'Set Reminder'}
+  </button>`;
+}
+
+ACTIONS['toggle-reminder'] = (trigger) => {
+  const iso = trigger.dataset.date;
+  const owner = reminderOwner();
+  const reminders = getReminders(owner);
+  const active = reminders.includes(iso);
+  saveReminders(owner, active ? reminders.filter((date) => date !== iso) : [...reminders, iso]);
+  const label = formatDate(iso, SHORT_DATE);
+  showToast(active
+    ? `Reminder for ${label} removed.`
+    : `Reminder saved for ${label}. This prototype stores it in your browser and does not send messages.`, active ? 'info' : 'success');
+  renderCollectionWidgets();
+};
+
+/* ---- Widgets ---- */
+
+function collectionBoxHtml() {
+  const date = nextCollectionDate();
+  const bins = binsOn(date);
+  return `
+    <div class="upcoming-collection-box">
+      <div>
+        <div class="collection-info-title">Next Collection • ${esc(collectionRelativeLabel(date))}</div>
+        <div class="collection-info-type">${binNames(bins)}</div>
+        <div class="collection-info-time">${esc(formatDateObj(date, LONG_DATE))} • Bins out by 7:00 AM</div>
+      </div>
+      ${reminderButtonHtml(toISODate(date))}
+    </div>`;
+}
+
+function monthGridHtml() {
+  const today = new Date();
+  const year = today.getFullYear();
+  const month = today.getMonth();
+  const title = today.toLocaleDateString('en-AU', { month: 'long', year: 'numeric' });
+  const firstOffset = (new Date(year, month, 1).getDay() + 6) % 7; // weeks start on Monday
+  const daysInMonth = new Date(year, month + 1, 0).getDate();
+  const cells = [];
+  for (let i = 0; i < firstOffset; i += 1) cells.push('<td></td>');
+  for (let day = 1; day <= daysInMonth; day += 1) {
+    const date = new Date(year, month, day);
+    const bins = binsOn(date);
+    const classes = [bins.length ? 'is-collection' : '', day === today.getDate() ? 'is-today' : ''].filter(Boolean).join(' ');
+    const hidden = bins.length ? `<span class="sr-only">: ${bins.map((bin) => BIN_INFO[bin].label).join(', ')}</span>` : '';
+    cells.push(`<td${classes ? ` class="${classes}"` : ''}>${day}${hidden}${bins.length ? `<div class="cal-dots">${binDots(bins)}</div>` : ''}</td>`);
+  }
+  while (cells.length % 7) cells.push('<td></td>');
+  const rows = [];
+  for (let i = 0; i < cells.length; i += 7) rows.push(`<tr>${cells.slice(i, i + 7).join('')}</tr>`);
+  return {
+    title,
+    html: `
+      <table class="cal-grid">
+        <caption class="sr-only">Bin collection days for ${esc(title)}, Suburb Zone 4</caption>
+        <thead><tr>${['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'].map((d) => `<th scope="col">${d}</th>`).join('')}</tr></thead>
+        <tbody>${rows.join('')}</tbody>
+      </table>`,
+  };
+}
+
+/** Fills every collection widget on the page (home page and dashboard). */
+function renderCollectionWidgets() {
+  $$('[data-collection-calendar]').forEach((container) => {
+    const grid = monthGridHtml();
+    container.innerHTML = `
+      <div class="calendar-header">
+        <h3 class="calendar-month-title"><i data-lucide="calendar"></i> ${esc(grid.title)}</h3>
+        <span class="badge badge-recyclable">Suburb Zone 4</span>
+      </div>
+      <div class="calendar-legend">
+        ${Object.keys(BIN_INFO).map((bin) => `<div class="legend-item"><span class="dot ${BIN_INFO[bin].dot}" aria-hidden="true"></span> ${esc(BIN_INFO[bin].label)}</div>`).join('')}
+      </div>
+      ${grid.html}
+      ${collectionBoxHtml()}`;
+  });
+  $$('[data-next-collection]').forEach((container) => {
+    container.innerHTML = collectionBoxHtml();
+  });
+  $$('[data-upcoming-collections]').forEach((container) => {
+    container.innerHTML = upcomingCollections(4).map(({ date, bins }) => `
+      <div class="upcoming-row">
+        <span>${esc(formatDateObj(date, SHORT_DATE))}</span>
+        <span class="upcoming-bins">${binNames(bins)}</span>
+      </div>`).join('');
+  });
+  $$('[data-next-bin]').forEach((container) => {
+    container.textContent = formatDateObj(nextDateForBin(container.dataset.nextBin), LONG_DATE);
+  });
+  renderIcons();
+}
+
+/* ==========================================================================
    8. SEARCH
    ========================================================================== */
 
@@ -1181,6 +1347,17 @@ function initQuickSearch() {
   if (!form) return;
   initSuggestions($('#wasteSearchInput', form), $('#searchSuggestions', form), (rule) => {
     window.location.href = `${sitePath('pages/waste-search.html')}?q=${encodeURIComponent(rule.name)}`;
+  });
+}
+
+/** Home page counters come from the live rule list, so they can never be out of date. */
+function initHomeStats() {
+  const rules = getRules();
+  $$('[data-rule-count]').forEach((el) => {
+    el.textContent = rules.length;
+  });
+  $$('[data-category-count]').forEach((el) => {
+    el.textContent = rules.filter((rule) => rule.category === el.dataset.categoryCount).length;
   });
 }
 
@@ -2065,6 +2242,8 @@ document.addEventListener('DOMContentLoaded', () => {
   initMobileMenu();
   renderNavActions();
   initQuickSearch();
+  initHomeStats();
+  renderCollectionWidgets();
   initWasteSearchPage();
   initRecyclingGuide();
   initHubFinder();
