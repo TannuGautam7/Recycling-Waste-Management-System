@@ -1319,7 +1319,11 @@ function initSuggestions(input, list, onPick) {
   input.addEventListener('blur', () => setTimeout(close, 120));
   input.addEventListener('keydown', (event) => {
     if (event.key === 'Escape') {
-      if (!list.hidden) event.stopPropagation();
+      // With the list open, Esc only dismisses it. Otherwise Chrome would also clear the box.
+      if (!list.hidden) {
+        event.preventDefault();
+        event.stopPropagation();
+      }
       close();
     } else if (event.key === 'ArrowDown' && options.length) {
       event.preventDefault();
@@ -2069,8 +2073,14 @@ function showDashboardTab(requested) {
   $$('.sidebar-link').forEach((link) => {
     const active = link.dataset.tab === tab;
     link.classList.toggle('active', active);
-    if (active) link.setAttribute('aria-current', 'page');
-    else link.removeAttribute('aria-current');
+    if (active) {
+      link.setAttribute('aria-current', 'page');
+      // On phones the sidebar is a scrolling strip, so keep the active tab in view.
+      const strip = link.parentElement;
+      if (strip.scrollWidth > strip.clientWidth) strip.scrollLeft = link.offsetLeft - strip.offsetLeft - 16;
+    } else {
+      link.removeAttribute('aria-current');
+    }
   });
 }
 

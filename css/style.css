@@ -1164,7 +1164,8 @@ textarea.form-control { resize: vertical; min-height: 7rem; }
   border-radius: var(--radius-lg);
   border: 1px solid var(--border-light);
   box-shadow: var(--shadow-sm);
-  overflow: hidden;
+  overflow-x: auto;
+  container-type: inline-size;
 }
 .table-header-box { padding: 1.5rem; border-bottom: 1px solid var(--border-light); display: flex; align-items: center; justify-content: space-between; gap: 1rem; flex-wrap: wrap; }
 .table-header-box h2, .table-header-box h3 { font-size: var(--fs-lg); }
@@ -1305,8 +1306,12 @@ textarea.form-control { resize: vertical; min-height: 7rem; }
   .item-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .dashboard-stats-grid, .admin-stats { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .footer-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-  .map-shell { height: 480px; }
+  .map-shell { height: 480px; order: -1; }
   .location-list.scrollable { max-height: none; overflow: visible; padding-right: 0; }
+}
+
+@media (min-width: 901px) {
+  .dashboard-wrapper { background: linear-gradient(to right, var(--white) 259px, var(--border-light) 259px, var(--border-light) 260px, transparent 260px); }
 }
 
 /* Below tablet width the sidebar becomes a horizontal tab strip. */
@@ -1356,15 +1361,19 @@ textarea.form-control { resize: vertical; min-height: 7rem; }
   .error-code { font-size: 4.5rem; }
 }
 
-/* Tables become labelled cards on phones, so nothing scrolls sideways. */
-@media (max-width: 640px) {
+/* Tables become labelled cards when their own container is narrow. Using the container
+   rather than the viewport also covers tablets, where the sidebar takes up width. */
+@container (max-width: 900px) {
   .custom-table thead { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0, 0, 0, 0); }
   .custom-table, .custom-table tbody, .custom-table tr, .custom-table td { display: block; width: 100%; }
   .custom-table tbody tr { padding: 0.75rem 1rem; }
-  .custom-table td { padding: 0.35rem 0; display: flex; justify-content: space-between; gap: 1rem; text-align: right; font-size: var(--fs-sm); }
+  .custom-table td { padding: 0.35rem 0; display: flex; justify-content: space-between; align-items: flex-start; gap: 1rem; text-align: right; font-size: var(--fs-sm); }
   .custom-table td::before { content: attr(data-label); font-weight: 700; color: var(--secondary-text); text-align: left; flex-shrink: 0; }
   .custom-table td.cell-full { display: block; text-align: left; }
   .custom-table td.cell-full::before { content: none; }
+}
+
+@media (max-width: 640px) {
   .search-input-wrapper .btn span { display: none; }
   .search-input-wrapper .btn { padding: 0.7rem; }
 }
