@@ -85,185 +85,368 @@ document.addEventListener('click', (event) => {
     });
 });
 
-// --- 1. REAL-WORLD MASTER WASTE DATABASE ---
-let WASTE_DATABASE = [
+/* ==========================================================================
+   2. DATA (seed values, copied into localStorage on first visit)
+   ========================================================================== */
+
+const CATEGORIES = ['Plastic', 'Paper & Cardboard', 'Glass', 'Metal', 'E-Waste', 'Organics', 'General Waste'];
+
+/* How each disposal status is displayed and logged. */
+const RULE_STATUS = {
+  recyclable: { label: 'Recyclable', badge: 'badge-recyclable', icon: 'check-circle-2', logStatus: 'Recycled' },
+  'not-recyclable': { label: 'Not Recyclable', badge: 'badge-non-recyclable', icon: 'x-circle', logStatus: 'Landfill' },
+  special: { label: 'Special Drop-off', badge: 'badge-special', icon: 'alert-triangle', logStatus: 'Drop-off' },
+};
+
+const LOG_STATUS_BADGE = { Recycled: 'badge-recyclable', 'Drop-off': 'badge-special', Landfill: 'badge-non-recyclable' };
+
+const YELLOW_BIN = 'Yellow Recycling Bin';
+const GREEN_BIN = 'Green FOGO Bin';
+const RED_BIN = 'Red General Waste Bin';
+
+const SEED_RULES = [
+  /* [id, name, category, status, disposal method, preparation steps, search keywords] */
+
+  // Plastic
+  ['plastic-bottle', 'Plastic Water Bottle (PET #1)', 'Plastic', 'recyclable', YELLOW_BIN, ['Empty out all liquid.', 'Rinse out any residue with a little water.', 'Screw the cap back on so it is not lost during sorting.', 'Eligible drink bottles can also earn a 10c refund through your state\'s container deposit scheme.'], 'soft drink soda container deposit pet'],
+  ['milk-bottle', 'Plastic Milk Bottle (HDPE #2)', 'Plastic', 'recyclable', YELLOW_BIN, ['Empty and rinse the bottle.', 'Screw the lid back on.', 'Place it in the bin loose, not in a plastic bag.'], 'hdpe juice jug'],
+  ['detergent-bottle', 'Shampoo & Detergent Bottle', 'Plastic', 'recyclable', YELLOW_BIN, ['Use up the contents and rinse the bottle.', 'Remove pump dispensers, which contain metal springs, and put them in the red bin.', 'Replace the screw cap.'], 'conditioner body wash laundry dishwashing cleaning'],
+  ['yoghurt-tub', 'Yoghurt & Margarine Tub (PP #5)', 'Plastic', 'recyclable', YELLOW_BIN, ['Scrape out any food.', 'Rinse lightly.', 'Keep the tub and lid together, or put small lids in the red bin.'], 'ice cream butter container polypropylene'],
+  ['takeaway-container', 'Rigid Plastic Takeaway Container', 'Plastic', 'recyclable', YELLOW_BIN, ['Scrape out all food scraps.', 'Rinse off sauce and oil.', 'Check that it holds its shape: firm plastic only.'], 'food punnet tray clamshell berry'],
+  ['soft-plastic', 'Soft Plastic Bag & Wrapper', 'Plastic', 'special', 'Soft Plastics Drop-off (where available)', ['Never put soft plastics in the yellow bin, because they tangle sorting machinery.', 'Use the scrunch test: if it springs back after scrunching, it is soft plastic.', 'Take clean, dry soft plastics to a collection point if one operates near you. Otherwise use the red bin.'], 'shopping bag bread bag chip packet wrapper film freezer lolly'],
+  ['polystyrene', 'Polystyrene Foam Packaging', 'Plastic', 'not-recyclable', RED_BIN, ['Foam breaks apart and contaminates recycling.', 'Break large pieces down so the bin lid closes.', 'Some councils accept clean foam at drop-off days, so check locally.'], 'styrofoam esky foam meat tray packing peanuts'],
+  ['plastic-cutlery', 'Plastic Straws & Cutlery', 'Plastic', 'not-recyclable', RED_BIN, ['These items are too small to be sorted at recycling facilities.', 'Place them in the red bin.', 'Switch to reusable cutlery where you can.'], 'fork spoon knife single use'],
+  ['cling-wrap', 'Cling Wrap', 'Plastic', 'not-recyclable', RED_BIN, ['Soiled film cannot be recycled.', 'Place it in the red bin, not the yellow bin.'], 'glad wrap plastic film'],
+  ['garden-hose', 'Garden Hose & PVC Pipe (#3)', 'Plastic', 'not-recyclable', RED_BIN, ['Hoses wrap around sorting equipment and stop the line.', 'Cut long lengths to fit the red bin, or book a council bulky collection.'], 'pvc pipe tube irrigation'],
+
+  // Paper & Cardboard
+  ['cardboard-box', 'Cardboard Box (Clean)', 'Paper & Cardboard', 'recyclable', YELLOW_BIN, ['Flatten the box completely to save bin space.', 'Remove heavy plastic wrapping and polystyrene.', 'Keep it dry, because wet cardboard cannot be processed.'], 'delivery parcel carton shipping moving'],
+  ['pizza-box', 'Pizza Box (Soiled / Greasy)', 'Paper & Cardboard', 'not-recyclable', `${RED_BIN} or ${GREEN_BIN}`, ['Grease and food residue contaminate paper recycling.', 'Tear off any clean lid and put that part in the yellow bin.', 'Put the greasy base in the green FOGO bin if your council accepts it, otherwise the red bin.'], 'greasy food container takeaway'],
+  ['newspaper', 'Newspapers & Magazines', 'Paper & Cardboard', 'recyclable', YELLOW_BIN, ['Remove any plastic wrapping.', 'Keep them dry and place them in the bin loose.'], 'junk mail catalogue brochure glossy'],
+  ['office-paper', 'Office Paper & Envelopes', 'Paper & Cardboard', 'recyclable', YELLOW_BIN, ['Place sheets in the bin loose, not bagged.', 'Staples and envelope windows can stay in place.'], 'printer letter notebook'],
+  ['cereal-box', 'Cereal & Food Boxes', 'Paper & Cardboard', 'recyclable', YELLOW_BIN, ['Remove the inner plastic liner and put it in the red bin.', 'Flatten the box.'], 'cracker pasta tissue box paperboard'],
+  ['milk-carton', 'Milk & Juice Carton', 'Paper & Cardboard', 'recyclable', YELLOW_BIN, ['Empty and rinse the carton.', 'Flatten it and replace the cap.', 'Most councils accept cartons, but check locally for long-life cartons.'], 'liquid paperboard tetra pak'],
+  ['egg-carton', 'Cardboard Egg Carton', 'Paper & Cardboard', 'recyclable', YELLOW_BIN, ['Remove any broken egg.', 'Place the clean carton in the bin. Soiled cartons can go in the green FOGO bin.'], 'eggs'],
+  ['coffee-cup', 'Takeaway Coffee Cup', 'Paper & Cardboard', 'not-recyclable', RED_BIN, ['Paper cups have a thin plastic lining that stops them being pulped with paper.', 'Put the cup in the red bin.', 'Rigid plastic lids are accepted by some councils, so check locally.', 'A reusable cup avoids this waste altogether.'], 'disposable paper tea'],
+  ['tissues', 'Used Tissues & Paper Towels', 'Paper & Cardboard', 'not-recyclable', `${RED_BIN} or ${GREEN_BIN}`, ['Used paper fibres are too short and too soiled to recycle.', 'Put them in the green FOGO bin if your council accepts them, otherwise the red bin.'], 'napkin serviette kitchen towel'],
+  ['receipts', 'Thermal Receipts', 'Paper & Cardboard', 'not-recyclable', RED_BIN, ['Shiny thermal paper contains chemical coatings that contaminate paper recycling.', 'Place it in the red bin.'], 'docket eftpos'],
+  ['shredded-paper', 'Shredded Paper', 'Paper & Cardboard', 'not-recyclable', `${GREEN_BIN} or ${RED_BIN}`, ['Shreds are too small to sort and they scatter at the facility.', 'Add them to home compost or the green FOGO bin if accepted.', 'Otherwise use the red bin.'], 'documents confidential'],
+
+  // Glass
+  ['glass-bottle', 'Glass Drink Bottle (Clear/Green/Brown)', 'Glass', 'recyclable', YELLOW_BIN, ['Empty and rinse the bottle.', 'Remove the lid, then see "Metal Jar Lids & Bottle Caps".', 'Eligible bottles can also earn a 10c refund through your state\'s container deposit scheme.'], 'beer wine soft drink container deposit'],
+  ['glass-jar', 'Glass Food Jar', 'Glass', 'recyclable', YELLOW_BIN, ['Scrape out food and rinse.', 'Remove the lid. Labels can stay on.'], 'jam sauce pasta pickle honey vegemite'],
+  ['drinking-glass', 'Drinking Glass & Glassware', 'Glass', 'not-recyclable', RED_BIN, ['Drinking glass melts at a different temperature from bottles and spoils recycled glass.', 'Wrap broken pieces in newspaper before putting them in the red bin.', 'Donate unbroken items instead.'], 'tumbler wine glass vase'],
+  ['mirror', 'Mirror & Window Glass', 'Glass', 'not-recyclable', RED_BIN, ['Treated glass cannot be recycled with bottles and jars.', 'Wrap sharp pieces securely.', 'Use a council bulky collection for large panes.'], 'window pane sheet glass'],
+  ['ceramic', 'Ceramic Plate & Mug', 'Glass', 'not-recyclable', RED_BIN, ['Ceramics do not melt with glass and contaminate whole batches.', 'Wrap broken pieces. Donate items in good condition.'], 'crockery bowl cup porcelain china terracotta'],
+  ['broken-glass', 'Broken Glass', 'Glass', 'not-recyclable', RED_BIN, ['Broken glass is a hazard for sorting staff.', 'Wrap it in newspaper or put it in a sealed box, and label it "glass".', 'Place it in the red bin.'], 'shards smashed'],
+
+  // Metal
+  ['aluminium-can', 'Aluminium Beverage Can', 'Metal', 'recyclable', YELLOW_BIN, ['Empty out all liquid and rinse lightly.', 'Do not crush the can, because sorting machines identify it by shape.', 'Eligible cans can also earn a 10c refund through your state\'s container deposit scheme.'], 'soft drink beer soda container deposit'],
+  ['steel-tin', 'Steel Food Tin', 'Metal', 'recyclable', YELLOW_BIN, ['Empty and rinse to prevent odours.', 'Push the lid inside the tin if it has come off.'], 'can soup tuna pet food baked beans'],
+  ['aluminium-foil', 'Aluminium Foil & Foil Trays', 'Metal', 'recyclable', YELLOW_BIN, ['Wipe off any food.', 'Scrunch foil into a ball at least the size of a golf ball, so it can be sorted.', 'Foil-lined chip packets are soft plastics, not foil.'], 'baking tray takeaway pie'],
+  ['jar-lids', 'Metal Jar Lids & Bottle Caps', 'Metal', 'recyclable', YELLOW_BIN, ['Small lids are lost in sorting if loose.', 'Collect them inside a steel tin and pinch the top closed.', 'Place the tin in the yellow bin.'], 'beer cap crown seal'],
+  ['scrap-metal', 'Pots, Pans & Scrap Metal', 'Metal', 'special', 'Council Drop-off or Scrap Metal Dealer', ['Do not put heavy metal items in the yellow bin, because they damage equipment.', 'Take them to a council resource centre or scrap dealer.', 'Donate cookware that is still usable.'], 'saucepan frying pan cutlery tools wire'],
+  ['gas-bottle', 'Gas Bottle (LPG)', 'Metal', 'special', 'Bottle Swap or Council Drop-off', ['Never put gas bottles in any bin, because they can explode in collection trucks.', 'Swap them at a retailer that exchanges bottles.', 'Take damaged or out-of-date bottles to a council facility.'], 'bbq barbecue butane camping cylinder'],
+
+  // E-Waste
+  ['battery-aa', 'AA / AAA Household Battery', 'E-Waste', 'special', 'Battery Drop-off Point', ['Never put batteries in a household bin, because they are a fire hazard.', 'Tape the terminals with clear tape to prevent short circuits.', 'Take them to a B-cycle drop-off point, found at many major retailers.'], 'batteries lithium alkaline remote torch 9v button'],
+  ['lithium-battery', 'Lithium-ion Battery & Power Bank', 'E-Waste', 'special', 'Battery Drop-off Point', ['Never put these in a bin, because damaged lithium batteries can start fires in trucks.', 'Tape the terminals and store them somewhere cool until drop-off.', 'Take them to a battery drop-off or e-waste hub. Damaged batteries go to a hazardous waste facility.'], 'batteries powerbank laptop battery e-bike scooter tool'],
+  ['car-battery', 'Car Battery', 'E-Waste', 'special', 'Auto Retailer or Council Drop-off', ['Lead-acid batteries contain hazardous acid.', 'Keep the battery upright and do not stack it.', 'Return it to an auto retailer or council chemical drop-off.'], 'batteries lead acid vehicle boat'],
+  ['mobile-phone', 'Mobile Phone & Tablet', 'E-Waste', 'special', 'E-Waste Hub or MobileMuster Point', ['Back up your data and perform a factory reset.', 'Remove the SIM card.', 'Drop it off at a MobileMuster point or e-waste hub, including chargers and accessories.'], 'smartphone iphone android ipad electronics'],
+  ['laptop', 'Laptop & Desktop Computer', 'E-Waste', 'special', 'E-Waste Hub', ['Back up and securely wipe your data.', 'Take the computer and accessories to an e-waste hub.', 'Donate working equipment where possible.'], 'computer monitor keyboard mouse printer electronics pc'],
+  ['television', 'Television', 'E-Waste', 'special', 'E-Waste Hub', ['Do not leave TVs on the kerb.', 'Take it to a free e-waste collection point or council drop-off.'], 'tv screen electronics'],
+  ['printer-cartridge', 'Printer Cartridge', 'E-Waste', 'special', 'Cartridge Collection Box', ['Keep the cartridge in a bag or its original packaging to stop leaks.', 'Drop it at a Cartridges 4 Planet Ark box, found at many office supply stores.'], 'ink toner'],
+  ['cables', 'Chargers & Cables', 'E-Waste', 'special', 'E-Waste Hub', ['Cables tangle sorting machinery, so keep them out of the yellow bin.', 'Bundle them with a rubber band and take them to an e-waste hub.'], 'usb cord adapter power lead electronics'],
+  ['small-appliance', 'Small Appliance (Kettle, Toaster)', 'E-Waste', 'special', 'E-Waste Hub or Council Drop-off', ['Empty any water and clear out crumbs.', 'Take it to an e-waste hub or council resource centre.', 'Consider repair or donation if it still works.'], 'hairdryer microwave blender iron electronics'],
+
+  // Organics
+  ['fruit-veg', 'Fruit & Vegetable Scraps', 'Organics', 'recyclable', GREEN_BIN, ['Collect scraps in a kitchen caddy.', 'Remove stickers and plastic ties.', 'Put them in the green FOGO bin if your council offers it, or home compost.'], 'peel peelings banana apple food scraps fogo'],
+  ['cooked-food', 'Cooked Food, Meat & Bones', 'Organics', 'recyclable', GREEN_BIN, ['Remove all packaging.', 'Wrap in newspaper to reduce smells.', 'If your council has no FOGO service, use the red bin. Do not add meat to home compost.'], 'leftovers chicken fish dairy food scraps fogo'],
+  ['coffee-grounds', 'Coffee Grounds & Tea Leaves', 'Organics', 'recyclable', GREEN_BIN, ['Empty grounds into the caddy or compost.', 'Remove plastic pods and tea bags with plastic mesh.'], 'tea bag espresso compost fogo'],
+  ['garden-waste', 'Grass Clippings & Prunings', 'Organics', 'recyclable', GREEN_BIN, ['Place garden waste in the bin loose.', 'Cut branches to fit under the closed lid.', 'Remove any soil, rocks, plastic pots or treated timber.'], 'lawn leaves branches weeds flowers garden fogo'],
+  ['compostable-liner', 'Compostable Caddy Liner', 'Organics', 'recyclable', GREEN_BIN, ['Only use liners supplied or approved by your council.', 'Plastic and "degradable" bags contaminate FOGO, so put those in the red bin.'], 'bag compostable biodegradable fogo'],
+
+  // General Waste
+  ['nappies', 'Disposable Nappies', 'General Waste', 'not-recyclable', RED_BIN, ['Empty solids into the toilet where possible.', 'Wrap the nappy and place it in the red bin.', 'Never put nappies in yellow or green bins.'], 'diaper baby wipes'],
+  ['face-masks', 'Face Masks & Disposable Gloves', 'General Waste', 'not-recyclable', RED_BIN, ['Used personal protective items are a hygiene risk for sorting staff.', 'Bag them and place them in the red bin.'], 'ppe medical rubber latex'],
+  ['cigarette-butts', 'Cigarette Butts', 'General Waste', 'not-recyclable', RED_BIN, ['Make sure they are fully extinguished.', 'Place them in the red bin, never on the ground or in drains.'], 'smoking ash tobacco'],
+  ['pet-waste', 'Pet Waste & Kitty Litter', 'General Waste', 'not-recyclable', RED_BIN, ['Bag it securely.', 'Place it in the red bin. It is not accepted in FOGO bins.'], 'dog cat poo animal'],
+  ['toothbrush', 'Toothbrush & Toothpaste Tube', 'General Waste', 'not-recyclable', RED_BIN, ['Mixed materials cannot be separated at recycling facilities.', 'Place them in the red bin, or use a dedicated oral-care recycling program if one is near you.'], 'dental floss oral care'],
+  ['clothing', 'Clothing & Textiles', 'General Waste', 'special', 'Charity or Textile Collection', ['Donate clean items in good condition.', 'Check whether a textile recycling service operates nearby for worn items.', 'Damaged items with no other option go in the red bin.'], 'clothes shoes fabric sheets towels'],
+  ['mattress', 'Mattress & Furniture', 'General Waste', 'special', 'Council Bulky Waste Collection', ['Book your council\'s bulky waste collection or take it to a resource centre.', 'Many facilities recover the steel and foam from mattresses.', 'Donate furniture that is still usable.'], 'couch sofa bed table chair hard rubbish'],
+  ['medicines', 'Expired Medicines', 'General Waste', 'special', 'Pharmacy Return (RUM Project)', ['Never flush medicines or put them in a bin.', 'Return them to any community pharmacy for free, safe disposal.'], 'tablets pills prescription rum sharps'],
+  ['household-chemicals', 'Household Chemicals & Paint', 'General Waste', 'special', 'Household Chemical Drop-off', ['Never pour chemicals down the drain.', 'Keep them in the original container with the lid on.', 'Take them to a household chemical drop-off or Paintback site.'], 'paint tin pesticide pool cleaner solvent motor oil hazardous'],
+].map(([id, name, category, status, disposalMethod, instructions, keywords]) => ({
+  id, name, category, status, disposalMethod, instructions, keywords,
+  adminNote: 'Verified by Tanu (Admin)',
+  updatedDate: '2026-10-01',
+}));
+
+/* Requests already waiting in the admin queue. They are deliberately not in the
+   rule list, so approving one visibly adds it to public search. */
+function seedPendingRequests() {
+  return [
+    { id: 'req-aerosol', name: 'Empty Aerosol Spray Can', category: 'Metal', status: 'recyclable', disposalMethod: YELLOW_BIN, instructions: ['Make sure the can is completely empty.', 'Remove the plastic lid and put it in the red bin.', 'Do not pierce or crush the can.'], submittedBy: 'alex.johnson@example.com', dateSubmitted: daysAgoISO(2), reason: 'Residents are unsure whether a pressurised can may go in the kerbside bin.' },
+    { id: 'req-bubble-wrap', name: 'Bubble Wrap Packaging Film', category: 'Plastic', status: 'special', disposalMethod: 'Soft Plastics Drop-off (where available)', instructions: ['Keep bubble wrap out of the yellow bin, because film tangles sorting machines.', 'Reuse it for packing if you can.', 'Take it to a soft plastics collection point where available. Otherwise use the red bin.'], submittedBy: 'maria.garcia@example.com', dateSubmitted: daysAgoISO(3), reason: 'Plastic film tangles sorting machines, so a clear rule is needed.' },
+    { id: 'req-vape', name: 'Disposable Vape', category: 'E-Waste', status: 'special', disposalMethod: 'Household Chemical Drop-off', instructions: ['Never put vapes in a household bin, because the lithium battery is a fire risk.', 'Do not try to take the device apart.', 'Take it to a household chemical or hazardous waste drop-off.'], submittedBy: 'david.chen@example.com', dateSubmitted: daysAgoISO(4), reason: 'Vapes contain a lithium battery and nicotine residue.' },
+    { id: 'req-pyrex', name: 'Broken Pyrex Baking Dish', category: 'Glass', status: 'not-recyclable', disposalMethod: RED_BIN, instructions: ['Heat-resistant glass melts at a different temperature and spoils recycled glass.', 'Wrap it securely in newspaper.', 'Place it in the red bin.'], submittedBy: 'resident.lee@example.com', dateSubmitted: daysAgoISO(6), reason: 'Treated heat-resistant glass ruins recycled bottle batches.' },
+  ];
+}
+
+/* Demo accounts: dummy data only. Passwords are stored as salted SHA-256 hashes. */
+const ALEX_ID = 'user-alex-johnson';
+const ADMIN_ID = 'user-admin';
+
+const SEED_USERS = [
   {
-    id: 'plastic-bottle',
-    name: 'Plastic Water Bottle (PET #1)',
-    category: 'Plastic',
-    recyclable: true,
-    disposalMethod: 'Yellow Recycling Bin',
-    instructions: [
-      'Empty all liquid contents completely.',
-      'Rinse out any residue with clean water.',
-      'Leave caps on or flatten the bottle to save space.'
-    ],
-    adminNote: 'Verified by Tanu (Admin) • Standard PET #1 Recycling Rule',
-    status: 'Published',
-    updatedDate: '2026-10-01'
+    id: ALEX_ID,
+    name: 'Alex Johnson',
+    email: 'alex.johnson@example.com',
+    role: 'resident',
+    roleTitle: 'Resident • Suburb Zone 4',
+    salt: '6f1d2c9ab34e4f7c8a10d5e2b7c46a93',
+    passwordHash: '3f8638bfc1fbd5179958def458cb1f28234063c19b96fd40d074258060652a80',
+    address: '142 Greenpoint Avenue',
+    accountId: 'ECO-88421',
+    createdAt: '2026-01-15',
+    demo: true,
+    // Earlier history, so 6 logged rows + 36 = 42 items, 24.5 kg and an 86% score.
+    baseline: { items: 36, diverted: 31, kg: 21.8 },
   },
   {
-    id: 'cardboard-box',
-    name: 'Cardboard Box (Clean)',
-    category: 'Paper & Cardboard',
-    recyclable: true,
-    disposalMethod: 'Yellow Recycling Bin',
-    instructions: [
-      'Flatten all cardboard boxes completely to maximize bin volume.',
-      'Remove tape, heavy plastic wrapping, and shipping labels if possible.',
-      'Keep cardboard dry; wet cardboard cannot be processed at recycling plants.'
-    ],
-    adminNote: 'Verified by Tanu (Admin) • Updated Oct 2026',
-    status: 'Published',
-    updatedDate: '2026-10-02'
+    id: ADMIN_ID,
+    name: 'Tanu',
+    email: 'admin@ecorecycle.org',
+    role: 'admin',
+    roleTitle: 'Senior Waste Operations Manager',
+    salt: 'c27e91b04d3a48f6b5e8127fa9d3360e',
+    passwordHash: 'cdb956785db272942be7a8464d8640fee4e978f171b1050ce34135c5c9da81b4',
+    address: '',
+    accountId: 'ECO-00001',
+    createdAt: '2026-01-01',
+    demo: true,
+    baseline: { items: 0, diverted: 0, kg: 0 },
   },
-  {
-    id: 'pizza-box',
-    name: 'Pizza Box (Soiled / Greasy)',
-    category: 'Paper & Cardboard',
-    recyclable: false,
-    disposalMethod: 'General Waste Bin / Organics',
-    instructions: [
-      'Grease and food residue contaminate paper recycling streams.',
-      'Tear off the clean lid and place the clean half in the Recycling Bin.',
-      'Dispose of the greasy bottom portion in General Waste or Green Organics.'
-    ],
-    adminNote: 'Verified by Tanu (Admin) • Contamination Rule',
-    status: 'Published',
-    updatedDate: '2026-09-28'
-  },
-  {
-    id: 'glass-bottle',
-    name: 'Glass Drink Bottle (Clear/Green/Brown)',
-    category: 'Glass',
-    recyclable: true,
-    disposalMethod: 'Yellow Recycling Bin / Glass Hub',
-    instructions: [
-      'Rinse thoroughly to remove syrup or residue.',
-      'Metal bottle caps can be recycled separately or placed back on tight.'
-    ],
-    adminNote: 'Verified by Tanu (Admin) • Glass Standard',
-    status: 'Published',
-    updatedDate: '2026-09-25'
-  },
-  {
-    id: 'battery-aa',
-    name: 'AA / AAA Lithium Battery',
-    category: 'E-Waste',
-    recyclable: 'special',
-    disposalMethod: 'E-Waste Drop-off Centre Only',
-    instructions: [
-      'NEVER put batteries in regular household recycling or garbage bins (Fire Hazard!).',
-      'Tape battery terminals with clear tape to prevent short circuits.'
-    ],
-    adminNote: 'Verified by Tanu (Admin) • Hazmat Advisory',
-    status: 'Published',
-    updatedDate: '2026-09-20'
-  },
-  {
-    id: 'aluminium-can',
-    name: 'Aluminium Beverage Can',
-    category: 'Metal',
-    recyclable: true,
-    disposalMethod: 'Yellow Recycling Bin',
-    instructions: [
-      'Empty all liquid contents and rinse lightly.'
-    ],
-    adminNote: 'Verified by Tanu (Admin) • 100% Recyclable',
-    status: 'Published',
-    updatedDate: '2026-09-15'
-  }
 ];
 
-// --- 2. PENDING CITIZEN ITEM SUBMISSIONS (Admin Queue) ---
-let PENDING_SUBMISSIONS = [
-  {
-    id: 'aerosol-can-req',
-    name: 'Empty Aerosol Spray Can',
-    category: 'Metal',
-    disposalMethod: 'Yellow Recycling Bin / Hazmat',
-    submittedBy: 'Resident (alex.johnson@example.com)',
-    dateSubmitted: 'Oct 07, 2026',
-    reason: 'Residents confused whether pressure valve can go into kerbside recycling bin.'
-  },
-  {
-    id: 'bubble-wrap-req',
-    name: 'Bubble Wrap Packaging Film',
-    category: 'Plastic',
-    disposalMethod: 'Soft Plastic Drop-off',
-    submittedBy: 'Resident (maria.garcia@example.com)',
-    dateSubmitted: 'Oct 06, 2026',
-    reason: 'Plastic film tangles sorting machines; requires special supermarket collection.'
-  },
-  {
-    id: 'coffee-cup-req',
-    name: 'Takeaway Paper Coffee Cup',
-    category: 'Paper & Cardboard',
-    disposalMethod: 'General Waste Bin',
-    submittedBy: 'Resident (david.chen@example.com)',
-    dateSubmitted: 'Oct 05, 2026',
-    reason: 'Internal plastic lining prevents regular paper pulping.'
-  },
-  {
-    id: 'pyrex-dish-req',
-    name: 'Broken Pyrex Baking Dish',
-    category: 'Glass',
-    disposalMethod: 'General Waste Bin',
-    submittedBy: 'Resident (resident.lee@example.com)',
-    dateSubmitted: 'Oct 03, 2026',
-    reason: 'Treated heat-resistant glass ruins recycled bottle melt batches.'
-  }
+function seedActivity() {
+  const rows = [
+    ['Plastic Water Bottle (PET #1)', 'Plastic', YELLOW_BIN, 0.4, 'Recycled', 1],
+    ['Cardboard Delivery Box', 'Paper & Cardboard', YELLOW_BIN, 1.2, 'Recycled', 3],
+    ['Expired AA Batteries (4x)', 'E-Waste', 'Battery Drop-off Point', 0.2, 'Drop-off', 5],
+    ['Soiled Pizza Box (Base)', 'General Waste', RED_BIN, 0.3, 'Landfill', 7],
+    ['Aluminium Soda Can', 'Metal', YELLOW_BIN, 0.3, 'Recycled', 9],
+    ['Glass Jam Jar', 'Glass', YELLOW_BIN, 0.6, 'Recycled', 12],
+  ];
+  return {
+    [ALEX_ID]: rows.map(([item, category, disposal, kg, status, days], index) => ({
+      id: `seed-${index + 1}`, item, category, disposal, kg, status, date: daysAgoISO(days),
+    })),
+  };
+}
+
+/* Sample drop-off hubs. Names, street addresses and hours are fictional; suburbs,
+   postcodes and map positions are real. Phone numbers use the (0x) 5550 range that
+   ACMA reserves for fictional use. */
+const HUBS = [
+  { id: 'greenpoint', name: 'GreenPoint Community Recycling Centre', street: '142 Environmental Way', suburb: 'Alexandria', state: 'NSW', postcode: '2015', lat: -33.9105, lng: 151.1945, types: ['Plastic', 'Paper', 'Glass', 'Metal'], hours: 'Mon–Sat: 8:00 AM – 5:00 PM', phone: '(02) 5550 0101' },
+  { id: 'ecohub', name: 'EcoHub E-Waste & Battery Depot', street: '88 Innovation Boulevard', suburb: 'Macquarie Park', state: 'NSW', postcode: '2113', lat: -33.7756, lng: 151.1208, types: ['E-Waste', 'Batteries', 'Metal'], hours: 'Mon–Fri: 9:00 AM – 6:00 PM', phone: '(02) 5550 0102' },
+  { id: 'metro-glass', name: 'Metro Glass & Organics Drop-off', street: '12 Recycling Crescent', suburb: 'Haymarket', state: 'NSW', postcode: '2000', lat: -33.8802, lng: 151.2032, types: ['Glass', 'Organics'], hours: '7 Days: 7:00 AM – 7:00 PM', phone: '(02) 5550 0103' },
+  { id: 'northside', name: 'Northside Hazardous Waste & Chemical Facility', street: '50 Industrial Highway', suburb: 'Hornsby', state: 'NSW', postcode: '2077', lat: -33.7027, lng: 151.0994, types: ['Batteries', 'E-Waste', 'Plastic'], hours: 'Sat & Sun: 9:00 AM – 3:00 PM', phone: '(02) 5550 0104' },
+  { id: 'parramatta', name: 'Parramatta Resource Centre', street: '27 River Road', suburb: 'Parramatta', state: 'NSW', postcode: '2150', lat: -33.8148, lng: 151.0017, types: ['Plastic', 'Paper', 'Glass', 'Metal', 'Organics'], hours: 'Mon–Sun: 8:00 AM – 4:30 PM', phone: '(02) 5550 0105' },
+  { id: 'brunswick', name: 'Brunswick Circular Drop-off', street: '310 Merri Street', suburb: 'Brunswick', state: 'VIC', postcode: '3056', lat: -37.7667, lng: 144.9601, types: ['Plastic', 'Paper', 'E-Waste', 'Batteries'], hours: 'Tue–Sun: 9:00 AM – 5:00 PM', phone: '(03) 5550 0106' },
+  { id: 'woolloongabba', name: 'Woolloongabba Recovery Hub', street: '19 Stanley Lane', suburb: 'Woolloongabba', state: 'QLD', postcode: '4102', lat: -27.4886, lng: 153.0365, types: ['Glass', 'Metal', 'E-Waste', 'Batteries'], hours: 'Mon–Sat: 7:30 AM – 4:00 PM', phone: '(07) 5550 0107' },
+  { id: 'osborne-park', name: 'Osborne Park Resource Depot', street: '6 Scarborough Link', suburb: 'Osborne Park', state: 'WA', postcode: '6017', lat: -31.9012, lng: 115.8142, types: ['Plastic', 'Paper', 'Metal', 'E-Waste', 'Organics'], hours: 'Mon–Fri: 8:00 AM – 5:00 PM', phone: '(08) 5550 0108' },
 ];
 
-// --- 3. MOCK RESIDENT ACTIVITY LOG DATA ---
-let RESIDENT_ACTIVITY = [
-  { id: 1, item: 'Plastic Water Bottle (PET #1)', category: 'Plastic', disposal: 'Yellow Recycling Bin', date: 'Oct 08', status: 'Recycled' },
-  { id: 2, item: 'Cardboard Delivery Box', category: 'Paper & Cardboard', disposal: 'Yellow Recycling Bin', date: 'Oct 07', status: 'Recycled' },
-  { id: 3, item: 'Expired AA Batteries (4x)', category: 'E-Waste', disposal: 'EcoHub Drop-off Hub', date: 'Oct 05', status: 'Drop-off' },
-  { id: 4, item: 'Soiled Pizza Box (Bottom)', category: 'General Waste', disposal: 'Landfill Waste Bin', date: 'Oct 04', status: 'Landfill' },
-  { id: 5, item: 'Aluminium Soda Can', category: 'Metal', disposal: 'Yellow Recycling Bin', date: 'Oct 02', status: 'Recycled' },
-  { id: 6, item: 'Glass Jam Jar', category: 'Glass', disposal: 'Yellow Recycling Bin', date: 'Sep 29', status: 'Recycled' }
+/* Distances are measured from here until the visitor shares their location. */
+const DEFAULT_REFERENCE = { lat: -33.8688, lng: 151.2093, label: 'Sydney CBD' };
+
+/* Plastic resin identification codes for the Recycling Guide decoder. */
+const RESIN_CODES = [
+  { code: 1, abbr: 'PET', name: 'Polyethylene Terephthalate', examples: 'Water and soft drink bottles, some food jars.', kerbside: 'Accepted in most yellow bins.', status: 'recyclable', tip: 'Eligible bottles earn a 10c refund through container deposit schemes, which keeps high-quality PET in circulation.' },
+  { code: 2, abbr: 'HDPE', name: 'High-Density Polyethylene', examples: 'Milk bottles, detergent and shampoo bottles.', kerbside: 'Accepted in most yellow bins.', status: 'recyclable', tip: 'Recycled HDPE is often made into new bottles, pipes and outdoor furniture.' },
+  { code: 3, abbr: 'PVC', name: 'Polyvinyl Chloride', examples: 'Pipes, garden hoses, some blister packs.', kerbside: 'Generally not accepted.', status: 'not-recyclable', tip: 'Small amounts of PVC can spoil a whole batch of recycled PET, so keep it out of the yellow bin.' },
+  { code: 4, abbr: 'LDPE', name: 'Low-Density Polyethylene', examples: 'Soft squeeze bottles, plastic bags, cling film.', kerbside: 'Not accepted loose in the yellow bin. Use a soft plastics collection where available.', status: 'special', tip: 'Film tangles sorting machinery and can shut a facility down for cleaning.' },
+  { code: 5, abbr: 'PP', name: 'Polypropylene', examples: 'Yoghurt tubs, takeaway containers, bottle caps.', kerbside: 'Rigid items are accepted by most councils.', status: 'recyclable', tip: 'Rinse food residue off tubs and containers so that they do not contaminate paper in the bin.' },
+  { code: 6, abbr: 'PS', name: 'Polystyrene', examples: 'Foam packaging, meat trays, disposable cups.', kerbside: 'Generally not accepted.', status: 'not-recyclable', tip: 'Foam breaks up easily and pollutes waterways, so choose alternatives where you can.' },
+  { code: 7, abbr: 'Other', name: 'Other Plastics', examples: 'Mixed or layered plastics, acrylic, some compostable plastics.', kerbside: 'Generally not accepted. Check with your council.', status: 'not-recyclable', tip: 'Mixed plastics are hard to recycle, so buy single-material packaging when you have the choice.' },
 ];
 
-// --- 4. MOCK RECYCLING LOCATIONS ---
-const MOCK_LOCATIONS = [
-  {
-    id: 1,
-    name: 'GreenPoint Community Recycling Centre',
-    address: '142 Environmental Way, Greenpoint Suburb',
-    distance: '1.8 km',
-    types: ['Plastic', 'Glass', 'Metal', 'Paper'],
-    hours: 'Mon–Sat: 8:00 AM – 5:00 PM',
-    phone: '(02) 9876 54321'
+/* ==========================================================================
+   3. STORAGE
+   All persistent data goes through this section. If localStorage is blocked,
+   full or corrupted, the app falls back to seed data or an in-memory copy and
+   keeps working for the current page.
+   ========================================================================== */
+
+const KEYS = {
+  users: 'ecorecycle_users',
+  session: 'ecorecycle_session',
+  rememberedEmail: 'ecorecycle_remembered_email',
+  rules: 'ecorecycle_waste_rules',
+  pending: 'ecorecycle_pending_requests',
+  activity: 'ecorecycle_activity_log',
+  savedHubs: 'ecorecycle_saved_hubs',
+  reminders: 'ecorecycle_reminders',
+  preferences: 'ecorecycle_preferences',
+  enquiries: 'ecorecycle_enquiries',
+};
+
+const Store = {
+  memory: {},
+  warned: false,
+
+  read(key, fallback) {
+    if (Object.prototype.hasOwnProperty.call(this.memory, key)) return clone(this.memory[key]);
+    try {
+      const raw = localStorage.getItem(key);
+      if (raw === null) return clone(fallback);
+      return JSON.parse(raw);
+    } catch (error) {
+      console.warn(`Could not read ${key}; using default data.`, error);
+      return clone(fallback);
+    }
   },
-  {
-    id: 2,
-    name: 'EcoHub E-Waste & Battery Depot',
-    address: '88 Innovation Boulevard, Tech Park',
-    distance: '3.2 km',
-    types: ['E-Waste', 'Batteries', 'Metal'],
-    hours: 'Mon–Fri: 9:00 AM – 6:00 PM',
-    phone: '(02) 9876 54322'
+
+  write(key, value) {
+    try {
+      localStorage.setItem(key, JSON.stringify(value));
+      delete this.memory[key];
+      return true;
+    } catch (error) {
+      // Keep the change for this page view so the action still appears to work.
+      this.memory[key] = clone(value);
+      if (!this.warned) {
+        this.warned = true;
+        console.warn('Browser storage is unavailable; changes will not be kept.', error);
+        showToast('Your browser is blocking storage, so changes will not be saved.', 'error');
+      }
+      return false;
+    }
   },
-  {
-    id: 3,
-    name: 'Metro Glass & Organics Drop-off',
-    address: '12 Recycling Crescent, Central City',
-    distance: '4.5 km',
-    types: ['Glass', 'General Recycling'],
-    hours: '7 Days: 7:00 AM – 7:00 PM',
-    phone: '(02) 9876 54323'
+
+  remove(key) {
+    delete this.memory[key];
+    try {
+      localStorage.removeItem(key);
+    } catch (error) {
+      console.warn(`Could not remove ${key}.`, error);
+    }
   },
-  {
-    id: 4,
-    name: 'Northside Hazardous Waste & Chemical Facility',
-    address: '50 Industrial Highway, Northville',
-    distance: '6.1 km',
-    types: ['Batteries', 'E-Waste', 'Plastic'],
-    hours: 'Sat & Sun: 9:00 AM – 3:00 PM',
-    phone: '(02) 9876 54324'
-  }
-];
+};
+
+const isPlainObject = (value) => value !== null && typeof value === 'object' && !Array.isArray(value);
+
+/** Reads a list, keeping only well-formed records. Corrupt or empty data falls back to the seed. */
+function readList(key, seed, isValid) {
+  const value = Store.read(key, seed);
+  if (!Array.isArray(value)) return clone(seed);
+  return value.filter(isValid);
+}
+
+function readMap(key, seed = {}) {
+  const value = Store.read(key, seed);
+  return isPlainObject(value) ? value : clone(seed);
+}
+
+const isValidRule = (r) => isPlainObject(r) && typeof r.id === 'string' && typeof r.name === 'string'
+  && CATEGORIES.includes(r.category) && Boolean(RULE_STATUS[r.status]) && Array.isArray(r.instructions);
+const isValidRequest = (r) => isPlainObject(r) && typeof r.id === 'string' && typeof r.name === 'string';
+const isValidUser = (u) => isPlainObject(u) && typeof u.id === 'string' && typeof u.email === 'string'
+  && typeof u.salt === 'string' && typeof u.passwordHash === 'string';
+
+/* Typed accessors */
+const getRules = () => readList(KEYS.rules, SEED_RULES, isValidRule);
+const saveRules = (rules) => Store.write(KEYS.rules, rules);
+const getPending = () => readList(KEYS.pending, seedPendingRequests(), isValidRequest);
+const savePending = (requests) => Store.write(KEYS.pending, requests);
+const getEnquiries = () => readList(KEYS.enquiries, [], isPlainObject);
+const saveEnquiries = (enquiries) => Store.write(KEYS.enquiries, enquiries);
+
+function getUsers() {
+  const users = readList(KEYS.users, SEED_USERS, isValidUser);
+  // The demo accounts always exist, so the README journey can't be locked out.
+  SEED_USERS.forEach((seed) => {
+    if (!users.some((user) => user.id === seed.id)) users.push(clone(seed));
+  });
+  return users;
+}
+const saveUsers = (users) => Store.write(KEYS.users, users);
+
+function getActivityMap() {
+  return readMap(KEYS.activity, seedActivity());
+}
+
+function getActivity(userId) {
+  const rows = getActivityMap()[userId];
+  return Array.isArray(rows) ? rows.filter(isPlainObject) : [];
+}
+
+function saveActivity(userId, rows) {
+  const map = getActivityMap();
+  map[userId] = rows;
+  Store.write(KEYS.activity, map);
+}
+
+/* Per-user records are keyed by user id; signed-out visitors share the "guest" key. */
+const GUEST_KEY = 'guest';
+
+function getSavedHubIds(owner) {
+  const ids = readMap(KEYS.savedHubs)[owner];
+  return Array.isArray(ids) ? ids.filter((id) => HUBS.some((hub) => hub.id === id)) : [];
+}
+
+function saveSavedHubIds(owner, ids) {
+  const map = readMap(KEYS.savedHubs);
+  map[owner] = ids;
+  Store.write(KEYS.savedHubs, map);
+}
+
+function getPreferences(userId) {
+  const prefs = readMap(KEYS.preferences)[userId];
+  return { email: true, sms: false, ...(isPlainObject(prefs) ? prefs : {}) };
+}
+
+function savePreferences(userId, prefs) {
+  const map = readMap(KEYS.preferences);
+  map[userId] = prefs;
+  Store.write(KEYS.preferences, map);
+}
+
+function getReminders(owner) {
+  const dates = readMap(KEYS.reminders)[owner];
+  return Array.isArray(dates) ? dates.filter((d) => typeof d === 'string') : [];
+}
+
+function saveReminders(owner, dates) {
+  const map = readMap(KEYS.reminders);
+  map[owner] = dates;
+  Store.write(KEYS.reminders, map);
+}
+
+/** First visit: writes the seed data so that later reads share one source of truth. */
+function initStorage() {
+  const seedIfMissing = (key, value) => {
+    try {
+      if (localStorage.getItem(key) === null) Store.write(key, value);
+    } catch (error) {
+      /* Reads fall back to seed data when storage is blocked. */
+    }
+  };
+  seedIfMissing(KEYS.users, SEED_USERS);
+  seedIfMissing(KEYS.rules, SEED_RULES);
+  seedIfMissing(KEYS.pending, seedPendingRequests());
+  seedIfMissing(KEYS.activity, seedActivity());
+  // Remove the session format used by the original prototype.
+  Store.remove('ecorecycle_user');
+}
+
+/* TEMPORARY bridge for dashboard code that has not been migrated yet. */
+let WASTE_DATABASE = getRules().map((r) => ({ ...r, recyclable: r.status === 'recyclable' ? true : r.status === 'special' ? 'special' : false }));
+let PENDING_SUBMISSIONS = getPending();
+let RESIDENT_ACTIVITY = getActivity(ALEX_ID);
+const MOCK_LOCATIONS = HUBS.map((h) => ({ id: h.id, name: h.name, address: `${h.street}, ${h.suburb} ${h.state} ${h.postcode}`, distance: '', types: h.types, hours: h.hours, phone: h.phone }));
 
 // --- 5. AUTHENTICATION ENGINE ---
 function getCurrentUser() {
@@ -1142,6 +1325,7 @@ function logSearchToActivity(name, category, disposal) {
    13. BOOT
    ========================================================================== */
 document.addEventListener('DOMContentLoaded', () => {
+  initStorage();
   renderIcons();
   initMobileMenu();
   initAuthUI();
