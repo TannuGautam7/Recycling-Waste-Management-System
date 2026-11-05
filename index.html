@@ -329,68 +329,43 @@
     </div>
   </section>
 
-  <!-- RECYCLING LOCATIONS PREVIEW (Section 10) -->
-  <section class="section section-bg" id="locations-section">
-    <div class="container">
-      <div class="section-header">
-        <span class="section-badge"><i data-lucide="map-pin"></i> Drop-off Hubs</span>
-        <h2 class="section-title">Find a Recycling Location</h2>
-        <p class="section-subtitle">Find suitable recycling locations for items that cannot be placed in your regular household recycling.</p>
-      </div>
-
-      <div class="location-filter-box">
-        <div class="filter-form-grid">
-          <div class="form-group">
-            <label class="form-label" for="locationSearchInput">Search Location</label>
-            <input type="text" id="locationSearchInput" class="form-control" placeholder="Enter suburb, postcode or area...">
-          </div>
-
-          <div class="form-group">
-            <label class="form-label" for="wasteTypeSelect">Waste Type</label>
-            <select id="wasteTypeSelect" class="form-control">
-              <option value="All">All Waste Types</option>
-              <option value="General Recycling">General Recycling</option>
-              <option value="E-Waste">E-Waste</option>
-              <option value="Batteries">Batteries</option>
-              <option value="Glass">Glass</option>
-              <option value="Metal">Metal</option>
-              <option value="Plastic">Plastic</option>
-            </select>
-          </div>
-
-          <button id="findLocationsBtn" class="btn btn-primary" style="height: 48px;">
-            <i data-lucide="search"></i> Find Locations
-          </button>
+  <section class="section section-bg" id="locations-section" aria-labelledby="homeHubsHeading">
+      <div class="container">
+        <div class="section-header">
+          <span class="section-badge"><i data-lucide="map-pin"></i> Drop-off Hubs</span>
+          <h2 class="section-title" id="homeHubsHeading">Find a Recycling Location</h2>
+          <p class="section-subtitle">Find suitable recycling locations for items that can't go in your regular household recycling.</p>
         </div>
+
+        <form class="location-filter-box" action="pages/locations.html" method="get" role="search">
+          <div class="filter-form-grid">
+            <div class="form-group">
+              <label class="form-label" for="homeHubQuery">Suburb or postcode</label>
+              <input type="search" id="homeHubQuery" name="q" class="form-control" placeholder="e.g. Parramatta or 2150" autocomplete="off">
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="homeHubType">Waste type</label>
+              <select id="homeHubType" name="type" class="form-control">
+                <option value="All">All Waste Types</option>
+                <option value="Plastic">Plastic</option>
+                <option value="Paper">Paper</option>
+                <option value="Glass">Glass</option>
+                <option value="Metal">Metal</option>
+                <option value="E-Waste">E-Waste</option>
+                <option value="Batteries">Batteries</option>
+                <option value="Organics">Organics</option>
+              </select>
+            </div>
+            <button type="submit" class="btn btn-primary"><i data-lucide="map"></i> Find on the Map</button>
+          </div>
+        </form>
+
+        <h3 class="h-card mb">Closest hubs to Sydney CBD</h3>
+        <div id="homeHubPreview" class="grid-3"></div>
       </div>
+    </section>
 
-      <div class="location-layout">
-        <!-- Location List Container -->
-        <div id="locationListContainer" class="location-list"></div>
-
-        <!-- Interactive Visual Mock Map -->
-        <div class="mock-map-container">
-          <div class="mock-map-bg"></div>
-          
-          <!-- Pins -->
-          <div class="map-pin" style="top: 25%; left: 35%;" onclick="openDirectionsModal('GreenPoint Community Recycling Centre')">
-            <i data-lucide="recycle"></i> GreenPoint Hub
-          </div>
-          <div class="map-pin" style="top: 55%; left: 65%;" onclick="openDirectionsModal('EcoHub E-Waste Depot')">
-            <i data-lucide="laptop"></i> EcoHub E-Waste
-          </div>
-          <div class="map-pin" style="top: 40%; left: 20%;" onclick="openDirectionsModal('Metro Glass Drop-off')">
-            <i data-lucide="wine"></i> Metro Glass
-          </div>
-          <div class="map-pin" style="top: 70%; left: 45%;" onclick="openDirectionsModal('Northside Hazmat Centre')">
-            <i data-lucide="alert-triangle"></i> Northside Chemical
-          </div>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- WASTE COLLECTION INFORMATION (Section 11) -->
+    <!-- WASTE COLLECTION INFORMATION (Section 11) -->
   <section class="section">
     <div class="container">
       <div class="section-header">

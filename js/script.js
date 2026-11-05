@@ -71,7 +71,7 @@ function formatDate(iso, options = { day: 'numeric', month: 'short', year: 'nume
  */
 const ACTIONS = {};
 
-document.addEventListener('click', (event) => {
+function handleActionClick(event) {
   const trigger = event.target.closest('[data-action]');
   if (!trigger) return;
   const handler = ACTIONS[trigger.dataset.action];
@@ -83,7 +83,9 @@ document.addEventListener('click', (event) => {
       console.error(error);
       showToast('Something went wrong. Please try again.', 'error');
     });
-});
+}
+
+document.addEventListener('click', handleActionClick);
 
 /* ==========================================================================
    2. DATA (seed values, copied into localStorage on first visit)
@@ -1455,74 +1457,319 @@ function initRecyclingGuide() {
   });
 }
 
-// --- 8. LOCATION FINDER LOGIC ---
-function initLocationFinder() {
-  const locationSearch = document.getElementById('locationSearchInput');
-  const typeFilter = document.getElementById('wasteTypeSelect');
-  const searchBtn = document.getElementById('findLocationsBtn');
-  const locationList = document.getElementById('locationListContainer');
+/* ==========================================================================
+   10. LOCATIONS
+   ========================================================================== */
 
-  if (!locationList) return;
+let hubReference = { ...DEFAULT_REFERENCE };
 
-  function renderLocations(filterText = '', filterType = 'All') {
-    const filtered = MOCK_LOCATIONS.filter(loc => {
-      const matchText = loc.name.toLowerCase().includes(filterText.toLowerCase()) || 
-                        loc.address.toLowerCase().includes(filterText.toLowerCase());
-      const matchType = filterType === 'All' || loc.types.includes(filterType);
-      return matchText && matchType;
-    });
+function haversineKm(a, b) {
+  const toRad = (deg) => (deg * Math.PI) / 180;
+  const dLat = toRad(b.lat - a.lat);
+  const dLng = toRad(b.lng - a.lng);
+  const h = Math.sin(dLat / 2) ** 2 + Math.cos(toRad(a.lat)) * Math.cos(toRad(b.lat)) * Math.sin(dLng / 2) ** 2;
+  return 6371 * 2 * Math.asin(Math.sqrt(h));
+}
 
-    if (filtered.length === 0) {
-      locationList.innerHTML = `
-        <div style="padding: 2rem; text-align: center; color: var(--secondary-text);">
-          No recycling locations match your filter. Try selecting "All" waste types.
-        </div>
-      `;
-      return;
-    }
+const hubDistanceKm = (hub) => haversineKm(hubReference, hub);
+const formatKm = (km) => `${km < 10 ? km.toFixed(1) : Math.round(km)} km`;
+const hubAddress = (hub) => `${hub.street}, ${hub.suburb} ${hub.state} ${hub.postcode}`;
+const findHub = (id) => HUBS.find((hub) => hub.id === id);
 
-    locationList.innerHTML = filtered.map(loc => `
-      <div class="location-card">
-        <div class="location-card-header">
-          <h4 class="location-name">${loc.name}</h4>
-          <span class="location-distance">${loc.distance}</span>
-        </div>
-        <p class="location-meta"><i data-lucide="map-pin"></i> ${loc.address}</p>
-        <p class="location-meta"><i data-lucide="clock"></i> ${loc.hours}</p>
-        <p class="location-meta"><i data-lucide="phone"></i> ${loc.phone}</p>
-        <div class="location-tags">
-          ${loc.types.map(t => `<span class="location-tag">${t}</span>`).join('')}
-        </div>
-        <div style="margin-top: 1rem; display: flex; gap: 0.5rem;">
-          <button class="btn btn-sm btn-primary" onclick="openDirectionsModal('${loc.name}')">
-            View Directions
-          </button>
-          <button class="btn btn-sm btn-secondary" onclick="saveLocationToFav('${loc.name}')">
-            <i data-lucide="heart"></i> Save Hub
-          </button>
-        </div>
+function matchingHubs(query, type) {
+  const tokens = String(query || '').toLowerCase().split(/[\s,]+/).filter(Boolean);
+  return HUBS
+    .filter((hub) => {
+      const text = `${hub.name} ${hub.street} ${hub.suburb} ${hub.state} ${hub.postcode}`.toLowerCase();
+      return tokens.every((token) => text.includes(token)) && (type === 'All' || !type || hub.types.includes(type));
+    })
+    .sort((a, b) => hubDistanceKm(a) - hubDistanceKm(b));
+}
+
+/* ---- Saved hubs ---- */
+
+/** Whose list a save goes to: the resident, the guest list, or null for admins. */
+function savedHubOwner() {
+  const user = currentUser();
+  if (!user) return GUEST_KEY;
+  return user.role === 'resident' ? user.id : null;
+}
+
+function isHubSaved(hubId) {
+  const owner = savedHubOwner();
+  return owner ? getSavedHubIds(owner).includes(hubId) : false;
+}
+
+ACTIONS['hub-save'] = (trigger) => {
+  const hub = findHub(trigger.dataset.id);
+  const owner = savedHubOwner();
+  if (!hub) return;
+  if (!owner) {
+    showToast('Saved hubs are a resident feature. Administrator accounts do not have a saved list.', 'info');
+    return;
+  }
+  const ids = getSavedHubIds(owner);
+  const saved = ids.includes(hub.id);
+  saveSavedHubIds(owner, saved ? ids.filter((id) => id !== hub.id) : [...ids, hub.id]);
+  if (saved) showToast(`Removed ${hub.name} from your saved hubs.`, 'info');
+  else if (owner === GUEST_KEY) showToast(`Saved ${hub.name}. Sign in as a resident to see it on your dashboard.`);
+  else showToast(`Saved ${hub.name} to your dashboard.`);
+  document.dispatchEvent(new CustomEvent('hubs:changed'));
+};
+
+/* ---- Directions modal ---- */
+
+ACTIONS['hub-directions'] = (trigger) => {
+  const hub = findHub(trigger.dataset.id);
+  if (!hub) return;
+  const destination = `${hub.lat},${hub.lng}`;
+  const google = `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(destination)}`;
+  const osm = `https://www.openstreetmap.org/directions?to=${encodeURIComponent(destination)}`;
+  buildModal('directionsModal', `Directions to ${hub.name}`, `
+    <dl class="directions-list">
+      <div><dt class="form-label">Address</dt><dd>${esc(hubAddress(hub))}</dd></div>
+      <div><dt class="form-label">Opening hours</dt><dd>${esc(hub.hours)}</dd></div>
+      <div><dt class="form-label">Phone</dt><dd>${esc(hub.phone)}</dd></div>
+      <div><dt class="form-label">Distance</dt><dd>${esc(formatKm(hubDistanceKm(hub)))} in a straight line from ${esc(hubReference.label)}</dd></div>
+    </dl>
+    <div class="row-wrap">
+      <a class="btn btn-primary" href="${esc(google)}" target="_blank" rel="noopener noreferrer"><i data-lucide="navigation"></i> Open in Google Maps<span class="sr-only"> (opens in a new tab)</span></a>
+      <a class="btn btn-secondary" href="${esc(osm)}" target="_blank" rel="noopener noreferrer"><i data-lucide="map"></i> Open in OpenStreetMap<span class="sr-only"> (opens in a new tab)</span></a>
+    </div>`);
+  openModal('directionsModal');
+};
+
+/* ---- Hub cards, shared by the finder, home page and dashboard ---- */
+
+function hubCardHtml(hub, { showMapButton = false, headingLevel = 3 } = {}) {
+  const saved = isHubSaved(hub.id);
+  const heading = `h${headingLevel}`;
+  return `
+    <article class="location-card" data-hub-id="${esc(hub.id)}">
+      <div class="location-card-header">
+        <${heading} class="location-name">${esc(hub.name)}</${heading}>
+        <span class="location-distance">${esc(formatKm(hubDistanceKm(hub)))}</span>
       </div>
-    `).join('');
+      <p class="location-meta"><i data-lucide="map-pin"></i> ${esc(hubAddress(hub))}</p>
+      <p class="location-meta"><i data-lucide="clock"></i> ${esc(hub.hours)}</p>
+      <p class="location-meta"><i data-lucide="phone"></i> ${esc(hub.phone)}</p>
+      <div class="location-tags">${hub.types.map((type) => `<span class="location-tag">${esc(type)}</span>`).join('')}</div>
+      <div class="location-actions">
+        <button type="button" class="btn btn-sm btn-primary" data-action="hub-directions" data-id="${esc(hub.id)}"><i data-lucide="navigation"></i> View Directions</button>
+        <button type="button" class="btn btn-sm btn-secondary" data-action="hub-save" data-id="${esc(hub.id)}" aria-pressed="${saved}">
+          <i data-lucide="${saved ? 'check' : 'heart'}"></i> ${saved ? 'Saved' : 'Save Hub'}<span class="sr-only">: ${esc(hub.name)}</span>
+        </button>
+        ${showMapButton ? `<button type="button" class="btn btn-sm btn-secondary" data-action="hub-focus" data-id="${esc(hub.id)}"><i data-lucide="map-pin"></i> Show on Map<span class="sr-only">: ${esc(hub.name)}</span></button>` : ''}
+      </div>
+    </article>`;
+}
 
-    if (window.lucide) lucide.createIcons();
+/* ---- Leaflet map ---- */
+
+const hubMapState = { map: null, layer: null, markers: {}, tilesLoaded: 0, tileErrors: 0 };
+
+function setMapNotice(message) {
+  const notice = document.getElementById('mapNotice');
+  if (!notice) return;
+  notice.textContent = message || '';
+  notice.hidden = !message;
+}
+
+const MAP_TILES_FAILED = 'Map tiles could not load, so the background may be blank. The pins and the hub list still work.';
+
+function initHubMap() {
+  const element = document.getElementById('hubMap');
+  if (!element) return;
+
+  if (typeof window.L === 'undefined') {
+    setMapNotice('The interactive map could not load. You can still use the hub list and View Directions.');
+    return;
   }
 
-  renderLocations();
+  const map = window.L.map(element, { scrollWheelZoom: false });
+  hubMapState.map = map;
+  hubMapState.layer = window.L.layerGroup().addTo(map);
 
-  if (searchBtn) {
-    searchBtn.addEventListener('click', () => {
-      const text = locationSearch ? locationSearch.value : '';
-      const type = typeFilter ? typeFilter.value : 'All';
-      renderLocations(text, type);
+  const tiles = window.L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    maxZoom: 19,
+    referrerPolicy: 'strict-origin-when-cross-origin',
+    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener noreferrer">OpenStreetMap</a> contributors',
+  });
+  tiles.on('tileload', () => {
+    hubMapState.tilesLoaded += 1;
+    setMapNotice('');
+  });
+  tiles.on('tileerror', () => {
+    hubMapState.tileErrors += 1;
+    if (!hubMapState.tilesLoaded && hubMapState.tileErrors >= 2) setMapNotice(MAP_TILES_FAILED);
+  });
+  tiles.addTo(map);
+  setTimeout(() => {
+    if (!hubMapState.tilesLoaded) setMapNotice(MAP_TILES_FAILED);
+  }, 8000);
+
+}
+
+function hubPopupHtml(hub) {
+  return `
+    <div class="hub-popup">
+      <h3>${esc(hub.name)}</h3>
+      <p>${esc(hubAddress(hub))}</p>
+      <p>${esc(hub.hours)}</p>
+      <div class="location-actions">
+        <button type="button" class="btn btn-sm btn-primary" data-action="hub-directions" data-id="${esc(hub.id)}">Directions</button>
+        <button type="button" class="btn btn-sm btn-secondary" data-action="hub-save" data-id="${esc(hub.id)}" aria-pressed="${isHubSaved(hub.id)}">${isHubSaved(hub.id) ? 'Saved' : 'Save Hub'}</button>
+      </div>
+    </div>`;
+}
+
+function updateHubMarkers(hubs, { refit = true } = {}) {
+  const { map, layer } = hubMapState;
+  if (!map) return;
+
+  layer.clearLayers();
+  hubMapState.markers = {};
+  hubs.forEach((hub) => {
+    const marker = window.L.marker([hub.lat, hub.lng], {
+      title: hub.name,
+      alt: hub.name,
+      riseOnHover: true,
+      icon: window.L.divIcon({
+        className: 'hub-pin-icon',
+        html: `<span class="hub-pin${isHubSaved(hub.id) ? ' is-saved' : ''}"><span class="hub-pin-dot"></span></span>`,
+        iconSize: [34, 34],
+        iconAnchor: [17, 41],
+        popupAnchor: [0, -38],
+      }),
     });
+    marker.bindPopup(() => hubPopupHtml(hub), { maxWidth: 280 });
+    marker.addTo(layer);
+    hubMapState.markers[hub.id] = marker;
+  });
+
+  if (!refit) return;
+  if (!hubs.length) {
+    map.setView([-28.5, 134], 4);
+    return;
   }
+  // Favour hubs near the reference point, so interstate pins don't zoom the map out to all of Australia.
+  const nearby = hubs.filter((hub) => hubDistanceKm(hub) <= 150);
+  const focus = nearby.length ? nearby : hubs;
+  if (focus.length === 1) map.setView([focus[0].lat, focus[0].lng], 13);
+  else map.fitBounds(focus.map((hub) => [hub.lat, hub.lng]), { padding: [50, 50], maxZoom: 13 });
 }
 
-function saveLocationToFav(locName) {
-  showToast(`Saved ${locName} to your Favorite Drop-off Hubs.`);
+ACTIONS['hub-focus'] = (trigger) => {
+  const marker = hubMapState.markers[trigger.dataset.id];
+  if (!marker) {
+    showToast('The map is not available right now.', 'info');
+    return;
+  }
+  const hub = findHub(trigger.dataset.id);
+  hubMapState.map.setView([hub.lat, hub.lng], 14);
+  marker.openPopup();
+  document.querySelector('.map-shell').scrollIntoView({ block: 'nearest' });
+};
+
+/* ---- Hub finder page ---- */
+
+function renderHubFinder({ refit = true } = {}) {
+  const list = document.getElementById('locationListContainer');
+  if (!list) return;
+
+  const query = $('#locationSearchInput').value.trim();
+  const type = $('#wasteTypeSelect').value;
+  const hubs = matchingHubs(query, type);
+
+  $('#hubCount').textContent = `${hubs.length === 1 ? '1 Drop-off Hub' : `${hubs.length} Drop-off Hubs`} Found`;
+  $('#distanceNote').textContent = `Straight-line distances from ${hubReference.label}.`;
+
+  list.innerHTML = hubs.length
+    ? hubs.map((hub) => hubCardHtml(hub, { showMapButton: true })).join('')
+    : `<div class="empty-state">
+         <h3>No hubs match your search</h3>
+         <p>No drop-off hubs match${query ? ` "${esc(query)}"` : ''}${type !== 'All' ? ` for ${esc(type)}` : ''}. Try a nearby suburb, or show every waste type.</p>
+         <button type="button" class="btn btn-secondary btn-sm" data-action="hub-clear">Clear filters</button>
+       </div>`;
+
+  updateHubMarkers(hubs, { refit });
+  renderIcons();
+
+  const params = new URLSearchParams();
+  if (query) params.set('q', query);
+  if (type !== 'All') params.set('type', type);
+  const qs = params.toString();
+  window.history.replaceState(null, '', qs ? `?${qs}` : window.location.pathname);
 }
-function openDirectionsModal(locationName) {
-  alert(`GPS Route Navigation: Displaying optimal route to ${locationName}.`);
+
+ACTIONS['hub-clear'] = () => {
+  $('#locationSearchInput').value = '';
+  $('#wasteTypeSelect').value = 'All';
+  renderHubFinder();
+  $('#locationSearchInput').focus();
+};
+
+ACTIONS['hub-use-location'] = (trigger) => {
+  if (!navigator.geolocation) {
+    showToast('Your browser cannot share a location. Distances remain from Sydney CBD.', 'info');
+    return;
+  }
+  trigger.disabled = true;
+  navigator.geolocation.getCurrentPosition((position) => {
+    trigger.disabled = false;
+    hubReference = { lat: position.coords.latitude, lng: position.coords.longitude, label: 'your location' };
+    renderHubFinder();
+    showToast('Distances updated from your location.');
+  }, () => {
+    trigger.disabled = false;
+    showToast('Location not available, so distances remain from Sydney CBD.', 'info');
+  }, { timeout: 8000 });
+};
+
+function initHubFinder() {
+  if (!document.getElementById('locationListContainer')) return;
+
+  const params = new URLSearchParams(window.location.search);
+  const input = $('#locationSearchInput');
+  const select = $('#wasteTypeSelect');
+  input.value = (params.get('q') || '').slice(0, 80);
+  const type = params.get('type');
+  if (type && Array.from(select.options).some((option) => option.value === type)) select.value = type;
+
+  initHubMap();
+
+  let timer;
+  input.addEventListener('input', () => {
+    clearTimeout(timer);
+    timer = setTimeout(renderHubFinder, 150);
+  });
+  select.addEventListener('change', () => renderHubFinder());
+  $('#hubFilterForm').addEventListener('submit', (event) => {
+    event.preventDefault();
+    clearTimeout(timer);
+    renderHubFinder();
+  });
+
+  document.addEventListener('hubs:changed', () => {
+    if (hubMapState.map) hubMapState.map.closePopup();
+    renderHubFinder({ refit: false });
+  });
+
+  renderHubFinder();
+}
+
+/** Home page preview: the three nearest hubs. */
+function renderHomeHubPreview() {
+  const container = document.getElementById('homeHubPreview');
+  if (!container) return;
+  container.innerHTML = matchingHubs('', 'All').slice(0, 3).map((hub) => hubCardHtml(hub)).join('');
+  renderIcons();
+}
+
+function initHomeHubPreview() {
+  if (!document.getElementById('homeHubPreview')) return;
+  renderHomeHubPreview();
+  document.addEventListener('hubs:changed', renderHomeHubPreview);
 }
 
 // --- 11. DASHBOARD CONTROLLER & PERMISSION ENFORCEMENT ---
@@ -1820,7 +2067,8 @@ document.addEventListener('DOMContentLoaded', () => {
   initQuickSearch();
   initWasteSearchPage();
   initRecyclingGuide();
-  initLocationFinder();
+  initHubFinder();
+  initHomeHubPreview();
   initAuthPage();
   initDashboard();
   renderIcons();

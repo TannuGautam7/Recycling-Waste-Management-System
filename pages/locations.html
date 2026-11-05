@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Recycling Locations & Drop-off Hubs | EcoRecycle</title>
+  <title>Recycling Locations &amp; Drop-off Hubs | EcoRecycle</title>
   <meta name="description" content="Locate community recycling centres, battery drop-offs, e-waste hubs, and hazardous material collection points near you in Australia.">
   <meta name="theme-color" content="#166534">
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%23166534'/%3E%3Cpath d='M16 7l4 7h-3v5h-2v-5h-3zM9 24l-1.5-2.6L11 15.5l1.7 1-3 5.1h6.3v2zm14 0h-5v-2h5.2l-2.6-4.5 1.7-1 3.6 6.2z' fill='%23fff'/%3E%3C/svg%3E">
@@ -11,6 +11,8 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Outfit:wght@600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap">
   <link rel="stylesheet" href="../css/style.css">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha384-sHL9NAb7lN7rfvG5lfHpm643Xkcjzp4jFvuavGOndn6pjVqS6ny56CAt3nsEVT4H" crossorigin="anonymous">
+  <script defer src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha384-cxOPjt7s7Iz04uaHJceBmS+qpjv2JkIHNVcuOrM+YHwZOmJGBXI00mdUXEq65HTH" crossorigin="anonymous"></script>
   <script defer src="https://unpkg.com/lucide@0.468.0/dist/umd/lucide.min.js" integrity="sha384-uTYyvsSSUZeaPhb5RbKlQa0zY/WpX/QHfvg2mczXyBQOpkWPEDy9lczyp+w7SKXu" crossorigin="anonymous"></script>
   <script defer src="../js/script.js"></script>
 </head>
@@ -50,88 +52,61 @@
   </header>
 
   <main id="main" tabindex="-1">
-
-
-  <!-- PAGE HEADER -->
-  <section class="section section-bg" style="padding: 3.5rem 0;">
-    <div class="container">
-      <div class="section-header" style="margin-bottom: 0;">
-        <span class="section-badge"><i data-lucide="map-pin"></i> Australia Drop-off Locator</span>
-        <h1 class="section-title">Find a Recycling Location</h1>
-        <p class="section-subtitle">Find suitable recycling locations for items that cannot be placed in your regular household recycling bin.</p>
-      </div>
-    </div>
-  </section>
-
-  <!-- MAIN LOCATIONS CONTENT -->
-  <section class="section">
-    <div class="container">
-      
-      <!-- Filter Form -->
-      <div class="location-filter-box">
-        <div class="filter-form-grid">
-          <div class="form-group">
-            <label class="form-label" for="locationSearchInput">Search Location</label>
-            <input type="text" id="locationSearchInput" class="form-control" placeholder="Enter suburb, postcode or state (e.g. Greenpoint, Sydney)...">
-          </div>
-
-          <div class="form-group">
-            <label class="form-label" for="wasteTypeSelect">Waste Type Filter</label>
-            <select id="wasteTypeSelect" class="form-control">
-              <option value="All">All Waste Types</option>
-              <option value="General Recycling">General Recycling</option>
-              <option value="E-Waste">E-Waste</option>
-              <option value="Batteries">Batteries</option>
-              <option value="Glass">Glass</option>
-              <option value="Metal">Metal</option>
-              <option value="Plastic">Plastic</option>
-            </select>
-          </div>
-
-          <button id="findLocationsBtn" class="btn btn-primary" style="height: 48px;">
-            <i data-lucide="search"></i> Find Locations
-          </button>
+    <section class="section-sm section-bg">
+      <div class="container">
+        <div class="section-header flush">
+          <span class="section-badge"><i data-lucide="map-pin"></i> Australia Drop-off Locator</span>
+          <h1 class="section-title">Find a Recycling Location</h1>
+          <p class="section-subtitle">Find drop-off hubs for items that can't go in your regular household recycling bin.</p>
         </div>
       </div>
+    </section>
 
-      <!-- Layout: List + Interactive Mock Map -->
-      <div class="location-layout">
-        <!-- Location List Container -->
-        <div>
-          <h3 style="margin-bottom: 1rem; font-size: 1.25rem;">Nearby Drop-off Hubs (4 Found)</h3>
-          <div id="locationListContainer" class="location-list"></div>
+    <section class="section-sm" aria-label="Hub search results">
+      <div class="container">
+        <form id="hubFilterForm" class="location-filter-box" role="search" novalidate>
+          <div class="filter-form-grid">
+            <div class="form-group">
+              <label class="form-label" for="locationSearchInput">Suburb or postcode</label>
+              <input type="search" id="locationSearchInput" name="q" class="form-control" placeholder="e.g. Parramatta or 2150" autocomplete="off">
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="wasteTypeSelect">Waste type</label>
+              <select id="wasteTypeSelect" name="type" class="form-control">
+                <option value="All">All Waste Types</option>
+                <option value="Plastic">Plastic</option>
+                <option value="Paper">Paper</option>
+                <option value="Glass">Glass</option>
+                <option value="Metal">Metal</option>
+                <option value="E-Waste">E-Waste</option>
+                <option value="Batteries">Batteries</option>
+                <option value="Organics">Organics</option>
+              </select>
+            </div>
+            <button type="submit" class="btn btn-primary"><i data-lucide="search"></i> Find Locations</button>
+          </div>
+        </form>
+
+        <div class="row-between mb">
+          <div>
+            <h2 class="h-card" id="hubCount" role="status" aria-live="polite">Drop-off Hubs</h2>
+            <p class="muted small" id="distanceNote"></p>
+          </div>
+          <button type="button" class="btn btn-sm btn-secondary" data-action="hub-use-location"><i data-lucide="locate-fixed"></i> Use My Location</button>
         </div>
 
-        <!-- Interactive Map Visual -->
-        <div>
-          <h3 style="margin-bottom: 1rem; font-size: 1.25rem;">Interactive Map View</h3>
-          <div class="mock-map-container" style="min-height: 540px;">
-            <div class="mock-map-bg"></div>
-            
-            <!-- Map Pins with Click handlers -->
-            <div class="map-pin" style="top: 25%; left: 35%;" onclick="openDirectionsModal('GreenPoint Community Recycling Centre')">
-              <i data-lucide="recycle"></i> GreenPoint Centre (1.8km)
-            </div>
+        <div class="location-layout">
+          <div id="locationListContainer" class="location-list scrollable"></div>
 
-            <div class="map-pin" style="top: 55%; left: 65%;" onclick="openDirectionsModal('EcoHub E-Waste & Battery Depot')">
-              <i data-lucide="laptop"></i> EcoHub E-Waste (3.2km)
-            </div>
-
-            <div class="map-pin" style="top: 40%; left: 20%;" onclick="openDirectionsModal('Metro Glass & Organics Drop-off')">
-              <i data-lucide="wine"></i> Metro Glass (4.5km)
-            </div>
-
-            <div class="map-pin" style="top: 70%; left: 45%;" onclick="openDirectionsModal('Northside Hazardous Waste Facility')">
-              <i data-lucide="alert-triangle"></i> Northside Chemical (6.1km)
-            </div>
+          <div class="map-shell" role="region" aria-label="Map of drop-off hubs">
+            <div id="hubMap"></div>
+            <p class="map-notice" id="mapNotice" role="status" hidden></p>
           </div>
         </div>
+
+        <p class="muted small mt">Prototype data: hub names, street addresses, hours and phone numbers are fictional samples.</p>
       </div>
-
-    </div>
-  </section>
-
-  <!-- FOOTER -->
+    </section>
   </main>
 
   <footer class="footer">
