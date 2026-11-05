@@ -234,14 +234,14 @@
             <label class="switch-row">
               <span>
                 <strong>Email bin reminders</strong>
-                <span class="muted small" style="display:block">The evening before each collection</span>
+                <span class="muted small switch-desc">The evening before each collection</span>
               </span>
               <span class="switch"><input type="checkbox" role="switch" id="prefEmail" data-pref="email"><span class="switch-track"></span></span>
             </label>
             <label class="switch-row">
               <span>
                 <strong>SMS bin reminders</strong>
-                <span class="muted small" style="display:block">A text message on the morning of collection</span>
+                <span class="muted small switch-desc">A text message on the morning of collection</span>
               </span>
               <span class="switch"><input type="checkbox" role="switch" id="prefSms" data-pref="sms"><span class="switch-track"></span></span>
             </label>
@@ -274,111 +274,85 @@
           </div>
         </section>
 
-        <!-- ADMINISTRATOR MODULE 1: SYSTEM OVERVIEW & CONTROL CENTER (Tanu Admin) -->
-      <section class="dash-module" data-module="admin" data-role="admin" hidden>
-        <div class="card" style="padding: 2.5rem; border: 2px solid var(--primary-green); margin-bottom: 2.5rem;">
-          
-          <div style="margin-bottom: 1.5rem;">
-            <span class="badge badge-recyclable" style="margin-bottom: 0.5rem;"><i data-lucide="shield-check"></i> System Administrator Portal</span>
-            <h2 style="font-size: 2rem; color: var(--primary-green);">City Recycling Control & Database Registry</h2>
-            <p style="color: var(--secondary-text);">Authorized Account: admin@ecorecycle.org (Tanu • City Environmental Protection Services).</p>
+        <!-- ADMIN: CONTROL CENTRE -->
+        <section class="dash-module" data-module="admin" data-role="admin" aria-labelledby="adminHeading" hidden>
+          <div class="mb">
+            <span class="badge badge-recyclable"><i data-lucide="shield-check"></i> System Administrator Portal</span>
+            <h2 class="h-section mt-sm" id="adminHeading">City Operations Analytics</h2>
           </div>
 
-          <!-- ADMIN ANALYTICS CARDS -->
-          <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 1.25rem; margin-bottom: 2.25rem;">
-            <div style="background-color: var(--soft-green); padding: 1.25rem; border-radius: var(--radius-md); border: 1px solid var(--border-green);">
-              <div style="font-size: 0.75rem; font-weight: 700; color: var(--secondary-text); text-transform: uppercase;">System Waste Rules</div>
-              <div style="font-size: 1.75rem; font-weight: 800; color: var(--primary-green);">120 Items</div>
+          <div class="admin-stats">
+            <div class="admin-stat">
+              <div class="admin-stat-label">Active Waste Rules</div>
+              <div class="admin-stat-val" data-admin-stat="rules">0</div>
             </div>
-            <div style="background-color: #FEF3C7; padding: 1.25rem; border-radius: var(--radius-md); border: 1px solid #FDE68A;">
-              <div style="font-size: 0.75rem; font-weight: 700; color: #92400E; text-transform: uppercase;">Pending Citizen Submissions</div>
-              <div style="font-size: 1.75rem; font-weight: 800; color: #B45309;" id="pendingCountBadge">4 Items</div>
+            <div class="admin-stat warning">
+              <div class="admin-stat-label">Pending Citizen Items</div>
+              <div class="admin-stat-val" data-admin-stat="pending">0</div>
             </div>
-            <div style="background-color: #E0F2FE; padding: 1.25rem; border-radius: var(--radius-md); border: 1px solid #BAE6FD;">
-              <div style="font-size: 0.75rem; font-weight: 700; color: #0369A1; text-transform: uppercase;">Active City Residents</div>
-              <div style="font-size: 1.75rem; font-weight: 800; color: #0284C7;">1,420 Users</div>
+            <div class="admin-stat info">
+              <div class="admin-stat-label">Registered Residents</div>
+              <div class="admin-stat-val" data-admin-stat="residents">0</div>
             </div>
-            <div style="background-color: var(--light-green); padding: 1.25rem; border-radius: var(--radius-md); border: 1px solid var(--border-green);">
-              <div style="font-size: 0.75rem; font-weight: 700; color: var(--primary-green); text-transform: uppercase;">City Waste Diverted</div>
-              <div style="font-size: 1.75rem; font-weight: 800; color: var(--primary-green);">74.2 Tons</div>
+            <div class="admin-stat">
+              <div class="admin-stat-label">City Tons Diverted (demo figure)</div>
+              <div class="admin-stat-val" data-admin-stat="tons">0</div>
             </div>
           </div>
 
-          <!-- PENDING CITIZEN SUBMISSIONS QUEUE -->
-          <div style="margin-bottom: 2.5rem;">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
-              <h3 style="font-size: 1.35rem; color: var(--dark-text);">Pending Resident Guidance Requests (Action Required)</h3>
-              <span class="badge badge-special">Citizen Moderation Queue</span>
-            </div>
-            <p style="font-size: 0.9rem; color: var(--secondary-text); margin-bottom: 1rem;">
-              Items requested by residents that require official council classification before publishing to the public waste search database.
-            </p>
-            <div id="adminPendingQueueContainer" style="display: flex; flex-direction: column; gap: 1rem;"></div>
+          <div class="row-between mb-sm">
+            <h2 class="h-card">Citizen Request Queue</h2>
+            <span class="badge badge-special">Action required</span>
           </div>
+          <p class="muted small mb">Items that residents searched for and couldn't find. Approve &amp; Publish adds an item to public Waste Search straight away.</p>
+          <div class="queue-list js-pending-queue mb-lg"></div>
 
-          <!-- MASTER SYSTEM DIRECTORY TABLE -->
+          <h2 class="h-card mb-sm">Recent Rule Changes</h2>
+          <div class="upcoming-list" id="recentRuleChanges"></div>
+        </section>
+
+        <!-- ADMIN: MASTER REGISTRY -->
+        <section class="dash-module" data-module="admin-directory" data-role="admin" aria-labelledby="registryHeading" hidden>
           <div class="table-wrapper">
             <div class="table-header-box">
-              <h3 style="font-size: 1.25rem;">Published Master Waste Rule Directory</h3>
-              <span class="badge badge-info">Admin Write Authority Active</span>
+              <div>
+                <h2 id="registryHeading">Master Waste Rule Registry</h2>
+                <p class="muted small" id="registryCount" role="status"></p>
+              </div>
+              <button type="button" class="btn btn-primary btn-sm" data-action="new-rule"><i data-lucide="plus-circle"></i> Publish Waste Rule</button>
             </div>
-
+            <div class="registry-tools">
+              <div class="form-group">
+                <label class="form-label" for="registrySearch">Find a rule</label>
+                <input type="search" id="registrySearch" class="form-control" placeholder="e.g. battery">
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="registryCategory">Category</label>
+                <select id="registryCategory" class="form-control">
+                  <option value="all">All Categories</option>
+                  <option value="Plastic">Plastic</option>
+                  <option value="Paper &amp; Cardboard">Paper &amp; Cardboard</option>
+                  <option value="Glass">Glass</option>
+                  <option value="Metal">Metal</option>
+                  <option value="E-Waste">E-Waste</option>
+                  <option value="Organics">Organics</option>
+                  <option value="General Waste">General Waste</option>
+                </select>
+              </div>
+            </div>
             <table class="custom-table">
-              <thead>
-                <tr>
-                  <th>Item Name</th>
-                  <th>Category</th>
-                  <th>Disposal Channel</th>
-                  <th>System Status</th>
-                  <th>Admin Action</th>
-                </tr>
-              </thead>
-              <tbody id="adminWasteTableBody"></tbody>
+              <thead><tr><th scope="col">Item and verification</th><th scope="col">Category</th><th scope="col">Status</th><th scope="col">Disposal</th><th scope="col">Actions</th></tr></thead>
+              <tbody id="ruleTableBody"></tbody>
             </table>
           </div>
+        </section>
 
-        </div>
-      </section>
-
-      <!-- ADMINISTRATOR MODULE 2: MASTER WASTE DIRECTORY MODULE -->
-      <section class="dash-module" data-module="admin-directory" data-role="admin" hidden>
-        <div class="card" style="padding: 2.5rem; margin-bottom: 2rem;">
-          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
-            <div>
-              <h2 style="font-size: 1.75rem; color: var(--primary-green);">Master Waste Directory Registry</h2>
-              <p style="color: var(--secondary-text);">View, edit, or remove official city waste sorting guidelines.</p>
-            </div>
-            <button class="btn btn-primary" onclick="openModal('addAdminItemModal')">
-              <i data-lucide="plus-circle"></i> Publish Waste Rule
-            </button>
-          </div>
-
-          <div class="table-wrapper">
-            <table class="custom-table">
-              <thead>
-                <tr>
-                  <th>Item Name</th>
-                  <th>Category</th>
-                  <th>Disposal Channel</th>
-                  <th>System Status</th>
-                  <th>Admin Action</th>
-                </tr>
-              </thead>
-              <tbody id="adminWasteTableBody2"></tbody>
-            </table>
-          </div>
-        </div>
-      </section>
-
-      <!-- ADMINISTRATOR MODULE 3: PENDING CITIZEN REQUESTS MODULE -->
-      <section class="dash-module" data-module="admin-pending" data-role="admin" hidden>
-        <div class="card" style="padding: 2.5rem; margin-bottom: 2rem;">
-          <h2 style="font-size: 1.75rem; color: var(--primary-green); margin-bottom: 0.5rem;">Citizen Guidance Requests Queue</h2>
-          <p style="color: var(--secondary-text); margin-bottom: 1.5rem;">Approve or reject unindexed waste items requested by city residents.</p>
-          
-          <div id="adminPendingQueueContainer2" style="display: flex; flex-direction: column; gap: 1rem;"></div>
-        </div>
-      </section>
+        <!-- ADMIN: PENDING REQUESTS -->
+        <section class="dash-module" data-module="admin-pending" data-role="admin" aria-labelledby="pendingHeading" hidden>
+          <h2 class="h-section" id="pendingHeading">Pending Citizen Requests</h2>
+          <p class="muted mb">Approve or reject unlisted items requested by residents.</p>
+          <div class="queue-list js-pending-queue"></div>
+        </section>
       </div>
     </div>
   </main>
@@ -479,74 +453,62 @@
     </div>
   </div>
 
-  <!-- ADD ADMIN ITEM MODAL -->
-  <div id="addAdminItemModal" class="modal-overlay" data-role="admin">
-    <div class="modal-box">
-      <span class="modal-close" onclick="closeModal('addAdminItemModal')">&times;</span>
-      <h3 style="font-size: 1.5rem; margin-bottom: 1rem;">Publish New Master Waste Rule</h3>
-      
-      <form onsubmit="addAdminWasteItem(event)">
-        <div class="form-group" style="margin-bottom: 1rem;">
-          <label class="form-label">Item Name</label>
-          <input type="text" id="adminNewName" class="form-control" placeholder="e.g. Aluminium Foil Tray" required>
+  <!-- ADMIN: CREATE / EDIT / APPROVE RULE -->
+  <div id="ruleModal" class="modal-overlay" data-role="admin">
+    <div class="modal-box" role="dialog" aria-modal="true" aria-labelledby="ruleModalTitle">
+      <button type="button" class="modal-close" data-action="close-modal" aria-label="Close dialog"><i data-lucide="x"></i></button>
+      <h2 class="modal-title" id="ruleModalTitle">Publish New Waste Rule</h2>
+      <p class="notice small mb" id="ruleRequestHint" hidden></p>
+      <form id="ruleForm" class="form-stack" novalidate>
+        <div class="form-group">
+          <label class="form-label" for="ruleName">Item Name</label>
+          <input type="text" id="ruleName" class="form-control" maxlength="100" placeholder="e.g. Aluminium Foil Tray">
         </div>
-
-        <div class="form-group" style="margin-bottom: 1rem;">
-          <label class="form-label">Category</label>
-          <select id="adminNewCategory" class="form-control">
-            <option value="Metal">Metal</option>
-            <option value="Plastic">Plastic</option>
-            <option value="Paper & Cardboard">Paper & Cardboard</option>
-            <option value="Glass">Glass</option>
-            <option value="E-Waste">E-Waste</option>
-            <option value="General Waste">General Waste</option>
-          </select>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label" for="ruleCategory">Category</label>
+            <select id="ruleCategory" class="form-control">
+              <option value="">Choose a category</option>
+              <option value="Plastic">Plastic</option>
+              <option value="Paper &amp; Cardboard">Paper &amp; Cardboard</option>
+              <option value="Glass">Glass</option>
+              <option value="Metal">Metal</option>
+              <option value="E-Waste">E-Waste</option>
+              <option value="Organics">Organics</option>
+              <option value="General Waste">General Waste</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="ruleStatus">Status</label>
+            <select id="ruleStatus" class="form-control">
+              <option value="">Choose a status</option>
+              <option value="recyclable">Recyclable</option>
+              <option value="not-recyclable">Not Recyclable</option>
+              <option value="special">Special Drop-off</option>
+            </select>
+          </div>
         </div>
-
-        <div class="form-group" style="margin-bottom: 1.5rem;">
-          <label class="form-label">Disposal Channel</label>
-          <input type="text" id="adminNewDisposal" class="form-control" placeholder="e.g. Yellow Recycling Bin" required>
+        <div class="form-group">
+          <label class="form-label" for="ruleDisposal">Disposal Method</label>
+          <input type="text" id="ruleDisposal" class="form-control" list="ruleDisposalOptions" placeholder="e.g. Yellow Recycling Bin">
+          <datalist id="ruleDisposalOptions">
+            <option value="Yellow Recycling Bin"></option>
+            <option value="Green FOGO Bin"></option>
+            <option value="Red General Waste Bin"></option>
+            <option value="E-Waste Hub"></option>
+            <option value="Household Chemical Drop-off"></option>
+          </datalist>
         </div>
-
-        <button type="submit" class="btn btn-primary" style="width: 100%;">
-          <i data-lucide="shield-check"></i> Publish Waste Rule to System (Admin)
-        </button>
-      </form>
-    </div>
-  </div>
-
-  <!-- EDIT ADMIN ITEM MODAL -->
-  <div id="editAdminItemModal" class="modal-overlay" data-role="admin">
-    <div class="modal-box">
-      <span class="modal-close" onclick="closeModal('editAdminItemModal')">&times;</span>
-      <h3 style="font-size: 1.5rem; margin-bottom: 1rem;">Edit Master Waste Rule</h3>
-      
-      <form onsubmit="saveEditedAdminWasteItem(event)">
-        <div class="form-group" style="margin-bottom: 1rem;">
-          <label class="form-label">Item Name</label>
-          <input type="text" id="editAdminName" class="form-control" required>
+        <div class="form-group">
+          <label class="form-label" for="ruleSteps">Preparation Steps</label>
+          <textarea id="ruleSteps" class="form-control" rows="4" aria-describedby="ruleStepsHint"></textarea>
+          <p class="form-hint" id="ruleStepsHint">One step per line.</p>
         </div>
-
-        <div class="form-group" style="margin-bottom: 1rem;">
-          <label class="form-label">Category</label>
-          <select id="editAdminCategory" class="form-control">
-            <option value="Metal">Metal</option>
-            <option value="Plastic">Plastic</option>
-            <option value="Paper & Cardboard">Paper & Cardboard</option>
-            <option value="Glass">Glass</option>
-            <option value="E-Waste">E-Waste</option>
-            <option value="General Waste">General Waste</option>
-          </select>
+        <div class="form-group">
+          <label class="form-label" for="ruleNote">Editor Note (optional)</label>
+          <input type="text" id="ruleNote" class="form-control" maxlength="120" placeholder="Shown with the rule, e.g. Verified with council">
         </div>
-
-        <div class="form-group" style="margin-bottom: 1.5rem;">
-          <label class="form-label">Disposal Channel</label>
-          <input type="text" id="editAdminDisposal" class="form-control" required>
-        </div>
-
-        <button type="submit" class="btn btn-primary" style="width: 100%;">
-          <i data-lucide="save"></i> Save Changes to Waste Rule
-        </button>
+        <button type="submit" class="btn btn-primary btn-block"><i data-lucide="shield-check"></i> <span id="ruleSubmitLabel">Publish Waste Rule</span></button>
       </form>
     </div>
   </div>

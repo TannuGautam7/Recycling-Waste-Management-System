@@ -447,14 +447,6 @@ function initStorage() {
   Store.remove('ecorecycle_user');
 }
 
-/* TEMPORARY bridge for dashboard code that has not been migrated yet. */
-let WASTE_DATABASE = getRules().map((r) => ({ ...r, recyclable: r.status === 'recyclable' ? true : r.status === 'special' ? 'special' : false }));
-let PENDING_SUBMISSIONS = getPending();
-let RESIDENT_ACTIVITY = getActivity(ALEX_ID);
-const MOCK_LOCATIONS = HUBS.map((h) => ({ id: h.id, name: h.name, address: `${h.street}, ${h.suburb} ${h.state} ${h.postcode}`, distance: '', types: h.types, hours: h.hours, phone: h.phone }));
-const getCurrentUser = () => { const u = currentUser(); return u ? { ...u, loggedIn: true, avatar: initialsOf(u.name) } : null; };
-const logoutUser = () => ACTIONS.logout();
-
 /* ==========================================================================
    4. UI
    ========================================================================== */
@@ -2341,192 +2333,334 @@ function initDashboard() {
   });
 }
 
-/* TEMPORARY: administrator logic pending migration */
-function initAdminDashboard() { renderAdminWasteTable(); renderAdminPendingQueue(); }
-function renderAdminDashboard() { initAdminDashboard(); }
-ACTIONS['new-rule'] = () => openModal('addAdminItemModal');
-// Render Admin Master Database Table
-function renderAdminWasteTable() {
-  const tableBody = document.getElementById('adminWasteTableBody');
-  const tableBody2 = document.getElementById('adminWasteTableBody2');
-  if (!tableBody && !tableBody2) return;
+/* ---- Administrator view ----
+   Every action rechecks the role first, because residents must not be able to
+   change rules even if they call these handlers from the browser console. */
 
-  const html = WASTE_DATABASE.map(item => `
-    <tr>
-      <td><strong>${item.name}</strong></td>
-      <td>${item.category}</td>
-      <td>${item.disposalMethod}</td>
-      <td>
-        <span class="badge badge-recyclable">Published</span>
-      </td>
-      <td>
-        <button class="btn btn-sm btn-secondary" onclick="openEditAdminItemModal('${item.id}')">
-          <i data-lucide="edit"></i> Edit Rule
-        </button>
-      </td>
-    </tr>
-  `).join('');
-
-  if (tableBody) tableBody.innerHTML = html;
-  if (tableBody2) tableBody2.innerHTML = html;
-  if (window.lucide) lucide.createIcons();
+function requireAdmin() {
+  const user = currentUser();
+  if (user && user.role === 'admin') return user;
+  showToast('Access denied: only administrators can do this.', 'error');
+  return null;
 }
 
-// Open Edit Modal for Admin
-let currentEditingItemId = null;
-function openEditAdminItemModal(itemId) {
-  const item = WASTE_DATABASE.find(i => i.id === itemId);
-  if (!item) return;
+const CITY_TONS_DIVERTED = 74.2; // demo figure from the project brief
 
-  currentEditingItemId = itemId;
-  document.getElementById('editAdminName').value = item.name;
-  document.getElementById('editAdminCategory').value = item.category;
-  document.getElementById('editAdminDisposal').value = item.disposalMethod;
-
-  openModal('editAdminItemModal');
+function renderAdminStats() {
+  $('[data-admin-stat="rules"]').textContent = getRules().length;
+  $('[data-admin-stat="pending"]').textContent = getPending().length;
+  $('[data-admin-stat="residents"]').textContent = getUsers().filter((user) => user.role === 'resident').length;
+  $('[data-admin-stat="tons"]').textContent = `${CITY_TONS_DIVERTED} t`;
 }
 
-function saveEditedAdminWasteItem(e) {
-  e.preventDefault();
-  if (!currentEditingItemId) return;
+/* ---- Citizen request queue ---- */
 
-  const item = WASTE_DATABASE.find(i => i.id === currentEditingItemId);
-  if (item) {
-    item.name = document.getElementById('editAdminName').value;
-    item.category = document.getElementById('editAdminCategory').value;
-    item.disposalMethod = document.getElementById('editAdminDisposal').value;
-    item.updatedDate = 'Just Now';
-    item.adminNote = 'Updated by Tanu (Admin)';
+const isClassified = (request) => Boolean(RULE_STATUS[request.status] && request.disposalMethod && CATEGORIES.includes(request.category)
+  && Array.isArray(request.instructions) && request.instructions.length);
 
-    renderAdminWasteTable();
-    closeModal('editAdminItemModal');
-    showToast(`Waste rule for "${item.name}" updated successfully!`);
-  }
-}
-
-// Render Admin Pending Submissions Queue Table
-function renderAdminPendingQueue() {
-  const container = document.getElementById('adminPendingQueueContainer');
-  const container2 = document.getElementById('adminPendingQueueContainer2');
-  const countBadge = document.getElementById('pendingCountBadge');
-
-  if (countBadge) countBadge.innerText = PENDING_SUBMISSIONS.length;
-
-  if (!container && !container2) return;
-
-  let html = '';
-  if (PENDING_SUBMISSIONS.length === 0) {
-    html = `<div style="padding: 1.5rem; text-align: center; color: var(--secondary-text);">No pending item submissions from citizens. All items reviewed!</div>`;
-  } else {
-    html = PENDING_SUBMISSIONS.map((req, idx) => `
-      <div style="background-color: var(--white); border: 1px solid var(--border-light); border-radius: var(--radius-md); padding: 1.25rem; display: flex; align-items: center; justify-content: space-between; gap: 1rem;">
-        <div>
-          <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.25rem;">
-            <h4 style="font-size: 1.1rem; color: var(--dark-text);">${req.name}</h4>
-            <span class="badge badge-special">Submitted ${req.dateSubmitted}</span>
-          </div>
-          <p style="font-size: 0.875rem; color: var(--secondary-text); margin-bottom: 0.25rem;">
-            <strong>Category:</strong> ${req.category} | <strong>Target Disposal:</strong> ${req.disposalMethod}
-          </p>
-          <p style="font-size: 0.8rem; color: var(--secondary-text); italic;">
-            Submitted by ${req.submittedBy} • Note: "${req.reason}"
-          </p>
+function queueCardHtml(request) {
+  const classified = isClassified(request);
+  return `
+    <article class="queue-card">
+      <div class="queue-info">
+        <div class="row-wrap mb-sm">
+          <h3>${esc(request.name)}</h3>
+          <span class="badge badge-info">Submitted ${esc(formatDate(request.dateSubmitted))}</span>
+          ${classified ? statusBadge(request.status) : '<span class="badge badge-special">Needs classification</span>'}
         </div>
-
-        <div style="display: flex; gap: 0.5rem; flex-shrink: 0;">
-          <button class="btn btn-sm btn-primary" onclick="approvePendingItem(${idx})">
-            <i data-lucide="check"></i> Approve & Publish
-          </button>
-          <button class="btn btn-sm btn-secondary" onclick="rejectPendingItem(${idx})" style="color: var(--error);">
-            <i data-lucide="x"></i> Reject
-          </button>
-        </div>
+        <p class="small muted"><strong>Category:</strong> ${esc(request.category || 'Not specified')} • <strong>Target disposal:</strong> ${esc(request.disposalMethod || 'To be decided')}</p>
+        <p class="small muted">Submitted by ${esc(request.submittedBy)} • "${esc(request.reason)}"</p>
       </div>
-    `).join('');
-  }
-
-  if (container) container.innerHTML = html;
-  if (container2) container2.innerHTML = html;
-  if (window.lucide) lucide.createIcons();
+      <div class="queue-actions">
+        <button type="button" class="btn btn-sm btn-primary" data-action="approve-request" data-id="${esc(request.id)}"><i data-lucide="check"></i> Approve &amp; Publish<span class="sr-only">: ${esc(request.name)}</span></button>
+        <button type="button" class="btn btn-sm btn-danger-outline" data-action="reject-request" data-id="${esc(request.id)}"><i data-lucide="x"></i> Reject<span class="sr-only">: ${esc(request.name)}</span></button>
+      </div>
+    </article>`;
 }
 
-function approvePendingItem(index) {
-  const req = PENDING_SUBMISSIONS[index];
-  if (req) {
-    WASTE_DATABASE.unshift({
-      id: req.id,
-      name: req.name,
-      category: req.category === 'Under Review' ? 'Metal' : req.category,
-      recyclable: true,
-      disposalMethod: req.disposalMethod === 'Pending Admin Classification' ? 'Yellow Recycling Bin' : req.disposalMethod,
-      instructions: ['Follow verified municipal disposal rules.'],
-      adminNote: 'Approved by Tanu (Admin)',
-      status: 'Published',
-      updatedDate: 'Just Now'
-    });
-
-    PENDING_SUBMISSIONS.splice(index, 1);
-    renderAdminWasteTable();
-    renderAdminPendingQueue();
-    showToast(`Approved "${req.name}"! Rule published to search database.`);
-  }
+function renderPendingQueue() {
+  const requests = getPending();
+  $$('.js-pending-queue').forEach((container) => {
+    container.innerHTML = requests.length
+      ? requests.map(queueCardHtml).join('')
+      : '<div class="empty-state"><h3>All caught up</h3><p>There are no citizen requests waiting for review.</p></div>';
+  });
 }
 
-function rejectPendingItem(index) {
-  const req = PENDING_SUBMISSIONS[index];
-  if (req) {
-    PENDING_SUBMISSIONS.splice(index, 1);
-    renderAdminPendingQueue();
-    showToast(`Item "${req.name}" rejected.`);
-  }
+/* ---- Master rule registry ---- */
+
+function ruleRowHtml(rule) {
+  return `
+    <tr>
+      <td data-label="Item" class="cell-full"><strong>${esc(rule.name)}</strong><span class="rule-note">${esc(rule.adminNote)} • ${esc(formatDate(rule.updatedDate))}</span></td>
+      <td data-label="Category">${esc(rule.category)}</td>
+      <td data-label="Status">${statusBadge(rule.status)}</td>
+      <td data-label="Disposal">${esc(rule.disposalMethod)}</td>
+      <td data-label="Actions" class="cell-full">
+        <div class="table-actions">
+          <button type="button" class="btn btn-sm btn-secondary" data-action="edit-rule" data-id="${esc(rule.id)}"><i data-lucide="pencil"></i> Edit<span class="sr-only">: ${esc(rule.name)}</span></button>
+          <button type="button" class="btn btn-sm btn-danger-outline" data-action="delete-rule" data-id="${esc(rule.id)}"><i data-lucide="trash-2"></i> Delete<span class="sr-only">: ${esc(rule.name)}</span></button>
+        </div>
+      </td>
+    </tr>`;
 }
 
-function addAdminWasteItem(e) {
-  e.preventDefault();
-  const currentUser = getCurrentUser();
-  if (!currentUser || currentUser.role !== 'admin') {
-    showToast('⛔ Access Denied: Only Administrators can publish system rules.');
+function renderRuleRegistry() {
+  const tbody = document.getElementById('ruleTableBody');
+  if (!tbody) return;
+  const query = $('#registrySearch').value;
+  const category = $('#registryCategory').value;
+  const rules = getRules();
+  const base = queryTokens(query).length
+    ? searchRules(query, rules)
+    : [...rules].sort((a, b) => (b.updatedAt || 0) - (a.updatedAt || 0) || a.name.localeCompare(b.name));
+  const visible = category === 'all' ? base : base.filter((rule) => rule.category === category);
+  $('#registryCount').textContent = `${visible.length} of ${rules.length} rules`;
+  tbody.innerHTML = visible.length
+    ? visible.map(ruleRowHtml).join('')
+    : '<tr><td colspan="5" class="cell-full muted">No rules match this filter.</td></tr>';
+}
+
+function renderRecentChanges() {
+  const list = document.getElementById('recentRuleChanges');
+  if (!list) return;
+  const recent = getRules().filter((rule) => rule.updatedAt).sort((a, b) => b.updatedAt - a.updatedAt).slice(0, 5);
+  list.innerHTML = recent.length
+    ? recent.map((rule) => `
+        <div class="upcoming-row">
+          <span>${esc(rule.name)}</span>
+          <span class="rule-note">${esc(rule.adminNote)} • ${esc(formatDate(rule.updatedDate))}</span>
+        </div>`).join('')
+    : '<p class="muted small">No changes yet. Rules you create, edit or approve will be listed here with a verification note.</p>';
+}
+
+function renderAdminDashboard() {
+  renderAdminStats();
+  renderPendingQueue();
+  renderRuleRegistry();
+  renderRecentChanges();
+  renderIcons();
+}
+
+/* ---- Create, edit and approve share one form ---- */
+
+const ruleFormState = { mode: 'create', ruleId: null, requestId: null };
+
+function openRuleForm({ mode, rule = null, request = null }) {
+  const form = document.getElementById('ruleForm');
+  form.reset();
+  clearFormErrors(form);
+  ruleFormState.mode = mode;
+  ruleFormState.ruleId = rule ? rule.id : null;
+  ruleFormState.requestId = request ? request.id : null;
+
+  const source = rule || request || {};
+  $('#ruleName').value = source.name || '';
+  $('#ruleCategory').value = CATEGORIES.includes(source.category) ? source.category : '';
+  $('#ruleStatus').value = RULE_STATUS[source.status] ? source.status : '';
+  $('#ruleDisposal').value = source.disposalMethod || '';
+  $('#ruleSteps').value = Array.isArray(source.instructions) ? source.instructions.join('\n') : '';
+  $('#ruleNote').value = '';
+
+  const titles = { create: 'Publish New Waste Rule', edit: 'Edit Waste Rule', approve: 'Classify and Publish Request' };
+  const labels = { create: 'Publish Waste Rule', edit: 'Save Changes', approve: 'Approve & Publish' };
+  $('#ruleModalTitle').textContent = titles[mode];
+  $('#ruleSubmitLabel').textContent = labels[mode];
+  const hint = document.getElementById('ruleRequestHint');
+  hint.hidden = mode !== 'approve';
+  if (mode === 'approve') hint.textContent = `Submitted by ${request.submittedBy}: "${request.reason}" Add the disposal details before publishing.`;
+  openModal('ruleModal');
+}
+
+ACTIONS['new-rule'] = () => {
+  if (requireAdmin()) openRuleForm({ mode: 'create' });
+};
+
+ACTIONS['edit-rule'] = (trigger) => {
+  if (!requireAdmin()) return;
+  const rule = getRules().find((candidate) => candidate.id === trigger.dataset.id);
+  if (rule) openRuleForm({ mode: 'edit', rule });
+};
+
+ACTIONS['delete-rule'] = async (trigger) => {
+  if (!requireAdmin()) return;
+  const rule = getRules().find((candidate) => candidate.id === trigger.dataset.id);
+  if (!rule) return;
+  const confirmed = await confirmDialog({
+    title: 'Delete this waste rule?',
+    message: `"${rule.name}" will be removed from public Waste Search. This cannot be undone.`,
+    confirmLabel: 'Delete Rule',
+  });
+  if (!confirmed || !requireAdmin()) return;
+  saveRules(getRules().filter((candidate) => candidate.id !== rule.id));
+  renderAdminDashboard();
+  showToast(`Deleted "${rule.name}".`, 'info');
+};
+
+function uniqueRuleId(name, rules) {
+  const slug = name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '') || 'rule';
+  let id = slug;
+  let counter = 2;
+  while (rules.some((rule) => rule.id === id)) {
+    id = `${slug}-${counter}`;
+    counter += 1;
+  }
+  return id;
+}
+
+/** Adds a queue request to the live rule list and removes it from the queue. */
+function publishRequest(request, values, admin) {
+  const rules = getRules();
+  const rule = {
+    id: uniqueRuleId(values.name, rules),
+    keywords: '',
+    ...values,
+    adminNote: values.adminNote || `Approved by ${admin.name} (Admin)`,
+    updatedDate: toISODate(),
+    updatedAt: Date.now(),
+  };
+  saveRules([rule, ...rules]);
+  savePending(getPending().filter((candidate) => candidate.id !== request.id));
+  return rule;
+}
+
+ACTIONS['approve-request'] = (trigger) => {
+  const admin = requireAdmin();
+  if (!admin) return;
+  const request = getPending().find((candidate) => candidate.id === trigger.dataset.id);
+  if (!request) return;
+
+  const duplicate = getRules().some((rule) => rule.name.toLowerCase() === request.name.toLowerCase());
+  // Unclassified requests need disposal details first, so nothing inaccurate is ever published.
+  if (!isClassified(request) || duplicate) {
+    openRuleForm({ mode: 'approve', request });
+    if (duplicate) setFieldError($('#ruleName'), 'A rule with this name already exists. Rename it or reject this request.');
+    return;
+  }
+  publishRequest(request, {
+    name: request.name,
+    category: request.category,
+    status: request.status,
+    disposalMethod: request.disposalMethod,
+    instructions: request.instructions,
+  }, admin);
+  renderAdminDashboard();
+  showToast(`Approved "${request.name}". It is now live in Waste Search.`);
+};
+
+ACTIONS['reject-request'] = async (trigger) => {
+  if (!requireAdmin()) return;
+  const request = getPending().find((candidate) => candidate.id === trigger.dataset.id);
+  if (!request) return;
+  const confirmed = await confirmDialog({
+    title: 'Reject this request?',
+    message: `"${request.name}" will be removed from the queue and will not be published.`,
+    confirmLabel: 'Reject Request',
+  });
+  if (!confirmed || !requireAdmin()) return;
+  savePending(getPending().filter((candidate) => candidate.id !== request.id));
+  renderAdminDashboard();
+  showToast(`Rejected "${request.name}".`, 'info');
+};
+
+function handleRuleSubmit(event) {
+  event.preventDefault();
+  const admin = requireAdmin();
+  if (!admin) return;
+  const form = event.currentTarget;
+  const values = {
+    name: $('#ruleName').value.trim(),
+    category: $('#ruleCategory').value,
+    status: $('#ruleStatus').value,
+    disposalMethod: $('#ruleDisposal').value.trim(),
+    instructions: $('#ruleSteps').value.split('\n').map((step) => step.trim()).filter(Boolean),
+  };
+  const note = $('#ruleNote').value.trim();
+  const rules = getRules();
+  const { mode, ruleId, requestId } = ruleFormState;
+
+  const errors = {};
+  if (values.name.length < 2) errors.ruleName = 'Enter the item name.';
+  else if (rules.some((rule) => rule.id !== ruleId && rule.name.toLowerCase() === values.name.toLowerCase())) {
+    errors.ruleName = 'A rule with this name already exists.';
+  }
+  if (!values.category) errors.ruleCategory = 'Choose a category.';
+  if (!values.status) errors.ruleStatus = 'Choose a disposal status.';
+  if (values.disposalMethod.length < 2) errors.ruleDisposal = 'Enter where this item should go.';
+  if (!values.instructions.length) errors.ruleSteps = 'Add at least one preparation step.';
+  if (!applyFormErrors(form, errors)) return;
+
+  if (mode === 'approve') {
+    const request = getPending().find((candidate) => candidate.id === requestId);
+    if (!request) return;
+    publishRequest(request, { ...values, adminNote: note }, admin);
+    closeModal('ruleModal');
+    renderAdminDashboard();
+    showToast(`Approved "${values.name}". It is now live in Waste Search.`);
     return;
   }
 
-  const name = document.getElementById('adminNewName').value;
-  const category = document.getElementById('adminNewCategory').value;
-  const disposal = document.getElementById('adminNewDisposal').value;
+  const stamp = { updatedDate: toISODate(), updatedAt: Date.now() };
+  if (mode === 'edit') {
+    saveRules(rules.map((rule) => (rule.id === ruleId
+      ? { ...rule, ...values, ...stamp, adminNote: note || `Updated by ${admin.name} (Admin)` }
+      : rule)));
+    showToast(`Updated the rule for "${values.name}".`);
+  } else {
+    saveRules([{
+      id: uniqueRuleId(values.name, rules),
+      keywords: '',
+      ...values,
+      ...stamp,
+      adminNote: note || `Verified by ${admin.name} (Admin)`,
+    }, ...rules]);
+    showToast(`Published "${values.name}" to Waste Search.`);
+  }
+  closeModal('ruleModal');
+  renderAdminDashboard();
+}
 
-  WASTE_DATABASE.unshift({
-    id: name.toLowerCase().replace(/\s+/g, '-'),
-    name: name,
-    category: category,
-    recyclable: true,
-    disposalMethod: disposal,
-    instructions: ['Follow standard kerbside recycling rules.'],
-    adminNote: 'Added by Tanu (Admin)',
-    status: 'Published',
-    updatedDate: 'Just Now'
+function initAdminDashboard() {
+  $('#ruleForm').addEventListener('submit', handleRuleSubmit);
+  $('#registrySearch').addEventListener('input', () => {
+    renderRuleRegistry();
+    renderIcons();
   });
-
-  renderAdminWasteTable();
-  closeModal('addAdminItemModal');
-  showToast(`Successfully published "${name}" to system database.`);
+  $('#registryCategory').addEventListener('change', () => {
+    renderRuleRegistry();
+    renderIcons();
+  });
+  renderAdminDashboard();
 }
 
 /* ==========================================================================
    13. BOOT
+   Each step is isolated, so one failure can't stop the rest of the page.
    ========================================================================== */
+
 document.addEventListener('DOMContentLoaded', () => {
-  initStorage();
-  initMobileMenu();
-  renderNavActions();
-  initQuickSearch();
-  initHomeStats();
-  renderCollectionWidgets();
-  initWasteSearchPage();
-  initRecyclingGuide();
-  initHubFinder();
-  initHomeHubPreview();
-  initContactForm();
-  initAuthPage();
-  initDashboard();
-  renderIcons();
-  showPendingFlash();
+  [
+    initStorage,
+    toastRegion, // the aria-live region must exist before the first message
+    initMobileMenu,
+    renderNavActions,
+    initHomeStats,
+    initQuickSearch,
+    renderCollectionWidgets,
+    initWasteSearchPage,
+    initRecyclingGuide,
+    initHubFinder,
+    initHomeHubPreview,
+    initContactForm,
+    initAuthPage,
+    initDashboard,
+    renderIcons,
+    showPendingFlash,
+  ].forEach((step) => {
+    try {
+      step();
+    } catch (error) {
+      console.error(`Start-up step "${step.name}" failed.`, error);
+    }
+  });
 });
