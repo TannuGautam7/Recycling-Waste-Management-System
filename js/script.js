@@ -1,7 +1,89 @@
-/* ==========================================
-   EcoRecycle - Comprehensive JavaScript Logic
-   Account Authentication & Dynamic Dashboard Engine
-   ========================================== */
+/* ==========================================================================
+   EcoRecycle Australia: application script (vanilla JS, no build step)
+
+   Sections
+     1. CORE       paths and small helpers
+     2. DATA       seed data: waste rules, requests, accounts, hubs, resin codes
+     3. STORAGE    guarded localStorage access with fallback to seed data
+     4. UI         icons, toasts, modals, confirm dialog, form validation
+     5. AUTH       salted SHA-256 accounts, sessions, login and register pages
+     6. NAVIGATION hamburger menu and signed-in nav state
+     7. SCHEDULE   collection calendar and reminders
+     8. SEARCH     waste search, suggestions, admin queue requests
+     9. GUIDE      category navigation and resin-code decoder
+    10. LOCATIONS  hub finder, Leaflet map, directions, saved hubs
+    11. CONTACT    enquiry form
+    12. DASHBOARD  route guard, resident view, admin view
+    13. BOOT       page start-up
+   ========================================================================== */
+'use strict';
+
+/* ==========================================================================
+   1. CORE
+   ========================================================================== */
+
+/* Site root worked out from this script's own URL, so links work from
+   index.html, /pages/ and a GitHub Pages sub-folder alike. */
+const SITE_ROOT = new URL('../', document.currentScript ? document.currentScript.src : window.location.href).href;
+const sitePath = (path) => new URL(path, SITE_ROOT).href;
+
+const $ = (selector, root = document) => root.querySelector(selector);
+const $$ = (selector, root = document) => Array.from(root.querySelectorAll(selector));
+
+/** Escapes text for safe use inside HTML. All dynamic markup goes through this. */
+function esc(value) {
+  return String(value === undefined || value === null ? '' : value)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
+const clone = (value) => JSON.parse(JSON.stringify(value));
+
+/** Local calendar date as YYYY-MM-DD (not UTC, which can be a day out in Australia). */
+function toISODate(date = new Date()) {
+  const pad = (n) => String(n).padStart(2, '0');
+  return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}`;
+}
+
+function daysAgoISO(days) {
+  const d = new Date();
+  d.setDate(d.getDate() - days);
+  return toISODate(d);
+}
+
+function parseISODate(iso) {
+  const parts = String(iso || '').split('-').map(Number);
+  const date = parts.length === 3 ? new Date(parts[0], parts[1] - 1, parts[2]) : new Date(NaN);
+  return Number.isNaN(date.getTime()) ? null : date;
+}
+
+function formatDate(iso, options = { day: 'numeric', month: 'short', year: 'numeric' }) {
+  const date = parseISODate(iso);
+  return date ? date.toLocaleDateString('en-AU', options) : String(iso || '');
+}
+
+/**
+ * Click handlers registered by name. Markup uses data-action="name" rather than
+ * inline onclick, which keeps user content out of attribute strings.
+ */
+const ACTIONS = {};
+
+document.addEventListener('click', (event) => {
+  const trigger = event.target.closest('[data-action]');
+  if (!trigger) return;
+  const handler = ACTIONS[trigger.dataset.action];
+  if (!handler) return;
+  if (trigger.tagName === 'A' && trigger.getAttribute('href') === '#') event.preventDefault();
+  Promise.resolve()
+    .then(() => handler(trigger, event))
+    .catch((error) => {
+      console.error(error);
+      showToast('Something went wrong. Please try again.', 'error');
+    });
+});
 
 // --- 1. REAL-WORLD MASTER WASTE DATABASE ---
 let WASTE_DATABASE = [
@@ -226,18 +308,6 @@ function logoutUser() {
   setTimeout(() => { window.location.href = '../index.html'; }, 800);
 }
 
-// --- 6. DOM INITIALIZATION ---
-document.addEventListener('DOMContentLoaded', () => {
-  if (window.lucide) lucide.createIcons();
-
-  initAuthUI();
-  initWasteSearch();
-  initLocationFinder();
-  initMobileMenu();
-  initAuthForms();
-  initDashboard();
-});
-
 function initAuthUI() {
   const currentUser = getCurrentUser();
   const navActions = document.querySelector('.nav-actions');
@@ -256,6 +326,278 @@ function initAuthUI() {
     `;
     if (window.lucide) lucide.createIcons();
   }
+}
+
+/* ==========================================================================
+   4. UI
+   ========================================================================== */
+
+/* ---- Icons ---- */
+
+/* Text glyphs used when the Lucide CDN can't be reached, so icon-only buttons
+   stay visible. Other icons are decorative and simply disappear. */
+const ICON_FALLBACKS = {
+  menu: '☰', x: '✕', 'log-out': '⇥', eye: '👁', 'eye-off': '🙈', recycle: '♻', check: '✓',
+  'check-circle-2': '✓', 'x-circle': '✕', 'alert-triangle': '⚠', search: '🔍', plus: '+', trash: '🗑',
+};
+
+function renderIcons() {
+  if (window.lucide && typeof window.lucide.createIcons === 'function') {
+    window.lucide.createIcons({ attrs: { 'aria-hidden': 'true', focusable: 'false' } });
+    return;
+  }
+  $$('i[data-lucide]').forEach((el) => {
+    el.classList.add('icon-fallback');
+    el.setAttribute('aria-hidden', 'true');
+    el.textContent = ICON_FALLBACKS[el.dataset.lucide] || '';
+  });
+}
+
+/* ---- Toasts ---- */
+
+function toastRegion() {
+  let region = document.getElementById('toastContainer');
+  if (!region) {
+    region = document.createElement('div');
+    region.id = 'toastContainer';
+    region.className = 'toast-container';
+    region.setAttribute('role', 'status');
+    region.setAttribute('aria-live', 'polite');
+    region.setAttribute('aria-atomic', 'false');
+    document.body.appendChild(region);
+  }
+  return region;
+}
+
+function showToast(message, type = 'success') {
+  const toast = document.createElement('div');
+  toast.className = `toast ${type}`;
+  const iconName = type === 'error' ? 'alert-triangle' : type === 'info' ? 'info' : 'check-circle-2';
+  toast.innerHTML = `<i data-lucide="${iconName}"></i><span></span>`;
+  toast.querySelector('span').textContent = message;
+  toastRegion().appendChild(toast);
+  renderIcons();
+  setTimeout(() => {
+    toast.classList.add('is-leaving');
+    setTimeout(() => toast.remove(), 300);
+  }, 4500);
+}
+
+/** Shows a toast on the next page, for messages that come just before a redirect. */
+function flashToast(message, type = 'success') {
+  try {
+    sessionStorage.setItem('ecorecycle_flash', JSON.stringify({ message, type }));
+  } catch (error) {
+    /* Session storage blocked: the redirect still happens, only the toast is lost. */
+  }
+}
+
+function showPendingFlash() {
+  try {
+    const raw = sessionStorage.getItem('ecorecycle_flash');
+    if (!raw) return;
+    sessionStorage.removeItem('ecorecycle_flash');
+    const flash = JSON.parse(raw);
+    if (flash && flash.message) showToast(flash.message, flash.type);
+  } catch (error) {
+    /* A flash message is never essential. */
+  }
+}
+
+/* ---- Modals: focus trap, Esc to close, focus returned to the opener ---- */
+
+const FOCUSABLE = 'a[href], button:not([disabled]), input:not([disabled]):not([type="hidden"]), select:not([disabled]), textarea:not([disabled]), summary, [tabindex]:not([tabindex="-1"])';
+const modalStack = [];
+
+function focusableIn(container) {
+  return $$(FOCUSABLE, container).filter((el) => el.offsetParent !== null || el === document.activeElement);
+}
+
+function openModal(modalId) {
+  const overlay = document.getElementById(modalId);
+  if (!overlay || overlay.classList.contains('active')) return;
+  modalStack.push({ overlay, opener: document.activeElement });
+  overlay.classList.add('active');
+  document.body.style.overflow = 'hidden';
+  const box = $('.modal-box', overlay) || overlay;
+  const first = $('[data-autofocus]', box) || focusableIn(box).find((el) => !el.classList.contains('modal-close')) || focusableIn(box)[0];
+  if (first) first.focus();
+}
+
+function closeModal(modalId) {
+  const overlay = document.getElementById(modalId);
+  if (!overlay || !overlay.classList.contains('active')) return;
+  overlay.classList.remove('active');
+  const index = modalStack.findIndex((entry) => entry.overlay === overlay);
+  const entry = index >= 0 ? modalStack.splice(index, 1)[0] : null;
+  if (!modalStack.length) document.body.style.overflow = '';
+  if (entry && entry.opener && document.contains(entry.opener)) entry.opener.focus();
+  overlay.dispatchEvent(new CustomEvent('modal:closed'));
+}
+
+document.addEventListener('keydown', (event) => {
+  const top = modalStack[modalStack.length - 1];
+  if (!top) return;
+  if (event.key === 'Escape') {
+    event.preventDefault();
+    closeModal(top.overlay.id);
+    return;
+  }
+  if (event.key !== 'Tab') return;
+  const items = focusableIn($('.modal-box', top.overlay) || top.overlay);
+  if (!items.length) return;
+  const first = items[0];
+  const last = items[items.length - 1];
+  if (event.shiftKey && (document.activeElement === first || !top.overlay.contains(document.activeElement))) {
+    event.preventDefault();
+    last.focus();
+  } else if (!event.shiftKey && (document.activeElement === last || !top.overlay.contains(document.activeElement))) {
+    event.preventDefault();
+    first.focus();
+  }
+});
+
+// Clicking the dimmed backdrop closes a modal. Mousedown is used so that dragging
+// a text selection out of a field never closes the form by accident.
+document.addEventListener('mousedown', (event) => {
+  if (event.target.classList && event.target.classList.contains('modal-overlay')) closeModal(event.target.id);
+});
+
+ACTIONS['close-modal'] = (trigger) => {
+  const overlay = trigger.closest('.modal-overlay');
+  if (overlay) closeModal(overlay.id);
+};
+
+/** Creates a modal on first use. Body markup must already be escaped. */
+function buildModal(id, title, bodyHtml, boxClass = '') {
+  let overlay = document.getElementById(id);
+  if (!overlay) {
+    overlay = document.createElement('div');
+    overlay.id = id;
+    overlay.className = 'modal-overlay';
+    document.body.appendChild(overlay);
+  }
+  overlay.innerHTML = `
+    <div class="modal-box ${boxClass}" role="dialog" aria-modal="true" aria-labelledby="${id}Title">
+      <button type="button" class="modal-close" data-action="close-modal" aria-label="Close dialog"><i data-lucide="x"></i></button>
+      <h2 class="modal-title" id="${id}Title">${esc(title)}</h2>
+      ${bodyHtml}
+    </div>`;
+  renderIcons();
+  return overlay;
+}
+
+/** Accessible replacement for window.confirm. Resolves to true or false. */
+function confirmDialog({ title, message, confirmLabel = 'Confirm', danger = true }) {
+  return new Promise((resolve) => {
+    const overlay = buildModal('confirmModal', title, `
+      <p class="muted">${esc(message)}</p>
+      <div class="modal-actions">
+        <button type="button" class="btn btn-secondary" id="confirmCancel" data-autofocus>Cancel</button>
+        <button type="button" class="btn ${danger ? 'btn-danger' : 'btn-primary'}" id="confirmOk">${esc(confirmLabel)}</button>
+      </div>`, 'narrow');
+    overlay.setAttribute('role', 'presentation');
+    $('.modal-box', overlay).setAttribute('role', 'alertdialog');
+    let result = false;
+    $('#confirmOk', overlay).addEventListener('click', () => { result = true; closeModal('confirmModal'); });
+    $('#confirmCancel', overlay).addEventListener('click', () => closeModal('confirmModal'));
+    overlay.addEventListener('modal:closed', () => resolve(result), { once: true });
+    openModal('confirmModal');
+  });
+}
+
+/* ---- Form validation ---- */
+
+const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
+const isValidEmail = (value) => EMAIL_PATTERN.test(String(value || '').trim());
+
+function setFieldError(input, message) {
+  const group = input.closest('.form-group') || input.parentElement;
+  const errorId = `${input.id}-error`;
+  let error = document.getElementById(errorId);
+  if (!error) {
+    error = document.createElement('p');
+    error.id = errorId;
+    error.className = 'field-error';
+    group.appendChild(error);
+  }
+  error.textContent = message;
+  input.setAttribute('aria-invalid', 'true');
+  const described = (input.getAttribute('aria-describedby') || '').split(/\s+/).filter(Boolean);
+  if (!described.includes(errorId)) described.push(errorId);
+  input.setAttribute('aria-describedby', described.join(' '));
+}
+
+function clearFieldError(input) {
+  const errorId = `${input.id}-error`;
+  const error = document.getElementById(errorId);
+  if (error) error.remove();
+  input.removeAttribute('aria-invalid');
+  const described = (input.getAttribute('aria-describedby') || '').split(/\s+/).filter((id) => id && id !== errorId);
+  if (described.length) input.setAttribute('aria-describedby', described.join(' '));
+  else input.removeAttribute('aria-describedby');
+}
+
+function clearFormErrors(form) {
+  $$('[aria-invalid="true"]', form).forEach(clearFieldError);
+  clearFormAlert(form);
+}
+
+/** Applies an {inputId: message} map. Returns true if there were no errors. */
+function applyFormErrors(form, errors) {
+  clearFormErrors(form);
+  const ids = Object.keys(errors);
+  ids.forEach((id) => setFieldError(document.getElementById(id), errors[id]));
+  if (ids.length) document.getElementById(ids[0]).focus();
+  return ids.length === 0;
+}
+
+function showFormAlert(form, message, type = 'error') {
+  let alert = $('.form-alert', form);
+  if (!alert) {
+    alert = document.createElement('div');
+    form.prepend(alert);
+  }
+  alert.className = `form-alert ${type}`;
+  alert.setAttribute('role', type === 'error' ? 'alert' : 'status');
+  alert.textContent = message;
+}
+
+function clearFormAlert(form) {
+  const alert = $('.form-alert', form);
+  if (alert) alert.remove();
+}
+
+// An error clears as soon as the user starts correcting that field.
+document.addEventListener('input', (event) => {
+  if (event.target.getAttribute && event.target.getAttribute('aria-invalid') === 'true') clearFieldError(event.target);
+});
+
+/* ==========================================================================
+   6. NAVIGATION
+   ========================================================================== */
+
+function initMobileMenu() {
+  const toggle = document.getElementById('mobileMenuToggle');
+  const menu = document.getElementById('navCollapse');
+  if (!toggle || !menu) return;
+
+  const setOpen = (open) => {
+    menu.classList.toggle('mobile-active', open);
+    toggle.setAttribute('aria-expanded', String(open));
+    toggle.setAttribute('aria-label', open ? 'Close navigation menu' : 'Open navigation menu');
+  };
+
+  toggle.addEventListener('click', () => setOpen(!menu.classList.contains('mobile-active')));
+  menu.addEventListener('click', (event) => {
+    if (event.target.closest('a')) setOpen(false);
+  });
+  document.addEventListener('keydown', (event) => {
+    if (event.key === 'Escape' && menu.classList.contains('mobile-active')) {
+      setOpen(false);
+      toggle.focus();
+    }
+  });
 }
 
 // --- 7. WASTE SEARCH ENGINE ---
@@ -479,14 +821,8 @@ function initLocationFinder() {
 function saveLocationToFav(locName) {
   showToast(`Saved ${locName} to your Favorite Drop-off Hubs.`);
 }
-
-// --- 9. MOBILE MENU LOGIC ---
-function initMobileMenu() {
-  const toggleBtn = document.getElementById('mobileMenuToggle');
-  const navMenu = document.getElementById('navMenu');
-  if (toggleBtn && navMenu) {
-    toggleBtn.addEventListener('click', () => navMenu.classList.toggle('mobile-active'));
-  }
+function openDirectionsModal(locationName) {
+  alert(`GPS Route Navigation: Displaying optimal route to ${locationName}.`);
 }
 
 // --- 10. AUTH FORMS & LOGIN LOGIC ---
@@ -802,40 +1138,16 @@ function logSearchToActivity(name, category, disposal) {
   renderResidentActivityTable();
 }
 
-// --- 12. UTILITY TOAST & MODAL ENGINE ---
-function showToast(message) {
-  let toastContainer = document.getElementById('toastContainer');
-  if (!toastContainer) {
-    toastContainer = document.createElement('div');
-    toastContainer.id = 'toastContainer';
-    toastContainer.className = 'toast-container';
-    document.body.appendChild(toastContainer);
-  }
-
-  const toast = document.createElement('div');
-  toast.className = 'toast';
-  toast.innerHTML = `<i data-lucide="info"></i> <span>${message}</span>`;
-  toastContainer.appendChild(toast);
-
-  if (window.lucide) lucide.createIcons();
-
-  setTimeout(() => {
-    toast.style.opacity = '0';
-    toast.style.transform = 'translateX(50px)';
-    setTimeout(() => toast.remove(), 300);
-  }, 3200);
-}
-
-function openModal(modalId) {
-  const modal = document.getElementById(modalId);
-  if (modal) modal.classList.add('active');
-}
-
-function closeModal(modalId) {
-  const modal = document.getElementById(modalId);
-  if (modal) modal.classList.remove('active');
-}
-
-function openDirectionsModal(locationName) {
-  alert(`GPS Route Navigation: Displaying optimal route to ${locationName}.`);
-}
+/* ==========================================================================
+   13. BOOT
+   ========================================================================== */
+document.addEventListener('DOMContentLoaded', () => {
+  renderIcons();
+  initMobileMenu();
+  initAuthUI();
+  initWasteSearch();
+  initLocationFinder();
+  initAuthForms();
+  initDashboard();
+  showPendingFlash();
+});
