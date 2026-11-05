@@ -444,7 +444,6 @@ svg { flex-shrink: 0; }
 .form-hint { font-size: var(--fs-xs); color: var(--secondary-text); }
 .form-control {
   width: 100%;
-  min-height: 48px;
   padding: 0.75rem 1rem;
   border: 1px solid var(--border-control);
   border-radius: var(--radius-md);
@@ -456,6 +455,8 @@ svg { flex-shrink: 0; }
 .form-control::placeholder { color: #667085; }
 .form-control:focus { border-color: var(--main-green); box-shadow: 0 0 0 3px rgba(21, 128, 61, 0.18); }
 .form-control[aria-invalid="true"] { border-color: var(--error); background-color: #FFF8F8; }
+input.form-control, select.form-control { height: 50px; }
+.filter-form-grid .btn { height: 50px; }
 textarea.form-control { resize: vertical; min-height: 7rem; }
 .field-error {
   display: flex;
@@ -880,7 +881,7 @@ textarea.form-control { resize: vertical; min-height: 7rem; }
 .filter-form-grid { display: grid; grid-template-columns: 1fr 1fr auto; gap: 1rem; align-items: end; }
 .location-layout { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 2.5rem; align-items: start; }
 .location-list { display: flex; flex-direction: column; gap: 1.25rem; }
-.location-list.scrollable { max-height: 640px; overflow-y: auto; padding-right: 0.5rem; }
+.location-list.scrollable { position: relative; max-height: 640px; overflow-y: auto; padding-right: 0.5rem; }
 .location-card {
   background-color: var(--white);
   border: 1px solid var(--border-light);
