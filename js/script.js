@@ -1949,6 +1949,75 @@ function initHomeHubPreview() {
   document.addEventListener('hubs:changed', renderHomeHubPreview);
 }
 
+/* ==========================================================================
+   11. CONTACT
+   ========================================================================== */
+
+const MIN_MESSAGE_LENGTH = 20;
+
+function initContactForm() {
+  const form = document.getElementById('contactForm');
+  if (!form) return;
+
+  const user = currentUser();
+  if (user) {
+    $('#contactName').value = user.name;
+    $('#contactEmail').value = user.email;
+  }
+
+  form.addEventListener('submit', (event) => {
+    event.preventDefault();
+    const values = {
+      name: $('#contactName').value.trim(),
+      email: $('#contactEmail').value.trim(),
+      phone: $('#contactPhone').value.trim(),
+      suburb: $('#contactSuburb').value.trim(),
+      state: $('#contactState').value,
+      category: $('#contactCategory').value,
+      message: $('#contactMessage').value.trim(),
+    };
+
+    const errors = {};
+    if (values.name.length < 2) errors.contactName = 'Enter your full name.';
+    if (!values.email) errors.contactEmail = 'Enter your email address.';
+    else if (!isValidEmail(values.email)) errors.contactEmail = 'Enter a valid email address, for example name@example.com.';
+    if (values.phone && !/^[0-9 ()+-]{8,16}$/.test(values.phone)) errors.contactPhone = 'Enter a valid phone number, or leave this blank.';
+    if (!values.suburb) errors.contactSuburb = 'Enter your suburb or postcode.';
+    if (!values.state) errors.contactState = 'Choose your state or territory.';
+    if (!values.category) errors.contactCategory = 'Choose an inquiry category.';
+    if (!values.message) errors.contactMessage = 'Enter your message.';
+    else if (values.message.length < MIN_MESSAGE_LENGTH) {
+      errors.contactMessage = `Your message needs at least ${MIN_MESSAGE_LENGTH} characters (${values.message.length} so far).`;
+    }
+    if (!applyFormErrors(form, errors)) return;
+
+    const reference = `ENQ-${Date.now().toString().slice(-6)}`;
+    saveEnquiries([{ reference, ...values, createdAt: new Date().toISOString() }, ...getEnquiries()]);
+
+    form.hidden = true;
+    const success = document.getElementById('contactSuccess');
+    success.hidden = false;
+    $('#contactReference').textContent = reference;
+    $('#contactReply').textContent = values.email;
+    success.focus();
+    showToast('Thank you! Your message has been received.');
+  });
+}
+
+ACTIONS['contact-again'] = () => {
+  const form = document.getElementById('contactForm');
+  form.reset();
+  clearFormErrors(form);
+  const user = currentUser();
+  if (user) {
+    $('#contactName').value = user.name;
+    $('#contactEmail').value = user.email;
+  }
+  form.hidden = false;
+  document.getElementById('contactSuccess').hidden = true;
+  $('#contactName').focus();
+};
+
 // --- 11. DASHBOARD CONTROLLER & PERMISSION ENFORCEMENT ---
 function initDashboard() {
   const dashboardMain = document.querySelector('.dashboard-main');
@@ -2248,6 +2317,7 @@ document.addEventListener('DOMContentLoaded', () => {
   initRecyclingGuide();
   initHubFinder();
   initHomeHubPreview();
+  initContactForm();
   initAuthPage();
   initDashboard();
   renderIcons();

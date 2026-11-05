@@ -1008,6 +1008,7 @@ textarea.form-control { resize: vertical; min-height: 7rem; }
   padding: 1.75rem;
 }
 .demo-account { padding: 1rem; border: 1px solid var(--border-light); border-radius: var(--radius-md); display: grid; gap: 0.25rem; font-size: var(--fs-sm); }
+.demo-account .badge { justify-self: start; }
 .demo-account code { font-size: var(--fs-sm); overflow-wrap: anywhere; font-family: ui-monospace, Consolas, monospace; }
 
 .contact-grid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.2fr); gap: 3.5rem; align-items: start; }
@@ -1038,7 +1039,7 @@ textarea.form-control { resize: vertical; min-height: 7rem; }
 }
 .lock-card { max-width: 460px; width: 100%; text-align: center; padding: 2.5rem; border: 2px solid var(--border-green); }
 .lock-card .icon-tile { margin: 0 auto 1rem auto; }
-.lock-card h1 { font-size: var(--fs-2xl); margin-bottom: 0.5rem; }
+.lock-card h2 { font-size: var(--fs-2xl); margin-bottom: 0.5rem; }
 .lock-card p { color: var(--secondary-text); margin-bottom: 1.5rem; }
 
 .dashboard-wrapper { display: grid; grid-template-columns: 260px minmax(0, 1fr); min-height: calc(100vh - var(--nav-height)); }
