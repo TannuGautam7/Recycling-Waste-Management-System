@@ -9,10 +9,11 @@ DAT709 Capstone Project. Static site: HTML, CSS and vanilla JavaScript, with no 
 
 ## 🚀 Running the Site
 
-Web Crypto, which is used for password hashing, needs `localhost` or HTTPS, so run the site from a local server:
+Web Crypto, which is used for password hashing, needs `localhost` or HTTPS, so run the site from a local server. Use either of these commands from the project folder:
 
 ```bash
-python -m http.server 8080
+npx http-server -p 8080     # needs Node.js
+python -m http.server 8080  # needs Python
 ```
 
 Then open <http://localhost:8080>. The site also runs on GitHub Pages, because every path is relative.

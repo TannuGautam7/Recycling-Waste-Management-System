@@ -93,3 +93,34 @@ Severity: **H** = broken or misleading in a demo, **M** = visibly wrong or incom
 | C1 | M | JS | Logic is spread over `script.js` and inline `<script>` blocks. Globals and inline handlers throughout. `localStorage` reads are not guarded. |
 | C2 | L | JS / CSS | Dead code: `.mock-map-*`, unused `.btn-icon`, and duplicated table rendering. |
 | C3 | L | README | FR1 bin colours (green / brown / black) contradict section C (yellow / green / red). |
+
+## Outcome
+
+Status after the `final-polish` work. Evidence for each area is in [TESTING.md](TESTING.md).
+
+| IDs | Status | How it was resolved |
+|---|---|---|
+| F1, F2, S2 | Fixed | Real accounts with salted SHA-256 hashes, and a clear wrong-credentials error |
+| F3, F4 | Fixed | All data goes through a guarded `localStorage` layer, so approvals reach public search |
+| F5, F6, F7 | Fixed | 58 seeded items, live suggestions and results, working chips, and a stored Admin Queue request form |
+| F8, F9, F10 | Fixed | Leaflet map, directions modal, saved hubs on the dashboard, postcode and type filters, and URL state |
+| F11, F12, F13, F14 | Fixed | Live stats and counters, full log tab, notification toggles, settings, rule status field, and Delete with confirmation |
+| F15, F16 | Fixed | Dates are calculated from today; profile data is rendered only after the guard passes |
+| F17 | Fixed in part | Set Reminder now saves. **Sync with Phone Calendar was removed**, because it is not a README feature |
+| F18 | Fixed in part | Remember me, the password toggle, logout and demo labels work. **Forgot Password was removed**, because no email can be sent |
+| F19, F20, F25 | Fixed | Validated contact form, stored enquiries, live category counts, and details aligned with the README |
+| F21, F22, F23, F24 | Fixed | 7 guide sections, resin decoder, category navigation, ARIA tabs, and reserved fictional phone numbers |
+| S1, S3 | Fixed | All dynamic text is escaped, and inline handlers are replaced by delegated `data-action` events |
+| N1 to N7 | Fixed | One nav and footer on every page, working hamburger, dashboard tab strip, favicon and custom 404. The hamburger starts at 1180px rather than 768px, because the full nav needs about 1164px |
+| L1 to L7 | Fixed | No inline grids; `overflow-x: hidden` removed; measured at 320 to 1280px |
+| A1 to A11 | Fixed | axe-core reports 0 WCAG A/AA violations; modals, focus, labels, landmarks, headings, alt text and live regions all addressed |
+| P1 to P4 | Fixed | Pinned libraries with integrity hashes and fallbacks; correct local WebP images with dimensions; page styles consolidated |
+| C1 to C3 | Fixed | One sectioned `js/script.js`; dead code removed; README corrected |
+
+### Found and fixed during the work
+
+- Pressing Esc in the search box cleared the query as well as closing the suggestions.
+- Saving a hub from a map popup toggled it twice.
+- Dashboard tables were silently clipped at tablet widths. They now stack according to the width of their container.
+- The Locations page had about 1,000px of blank space below the footer on desktop, caused by hidden text escaping the scrolling list.
+- On phones, the map sat below all of the hub cards, so filter changes were out of sight.
