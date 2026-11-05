@@ -11,71 +11,10 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Outfit:wght@600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap">
   <link rel="stylesheet" href="../css/style.css">
-  <style>
-    .auth-container {
-      min-height: calc(100vh - 160px);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      padding: 3rem 1.5rem;
-    }
-
-    .auth-card {
-      background-color: var(--white);
-      border-radius: var(--radius-xl);
-      border: 1px solid var(--border-green);
-      box-shadow: var(--shadow-lg);
-      max-width: 460px;
-      width: 100%;
-      padding: 2.5rem;
-    }
-
-    .auth-tabs {
-      display: flex;
-      border-bottom: 2px solid var(--border-light);
-      margin-bottom: 2rem;
-    }
-
-    .auth-tab {
-      flex: 1;
-      text-align: center;
-      padding: 0.75rem 0;
-      font-weight: 700;
-      font-size: 1.1rem;
-      color: var(--secondary-text);
-      cursor: pointer;
-      position: relative;
-    }
-
-    .auth-tab.active {
-      color: var(--primary-green);
-    }
-
-    .auth-tab.active::after {
-      content: '';
-      position: absolute;
-      bottom: -2px;
-      left: 0;
-      width: 100%;
-      height: 3px;
-      background-color: var(--main-green);
-      border-radius: var(--radius-full);
-    }
-
-    .auth-form {
-      display: none;
-    }
-
-    .auth-form.active {
-      display: flex;
-      flex-direction: column;
-      gap: 1.25rem;
-    }
-  </style>
   <script defer src="https://unpkg.com/lucide@0.468.0/dist/umd/lucide.min.js" integrity="sha384-uTYyvsSSUZeaPhb5RbKlQa0zY/WpX/QHfvg2mczXyBQOpkWPEDy9lczyp+w7SKXu" crossorigin="anonymous"></script>
   <script defer src="../js/script.js"></script>
 </head>
-<body>
+<body class="page-soft">
 
   <a class="skip-link" href="#main">Skip to main content</a>
 
@@ -111,84 +50,95 @@
   </header>
 
   <main id="main" tabindex="-1">
-
-
-  <!-- AUTH SECTION -->
-  <div class="auth-container">
-    <div class="auth-card">
-      
-      <!-- Brand Header -->
-      <div style="text-align: center; margin-bottom: 2rem;">
-        <div style="width: 56px; height: 56px; background-color: var(--light-green); color: var(--primary-green); border-radius: var(--radius-md); display: inline-flex; align-items: center; justify-content: center; font-size: 1.75rem; margin-bottom: 0.75rem;">
-          <i data-lucide="user-check"></i>
-        </div>
-        <h2 style="font-size: 1.75rem;">Account Sign In</h2>
-        <p style="color: var(--secondary-text); font-size: 0.95rem;">Access your EcoRecycle account or system portal.</p>
-      </div>
-
-      <!-- Tab Switcher -->
-      <div class="auth-tabs">
-        <div class="auth-tab active" onclick="switchAuthTab('login', this)">Login</div>
-        <div class="auth-tab" onclick="switchAuthTab('register', this)">Register</div>
-      </div>
-
-      <!-- LOGIN FORM -->
-      <form id="loginForm" class="auth-form active">
-        <div class="form-group">
-          <label class="form-label" for="loginEmail">Email Address</label>
-          <input type="email" id="loginEmail" class="form-control" placeholder="Enter your email address..." required>
+    <div class="auth-container">
+      <div class="auth-card">
+        <div class="auth-head">
+          <div class="icon-tile"><i data-lucide="user-check"></i></div>
+          <h1>Account Sign In</h1>
+          <p class="muted small">Access your EcoRecycle account or the administrator portal.</p>
         </div>
 
-        <div class="form-group">
-          <div style="display: flex; justify-content: space-between; align-items: center;">
-            <label class="form-label" for="loginPassword">Password</label>
-            <a href="#" onclick="showToast('Password reset link sent to your email.'); return false;" style="font-size: 0.8rem; color: var(--main-green); font-weight: 600;">Forgot Password?</a>
+        <div class="auth-tabs" role="tablist" aria-label="Sign in or create an account">
+          <button type="button" class="auth-tab" role="tab" id="loginTab" data-tab="login" data-action="auth-tab" aria-controls="login" aria-selected="true">Login</button>
+          <button type="button" class="auth-tab" role="tab" id="registerTab" data-tab="register" data-action="auth-tab" aria-controls="register" aria-selected="false" tabindex="-1">Register</button>
+        </div>
+
+        <div id="login" role="tabpanel" aria-labelledby="loginTab" data-tab-panel="login">
+          <form id="loginForm" class="form-stack" novalidate>
+            <div class="form-group">
+              <label class="form-label" for="loginEmail">Email Address</label>
+              <input type="email" id="loginEmail" class="form-control" placeholder="name@example.com" autocomplete="username">
+            </div>
+
+            <div class="form-group">
+              <label class="form-label" for="loginPassword">Password</label>
+              <div class="password-field">
+                <input type="password" id="loginPassword" class="form-control" placeholder="Enter your password" autocomplete="current-password">
+                <button type="button" class="password-toggle" data-action="toggle-password" data-target="loginPassword" aria-label="Show password" aria-pressed="false"><i data-lucide="eye"></i></button>
+              </div>
+            </div>
+
+            <label class="checkbox-row">
+              <input type="checkbox" id="rememberMe"> Remember me for 30 days on this device
+            </label>
+
+            <button type="submit" class="btn btn-primary btn-block"><i data-lucide="log-in"></i> Sign In</button>
+          </form>
+        </div>
+
+        <div id="register" role="tabpanel" aria-labelledby="registerTab" data-tab-panel="register" hidden>
+          <form id="registerForm" class="form-stack" novalidate>
+            <div class="form-group">
+              <label class="form-label" for="regName">Full Name</label>
+              <input type="text" id="regName" class="form-control" placeholder="e.g. Sam Taylor" autocomplete="name">
+            </div>
+
+            <div class="form-group">
+              <label class="form-label" for="regEmail">Email Address</label>
+              <input type="email" id="regEmail" class="form-control" placeholder="name@example.com" autocomplete="email">
+            </div>
+
+            <div class="form-group">
+              <label class="form-label" for="regPass">Password</label>
+              <div class="password-field">
+                <input type="password" id="regPass" class="form-control" aria-describedby="regPassHint" autocomplete="new-password">
+                <button type="button" class="password-toggle" data-action="toggle-password" data-target="regPass" aria-label="Show password" aria-pressed="false"><i data-lucide="eye"></i></button>
+              </div>
+              <p class="form-hint" id="regPassHint">At least 8 characters, with an uppercase letter, a lowercase letter, a number and a symbol.</p>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label" for="regConfirmPass">Confirm Password</label>
+              <div class="password-field">
+                <input type="password" id="regConfirmPass" class="form-control" autocomplete="new-password">
+                <button type="button" class="password-toggle" data-action="toggle-password" data-target="regConfirmPass" aria-label="Show password" aria-pressed="false"><i data-lucide="eye"></i></button>
+              </div>
+            </div>
+
+            <button type="submit" class="btn btn-primary btn-block"><i data-lucide="user-plus"></i> Create Resident Account</button>
+          </form>
+        </div>
+      </div>
+
+      <aside class="demo-card" aria-labelledby="demoHeading">
+        <h2 class="h-card" id="demoHeading">Demo Accounts</h2>
+        <p class="muted small mb">These are dummy accounts for testing this prototype. They do not belong to real people.</p>
+        <div class="stack">
+          <div class="demo-account">
+            <span class="badge badge-recyclable">Demo Resident</span>
+            <code>alex.johnson@example.com</code>
+            <code>Password123!</code>
+            <button type="button" class="btn btn-secondary btn-sm mt-sm" data-action="use-demo" data-email="alex.johnson@example.com" data-password="Password123!">Use resident demo</button>
           </div>
-          <input type="password" id="loginPassword" class="form-control" placeholder="Enter your password..." required>
+          <div class="demo-account">
+            <span class="badge badge-info">Demo Administrator</span>
+            <code>admin@ecorecycle.org</code>
+            <code>AdminPassword123!</code>
+            <button type="button" class="btn btn-secondary btn-sm mt-sm" data-action="use-demo" data-email="admin@ecorecycle.org" data-password="AdminPassword123!">Use admin demo</button>
+          </div>
         </div>
-
-        <div style="display: flex; justify-content: space-between; align-items: center; font-size: 0.875rem;">
-          <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer;">
-            <input type="checkbox" checked style="accent-color: var(--main-green);"> Remember me
-          </label>
-        </div>
-
-        <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 0.5rem;">
-          <i data-lucide="log-in"></i> Sign In
-        </button>
-      </form>
-
-      <!-- REGISTER FORM -->
-      <form id="registerForm" class="auth-form">
-        <div class="form-group">
-          <label class="form-label" for="regName">Full Name</label>
-          <input type="text" id="regName" class="form-control" placeholder="e.g. Alex Johnson" required>
-        </div>
-
-        <div class="form-group">
-          <label class="form-label" for="regEmail">Email Address</label>
-          <input type="email" id="regEmail" class="form-control" placeholder="e.g. resident@example.com" required>
-        </div>
-
-        <div class="form-group">
-          <label class="form-label" for="regPass">Password</label>
-          <input type="password" id="regPass" class="form-control" placeholder="At least 8 characters" required minlength="8">
-        </div>
-
-        <div class="form-group">
-          <label class="form-label" for="regConfirmPass">Confirm Password</label>
-          <input type="password" id="regConfirmPass" class="form-control" placeholder="Repeat password" required>
-        </div>
-
-        <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 0.5rem;">
-          <i data-lucide="user-plus"></i> Create Account
-        </button>
-      </form>
-
+      </aside>
     </div>
-  </div>
-
-  <!-- FOOTER -->
   </main>
 
   <footer class="footer">
@@ -242,23 +192,5 @@
     </div>
   </footer>
 
-  <script>
-    function switchAuthTab(tab, element) {
-      document.querySelectorAll('.auth-tab').forEach(t => t.classList.remove('active'));
-      document.querySelectorAll('.auth-form').forEach(f => f.classList.remove('active'));
-
-      element.classList.add('active');
-      if (tab === 'login') {
-        document.getElementById('loginForm').classList.add('active');
-      } else {
-        document.getElementById('registerForm').classList.add('active');
-      }
-    }
-
-    if (window.location.hash === '#register') {
-      const regTab = document.querySelectorAll('.auth-tab')[1];
-      if (regTab) switchAuthTab('register', regTab);
-    }
-  </script>
 </body>
 </html>

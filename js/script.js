@@ -148,6 +148,8 @@ const SEED_RULES = [
   ['scrap-metal', 'Pots, Pans & Scrap Metal', 'Metal', 'special', 'Council Drop-off or Scrap Metal Dealer', ['Do not put heavy metal items in the yellow bin, because they damage equipment.', 'Take them to a council resource centre or scrap dealer.', 'Donate cookware that is still usable.'], 'saucepan frying pan cutlery tools wire'],
   ['gas-bottle', 'Gas Bottle (LPG)', 'Metal', 'special', 'Bottle Swap or Council Drop-off', ['Never put gas bottles in any bin, because they can explode in collection trucks.', 'Swap them at a retailer that exchanges bottles.', 'Take damaged or out-of-date bottles to a council facility.'], 'bbq barbecue butane camping cylinder'],
 
+  ['coat-hanger', 'Wire Coat Hanger', 'Metal', 'not-recyclable', RED_BIN, ['Hangers snag sorting machinery, so keep them out of the yellow bin.', 'Return them to a dry cleaner or donate them.', 'Otherwise take them to a scrap metal dealer or use the red bin.'], 'wire clothes dry cleaner'],
+
   // E-Waste
   ['battery-aa', 'AA / AAA Household Battery', 'E-Waste', 'special', 'Battery Drop-off Point', ['Never put batteries in a household bin, because they are a fire hazard.', 'Tape the terminals with clear tape to prevent short circuits.', 'Take them to a B-cycle drop-off point, found at many major retailers.'], 'batteries lithium alkaline remote torch 9v button'],
   ['lithium-battery', 'Lithium-ion Battery & Power Bank', 'E-Waste', 'special', 'Battery Drop-off Point', ['Never put these in a bin, because damaged lithium batteries can start fires in trucks.', 'Tape the terminals and store them somewhere cool until drop-off.', 'Take them to a battery drop-off or e-waste hub. Damaged batteries go to a hazardous waste facility.'], 'batteries powerbank laptop battery e-bike scooter tool'],
@@ -164,8 +166,8 @@ const SEED_RULES = [
   ['cooked-food', 'Cooked Food, Meat & Bones', 'Organics', 'recyclable', GREEN_BIN, ['Remove all packaging.', 'Wrap in newspaper to reduce smells.', 'If your council has no FOGO service, use the red bin. Do not add meat to home compost.'], 'leftovers chicken fish dairy food scraps fogo'],
   ['coffee-grounds', 'Coffee Grounds & Tea Leaves', 'Organics', 'recyclable', GREEN_BIN, ['Empty grounds into the caddy or compost.', 'Remove plastic pods and tea bags with plastic mesh.'], 'tea bag espresso compost fogo'],
   ['garden-waste', 'Grass Clippings & Prunings', 'Organics', 'recyclable', GREEN_BIN, ['Place garden waste in the bin loose.', 'Cut branches to fit under the closed lid.', 'Remove any soil, rocks, plastic pots or treated timber.'], 'lawn leaves branches weeds flowers garden fogo'],
+  ['eggshells', 'Eggshells & Nut Shells', 'Organics', 'recyclable', GREEN_BIN, ['Add them to the kitchen caddy with other food scraps.', 'Crush shells to help them break down faster in home compost.'], 'egg shell peanut walnut compost food scraps fogo'],
   ['compostable-liner', 'Compostable Caddy Liner', 'Organics', 'recyclable', GREEN_BIN, ['Only use liners supplied or approved by your council.', 'Plastic and "degradable" bags contaminate FOGO, so put those in the red bin.'], 'bag compostable biodegradable fogo'],
-
   // General Waste
   ['nappies', 'Disposable Nappies', 'General Waste', 'not-recyclable', RED_BIN, ['Empty solids into the toilet where possible.', 'Wrap the nappy and place it in the red bin.', 'Never put nappies in yellow or green bins.'], 'diaper baby wipes'],
   ['face-masks', 'Face Masks & Disposable Gloves', 'General Waste', 'not-recyclable', RED_BIN, ['Used personal protective items are a hygiene risk for sorting staff.', 'Bag them and place them in the red bin.'], 'ppe medical rubber latex'],
@@ -447,69 +449,8 @@ let WASTE_DATABASE = getRules().map((r) => ({ ...r, recyclable: r.status === 're
 let PENDING_SUBMISSIONS = getPending();
 let RESIDENT_ACTIVITY = getActivity(ALEX_ID);
 const MOCK_LOCATIONS = HUBS.map((h) => ({ id: h.id, name: h.name, address: `${h.street}, ${h.suburb} ${h.state} ${h.postcode}`, distance: '', types: h.types, hours: h.hours, phone: h.phone }));
-
-// --- 5. AUTHENTICATION ENGINE ---
-function getCurrentUser() {
-  const user = localStorage.getItem('ecorecycle_user');
-  if (user) {
-    try { return JSON.parse(user); } catch(e) {}
-  }
-  return null;
-}
-
-function loginWithAccount(email, password) {
-  const cleanEmail = (email || '').toLowerCase().trim();
-  let userObj = {};
-
-  if (cleanEmail === 'admin@ecorecycle.org' || cleanEmail.includes('admin') || cleanEmail.includes('tanu')) {
-    userObj = {
-      loggedIn: true,
-      role: 'admin',
-      name: 'Tanu',
-      email: 'admin@ecorecycle.org',
-      avatar: 'TN',
-      roleTitle: 'Senior Waste Operations Manager'
-    };
-  } else {
-    userObj = {
-      loggedIn: true,
-      role: 'resident',
-      name: 'Alex Johnson',
-      email: 'alex.johnson@example.com',
-      avatar: 'AJ',
-      roleTitle: 'Resident • Suburb Zone 4'
-    };
-  }
-
-  localStorage.setItem('ecorecycle_user', JSON.stringify(userObj));
-  return userObj;
-}
-
-function logoutUser() {
-  localStorage.removeItem('ecorecycle_user');
-  showToast('Logged out successfully.');
-  setTimeout(() => { window.location.href = '../index.html'; }, 800);
-}
-
-function initAuthUI() {
-  const currentUser = getCurrentUser();
-  const navActions = document.querySelector('.nav-actions');
-
-  if (navActions && currentUser && currentUser.loggedIn) {
-    const roleBadge = currentUser.role === 'admin' ? '🛡️ Admin' : '👤 Resident';
-    navActions.innerHTML = `
-      <div style="display: flex; align-items: center; gap: 0.75rem;">
-        <a href="${window.location.pathname.includes('/pages/') ? 'dashboard.html' : 'pages/dashboard.html'}" class="btn btn-secondary btn-sm">
-          <i data-lucide="user"></i> ${currentUser.name} (${roleBadge})
-        </a>
-        <button onclick="logoutUser()" class="btn btn-sm btn-dark" title="Logout">
-          <i data-lucide="log-out"></i>
-        </button>
-      </div>
-    `;
-    if (window.lucide) lucide.createIcons();
-  }
-}
+const getCurrentUser = () => { const u = currentUser(); return u ? { ...u, loggedIn: true, avatar: initialsOf(u.name) } : null; };
+const logoutUser = () => ACTIONS.logout();
 
 /* ==========================================================================
    4. UI
@@ -757,6 +698,286 @@ document.addEventListener('input', (event) => {
 });
 
 /* ==========================================================================
+   5. AUTH
+   Client-side only: this demonstrates the flow, but it isn't real security.
+   A production system would need server-side accounts and sessions.
+   ========================================================================== */
+
+const REMEMBER_DAYS = 30;
+const SESSION_TOKEN_KEY = 'ecorecycle_session_token';
+
+const normaliseEmail = (email) => String(email || '').trim().toLowerCase();
+
+function initialsOf(name) {
+  const parts = String(name || '').trim().split(/\s+/).filter(Boolean);
+  if (!parts.length) return '?';
+  return (parts[0][0] + (parts.length > 1 ? parts[parts.length - 1][0] : '')).toUpperCase();
+}
+
+function randomHex(byteCount) {
+  const bytes = crypto.getRandomValues(new Uint8Array(byteCount));
+  return Array.from(bytes, (b) => b.toString(16).padStart(2, '0')).join('');
+}
+
+/** SHA-256 of "salt:password", as hex. Web Crypto needs HTTPS or localhost. */
+async function hashPassword(salt, password) {
+  if (!window.crypto || !crypto.subtle) throw new Error('insecure-context');
+  const digest = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(`${salt}:${password}`));
+  return Array.from(new Uint8Array(digest), (b) => b.toString(16).padStart(2, '0')).join('');
+}
+
+/** Returns the list of unmet password rules (empty when the password is acceptable). */
+function passwordProblems(password) {
+  const problems = [];
+  if (password.length < 8) problems.push('at least 8 characters');
+  if (!/[A-Z]/.test(password)) problems.push('an uppercase letter');
+  if (!/[a-z]/.test(password)) problems.push('a lowercase letter');
+  if (!/[0-9]/.test(password)) problems.push('a number');
+  if (!/[^A-Za-z0-9]/.test(password)) problems.push('a symbol');
+  return problems;
+}
+
+/* ---- Sessions ----
+   "Remember me" on:  the session lasts 30 days, across browser restarts.
+   "Remember me" off: the session is tied to a token in sessionStorage, so it
+   ends when this browser tab or window closes. */
+
+function readSessionToken() {
+  try {
+    return sessionStorage.getItem(SESSION_TOKEN_KEY);
+  } catch (error) {
+    return null;
+  }
+}
+
+function getSession() {
+  const session = Store.read(KEYS.session, null);
+  if (!isPlainObject(session) || typeof session.userId !== 'string') return null;
+  if (session.remember) {
+    if (Number(session.expiresAt) < Date.now()) {
+      Store.remove(KEYS.session);
+      return null;
+    }
+    return session;
+  }
+  return session.token && session.token === readSessionToken() ? session : null;
+}
+
+function currentUser() {
+  const session = getSession();
+  return session ? getUsers().find((user) => user.id === session.userId) || null : null;
+}
+
+function startSession(user, remember) {
+  const token = randomHex(16);
+  Store.write(KEYS.session, {
+    userId: user.id,
+    remember: Boolean(remember),
+    token,
+    createdAt: Date.now(),
+    expiresAt: Date.now() + REMEMBER_DAYS * 24 * 60 * 60 * 1000,
+  });
+  try {
+    sessionStorage.setItem(SESSION_TOKEN_KEY, token);
+  } catch (error) {
+    /* A non-remembered session then can't survive a reload; login still succeeds. */
+  }
+  moveGuestHubsTo(user);
+}
+
+function endSession() {
+  Store.remove(KEYS.session);
+  try {
+    sessionStorage.removeItem(SESSION_TOKEN_KEY);
+  } catch (error) {
+    /* Nothing further to clear. */
+  }
+}
+
+/** Hubs saved before signing in move onto the resident's account. */
+function moveGuestHubsTo(user) {
+  if (user.role !== 'resident') return;
+  const guestIds = getSavedHubIds(GUEST_KEY);
+  if (!guestIds.length) return;
+  saveSavedHubIds(user.id, Array.from(new Set([...getSavedHubIds(user.id), ...guestIds])));
+  saveSavedHubIds(GUEST_KEY, []);
+}
+
+async function authenticate(email, password) {
+  const user = getUsers().find((candidate) => normaliseEmail(candidate.email) === normaliseEmail(email));
+  // Hash even when the email is unknown, so both failures behave the same way.
+  const hash = await hashPassword(user ? user.salt : '0'.repeat(32), password);
+  return user && hash === user.passwordHash ? user : null;
+}
+
+async function createResidentAccount({ name, email, password }) {
+  const salt = randomHex(16);
+  const user = {
+    id: `user-${randomHex(8)}`,
+    name,
+    email: normaliseEmail(email),
+    role: 'resident',
+    roleTitle: 'Resident • Suburb Zone 4',
+    salt,
+    passwordHash: await hashPassword(salt, password),
+    address: '',
+    accountId: `ECO-${String(10000 + Math.floor(Math.random() * 89999))}`,
+    createdAt: toISODate(),
+    demo: false,
+    baseline: { items: 0, diverted: 0, kg: 0 },
+  };
+  saveUsers([...getUsers(), user]);
+  return user;
+}
+
+ACTIONS.logout = () => {
+  endSession();
+  flashToast('You have been logged out.', 'info');
+  window.location.href = sitePath('index.html');
+};
+
+/* ---- Login page ---- */
+
+function selectAuthTab(tabName, moveFocus = false) {
+  $$('.auth-tab').forEach((tab) => {
+    const selected = tab.dataset.tab === tabName;
+    tab.setAttribute('aria-selected', String(selected));
+    tab.tabIndex = selected ? 0 : -1;
+    if (selected && moveFocus) tab.focus();
+  });
+  $$('[data-tab-panel]').forEach((panel) => {
+    panel.hidden = panel.dataset.tabPanel !== tabName;
+  });
+}
+
+ACTIONS['auth-tab'] = (trigger) => selectAuthTab(trigger.dataset.tab);
+
+ACTIONS['toggle-password'] = (trigger) => {
+  const input = document.getElementById(trigger.dataset.target);
+  if (!input) return;
+  const show = input.type === 'password';
+  input.type = show ? 'text' : 'password';
+  trigger.setAttribute('aria-pressed', String(show));
+  trigger.setAttribute('aria-label', show ? 'Hide password' : 'Show password');
+  trigger.innerHTML = `<i data-lucide="${show ? 'eye-off' : 'eye'}"></i>`;
+  renderIcons();
+};
+
+ACTIONS['use-demo'] = (trigger) => {
+  selectAuthTab('login');
+  clearFormErrors($('#loginForm'));
+  $('#loginEmail').value = trigger.dataset.email;
+  $('#loginPassword').value = trigger.dataset.password;
+  $('#loginForm button[type="submit"]').focus();
+  showToast('Demo details filled in. Press Sign In to continue.', 'info');
+};
+
+function authFailureMessage(error) {
+  return error && error.message === 'insecure-context'
+    ? 'Secure sign-in needs HTTPS or localhost. Please open the site from one of those addresses.'
+    : 'Sign-in is unavailable right now. Please try again.';
+}
+
+function initAuthPage() {
+  const loginForm = document.getElementById('loginForm');
+  if (!loginForm) return;
+
+  if (currentUser()) {
+    window.location.replace(sitePath('pages/dashboard.html'));
+    return;
+  }
+
+  // Tabs: click is handled by ACTIONS, the arrow keys follow the ARIA tabs pattern.
+  $('.auth-tabs').addEventListener('keydown', (event) => {
+    if (event.key !== 'ArrowRight' && event.key !== 'ArrowLeft') return;
+    event.preventDefault();
+    const next = event.target.dataset.tab === 'login' ? 'register' : 'login';
+    selectAuthTab(next, true);
+  });
+  const syncTabToHash = () => selectAuthTab(window.location.hash === '#register' ? 'register' : 'login');
+  window.addEventListener('hashchange', syncTabToHash);
+  syncTabToHash();
+
+  const remembered = Store.read(KEYS.rememberedEmail, '');
+  if (typeof remembered === 'string' && remembered) {
+    $('#loginEmail').value = remembered;
+    $('#rememberMe').checked = true;
+  }
+
+  loginForm.addEventListener('submit', handleLoginSubmit);
+  $('#registerForm').addEventListener('submit', handleRegisterSubmit);
+}
+
+async function handleLoginSubmit(event) {
+  event.preventDefault();
+  const form = event.currentTarget;
+  const emailInput = $('#loginEmail');
+  const passwordInput = $('#loginPassword');
+  const errors = {};
+  if (!emailInput.value.trim()) errors.loginEmail = 'Enter your email address.';
+  else if (!isValidEmail(emailInput.value)) errors.loginEmail = 'Enter a valid email address, for example name@example.com.';
+  if (!passwordInput.value) errors.loginPassword = 'Enter your password.';
+  if (!applyFormErrors(form, errors)) return;
+
+  const submit = $('button[type="submit"]', form);
+  submit.disabled = true;
+  try {
+    const user = await authenticate(emailInput.value, passwordInput.value);
+    if (!user) {
+      showFormAlert(form, 'Incorrect email or password. Please check your details and try again.');
+      passwordInput.value = '';
+      passwordInput.focus();
+      return;
+    }
+    const remember = $('#rememberMe').checked;
+    if (remember) Store.write(KEYS.rememberedEmail, normaliseEmail(emailInput.value));
+    else Store.remove(KEYS.rememberedEmail);
+    startSession(user, remember);
+    flashToast(`Welcome back, ${user.name}.`);
+    window.location.href = sitePath('pages/dashboard.html');
+  } catch (error) {
+    showFormAlert(form, authFailureMessage(error));
+  } finally {
+    submit.disabled = false;
+  }
+}
+
+async function handleRegisterSubmit(event) {
+  event.preventDefault();
+  const form = event.currentTarget;
+  const name = $('#regName').value.trim();
+  const email = $('#regEmail').value.trim();
+  const password = $('#regPass').value;
+  const confirm = $('#regConfirmPass').value;
+
+  const errors = {};
+  if (name.length < 2) errors.regName = 'Enter your full name.';
+  if (!email) errors.regEmail = 'Enter your email address.';
+  else if (!isValidEmail(email)) errors.regEmail = 'Enter a valid email address, for example name@example.com.';
+  else if (getUsers().some((user) => normaliseEmail(user.email) === normaliseEmail(email))) {
+    errors.regEmail = 'An account with this email already exists. Try logging in instead.';
+  }
+  const problems = passwordProblems(password);
+  if (problems.length) errors.regPass = `Password needs ${problems.join(', ')}.`;
+  if (!confirm) errors.regConfirmPass = 'Confirm your password.';
+  else if (confirm !== password) errors.regConfirmPass = 'Passwords do not match.';
+  if (!applyFormErrors(form, errors)) return;
+
+  const submit = $('button[type="submit"]', form);
+  submit.disabled = true;
+  try {
+    const user = await createResidentAccount({ name, email, password });
+    startSession(user, false);
+    flashToast(`Account created. Welcome, ${user.name}!`);
+    window.location.href = sitePath('pages/dashboard.html');
+  } catch (error) {
+    showFormAlert(form, authFailureMessage(error));
+  } finally {
+    submit.disabled = false;
+  }
+}
+
+/* ==========================================================================
    6. NAVIGATION
    ========================================================================== */
 
@@ -781,6 +1002,18 @@ function initMobileMenu() {
       toggle.focus();
     }
   });
+}
+
+/** Swaps the Login button for the dashboard and logout controls when signed in. */
+function renderNavActions() {
+  const container = document.getElementById('navActions');
+  const user = currentUser();
+  if (!container || !user) return;
+  container.innerHTML = `
+    <a href="${esc(sitePath('pages/dashboard.html'))}" class="btn btn-secondary btn-sm nav-user" aria-label="My dashboard, signed in as ${esc(user.name)}">
+      <i data-lucide="${user.role === 'admin' ? 'shield-check' : 'user'}"></i><span>${esc(user.name)}</span>
+    </a>
+    <button type="button" class="btn btn-dark btn-sm" data-action="logout"><i data-lucide="log-out"></i> Logout</button>`;
 }
 
 // --- 7. WASTE SEARCH ENGINE ---
@@ -1006,34 +1239,6 @@ function saveLocationToFav(locName) {
 }
 function openDirectionsModal(locationName) {
   alert(`GPS Route Navigation: Displaying optimal route to ${locationName}.`);
-}
-
-// --- 10. AUTH FORMS & LOGIN LOGIC ---
-function initAuthForms() {
-  const loginForm = document.getElementById('loginForm');
-  const registerForm = document.getElementById('registerForm');
-
-  if (loginForm) {
-    loginForm.addEventListener('submit', (e) => {
-      e.preventDefault();
-      const email = document.getElementById('loginEmail').value;
-      const pass = document.getElementById('loginPassword').value;
-      const user = loginWithAccount(email, pass);
-      showToast(`Login Successful! Welcome, ${user.name}. Redirecting...`);
-      setTimeout(() => { window.location.href = 'dashboard.html'; }, 1000);
-    });
-  }
-
-  if (registerForm) {
-    registerForm.addEventListener('submit', (e) => {
-      e.preventDefault();
-      const name = document.getElementById('regName').value || 'Alex Johnson';
-      const email = document.getElementById('regEmail').value || 'alex@example.com';
-      const user = loginWithAccount(email, 'Password123!');
-      showToast(`Account created! Welcome, ${name}. Redirecting...`);
-      setTimeout(() => { window.location.href = 'dashboard.html'; }, 1000);
-    });
-  }
 }
 
 // --- 11. DASHBOARD CONTROLLER & PERMISSION ENFORCEMENT ---
@@ -1326,12 +1531,12 @@ function logSearchToActivity(name, category, disposal) {
    ========================================================================== */
 document.addEventListener('DOMContentLoaded', () => {
   initStorage();
-  renderIcons();
   initMobileMenu();
-  initAuthUI();
+  renderNavActions();
   initWasteSearch();
   initLocationFinder();
-  initAuthForms();
+  initAuthPage();
   initDashboard();
+  renderIcons();
   showPendingFlash();
 });
