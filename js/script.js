@@ -347,7 +347,8 @@ const isPlainObject = (value) => value !== null && typeof value === 'object' && 
 function readList(key, seed, isValid) {
   const value = Store.read(key, seed);
   if (!Array.isArray(value)) return clone(seed);
-  return value.filter(isValid);
+  const valid = value.filter(isValid);
+  return valid.length || !value.length ? valid : clone(seed);
 }
 
 function readMap(key, seed = {}) {
@@ -996,6 +997,18 @@ function initMobileMenu() {
       setOpen(false);
       toggle.focus();
     }
+  });
+}
+
+/** Moves focus directly, so the link also works on the 404 page, which uses a <base> tag. */
+function initSkipLink() {
+  const link = $('.skip-link');
+  const main = document.getElementById('main');
+  if (!link || !main) return;
+  link.addEventListener('click', (event) => {
+    event.preventDefault();
+    main.focus();
+    main.scrollIntoView();
   });
 }
 
@@ -2643,6 +2656,7 @@ document.addEventListener('DOMContentLoaded', () => {
     initStorage,
     toastRegion, // the aria-live region must exist before the first message
     initMobileMenu,
+    initSkipLink,
     renderNavActions,
     initHomeStats,
     initQuickSearch,
