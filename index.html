@@ -133,43 +133,41 @@
     </div>
   </section>
 
-  <!-- WASTE SEARCH FEATURE (Section 6) -->
-  <section class="section" id="search-section">
-    <div class="container">
-      <div class="search-feature-box">
-        <div class="section-header" style="margin-bottom: 2rem;">
-          <span class="section-badge"><i data-lucide="search"></i> Instant Search Engine</span>
-          <h2 class="section-title">Where Does My Waste Go?</h2>
-          <p class="section-subtitle">Search for an item to find out how it should be disposed of.</p>
-        </div>
-
-        <div class="search-bar-container">
-          <div class="search-input-wrapper">
-            <i data-lucide="search" class="search-icon"></i>
-            <input type="text" id="wasteSearchInput" class="search-input" placeholder='Try "plastic bottle", "battery", "pizza box"...' aria-label="Search waste item">
-            <button id="wasteSearchBtn" class="btn btn-primary">
-              <i data-lucide="search"></i> Search
-            </button>
+  <section class="section" id="search-section" aria-labelledby="quickSearchHeading">
+      <div class="container">
+        <div class="search-feature-box">
+          <div class="section-header compact">
+            <span class="section-badge"><i data-lucide="search"></i> Instant Search Engine</span>
+            <h2 class="section-title" id="quickSearchHeading">Where Does My Waste Go?</h2>
+            <p class="section-subtitle">Search for an item to find out how it should be disposed of.</p>
           </div>
 
-          <div class="popular-searches">
-            <span class="popular-label">Popular Searches:</span>
-            <button class="search-chip" data-search="plastic bottle">Plastic Bottle</button>
-            <button class="search-chip" data-search="cardboard box">Cardboard</button>
-            <button class="search-chip" data-search="glass bottle">Glass Bottle</button>
-            <button class="search-chip" data-search="battery">Battery</button>
-            <button class="search-chip" data-search="pizza box">Food Container</button>
-            <button class="search-chip" data-search="smartphone">Electronics</button>
-          </div>
-        </div>
+          <form id="quickSearchForm" class="search-bar-container" role="search" action="pages/waste-search.html" method="get">
+            <div class="search-input-anchor">
+              <div class="search-input-wrapper">
+                <i data-lucide="search" class="search-icon"></i>
+                <label class="sr-only" for="wasteSearchInput">Search for a waste item</label>
+                <input type="search" id="wasteSearchInput" name="q" class="search-input" placeholder="Try &quot;plastic bottle&quot;, &quot;battery&quot; or &quot;pizza box&quot;" role="combobox" aria-autocomplete="list" aria-expanded="false" aria-controls="searchSuggestions" autocomplete="off">
+                <button type="submit" class="btn btn-primary" aria-label="Search"><i data-lucide="search"></i> <span>Search</span></button>
+              </div>
+              <ul id="searchSuggestions" class="suggestions" role="listbox" aria-label="Suggested items" hidden></ul>
+            </div>
 
-        <!-- Dynamic Mock Search Result Display -->
-        <div id="searchResultContainer" class="search-result-container"></div>
+            <div class="popular-searches">
+              <span class="popular-label">Popular searches:</span>
+              <a class="search-chip" href="pages/waste-search.html?q=plastic+bottle">Plastic Bottle</a>
+              <a class="search-chip" href="pages/waste-search.html?q=cardboard">Cardboard</a>
+              <a class="search-chip" href="pages/waste-search.html?q=glass+bottle">Glass Bottle</a>
+              <a class="search-chip" href="pages/waste-search.html?q=battery">Battery</a>
+              <a class="search-chip" href="pages/waste-search.html?q=pizza+box">Pizza Box</a>
+              <a class="search-chip" href="pages/waste-search.html?q=smartphone">Electronics</a>
+            </div>
+          </form>
+        </div>
       </div>
-    </div>
-  </section>
+    </section>
 
-  <!-- WASTE CATEGORIES (Section 7) - High Resolution Verified Environmental Photos -->
+    <!-- WASTE CATEGORIES (Section 7) - High Resolution Verified Environmental Photos -->
   <section class="section section-bg">
     <div class="container">
       <div class="section-header">

@@ -168,6 +168,7 @@ const SEED_RULES = [
   ['garden-waste', 'Grass Clippings & Prunings', 'Organics', 'recyclable', GREEN_BIN, ['Place garden waste in the bin loose.', 'Cut branches to fit under the closed lid.', 'Remove any soil, rocks, plastic pots or treated timber.'], 'lawn leaves branches weeds flowers garden fogo'],
   ['eggshells', 'Eggshells & Nut Shells', 'Organics', 'recyclable', GREEN_BIN, ['Add them to the kitchen caddy with other food scraps.', 'Crush shells to help them break down faster in home compost.'], 'egg shell peanut walnut compost food scraps fogo'],
   ['compostable-liner', 'Compostable Caddy Liner', 'Organics', 'recyclable', GREEN_BIN, ['Only use liners supplied or approved by your council.', 'Plastic and "degradable" bags contaminate FOGO, so put those in the red bin.'], 'bag compostable biodegradable fogo'],
+
   // General Waste
   ['nappies', 'Disposable Nappies', 'General Waste', 'not-recyclable', RED_BIN, ['Empty solids into the toilet where possible.', 'Wrap the nappy and place it in the red bin.', 'Never put nappies in yellow or green bins.'], 'diaper baby wipes'],
   ['face-masks', 'Face Masks & Disposable Gloves', 'General Waste', 'not-recyclable', RED_BIN, ['Used personal protective items are a hygiene risk for sorting staff.', 'Bag them and place them in the red bin.'], 'ppe medical rubber latex'],
@@ -958,7 +959,7 @@ async function handleRegisterSubmit(event) {
     errors.regEmail = 'An account with this email already exists. Try logging in instead.';
   }
   const problems = passwordProblems(password);
-  if (problems.length) errors.regPass = `Password needs ${problems.join(', ')}.`;
+  if (problems.length) errors.regPass = `Password needs ${problems.join(', ').replace(/, ([^,]*)$/, ' and $1')}.`;
   if (!confirm) errors.regConfirmPass = 'Confirm your password.';
   else if (confirm !== password) errors.regConfirmPass = 'Passwords do not match.';
   if (!applyFormErrors(form, errors)) return;
@@ -1016,159 +1017,381 @@ function renderNavActions() {
     <button type="button" class="btn btn-dark btn-sm" data-action="logout"><i data-lucide="log-out"></i> Logout</button>`;
 }
 
-// --- 7. WASTE SEARCH ENGINE ---
-function initWasteSearch() {
-  const searchInput = document.getElementById('wasteSearchInput');
-  const searchBtn = document.getElementById('wasteSearchBtn');
-  const resultContainer = document.getElementById('searchResultContainer');
-  const searchChips = document.querySelectorAll('.search-chip');
+/* ==========================================================================
+   8. SEARCH
+   ========================================================================== */
 
-  if (!searchInput) return;
+/* ---- Matching ---- */
 
-  function performSearch(query) {
-    if (!query || query.trim() === '') {
-      if (resultContainer) resultContainer.style.display = 'none';
-      return;
-    }
+function stemWord(word) {
+  if (word.length > 4 && word.endsWith('ies')) return `${word.slice(0, -3)}y`;
+  if (/(ch|sh|x|ss)es$/.test(word)) return word.slice(0, -2);
+  if (word.length > 3 && word.endsWith('s') && !word.endsWith('ss')) return word.slice(0, -1);
+  return word;
+}
 
-    const cleanQuery = query.toLowerCase().trim();
-    const matched = WASTE_DATABASE.find(item => 
-      item.name.toLowerCase().includes(cleanQuery) ||
-      item.category.toLowerCase().includes(cleanQuery) ||
-      item.id.includes(cleanQuery)
-    );
+function wordsOf(text) {
+  return String(text || '').toLowerCase().replace(/-/g, '').split(/[^a-z0-9#]+/).filter(Boolean);
+}
 
-    if (matched) {
-      renderSearchResult(matched);
-    } else {
-      renderNotFoundResult(query);
-    }
+const STOP_WORDS = new Set(['a', 'an', 'and', 'the', 'of', 'for', 'in', 'my', 'old', 'used']);
+
+function queryTokens(query) {
+  return wordsOf(query).filter((word) => !STOP_WORDS.has(word)).map(stemWord);
+}
+
+/** A token matches a word when the word starts with it, so results appear while typing. */
+const tokenMatches = (token, words) => words.some((word) => word.startsWith(token) || stemWord(word) === token);
+
+/** Relevance score: 0 = no match. Every token must match somewhere in the rule. */
+function scoreRule(rule, tokens) {
+  const nameWords = wordsOf(rule.name);
+  const otherWords = wordsOf(`${rule.keywords || ''} ${rule.category} ${rule.disposalMethod}`);
+  let score = 0;
+  for (const token of tokens) {
+    if (tokenMatches(token, nameWords)) score += 10;
+    else if (tokenMatches(token, otherWords)) score += 3;
+    else return 0;
   }
+  if (tokens.length && nameWords[0] && nameWords[0].startsWith(tokens[0])) score += 5;
+  return score;
+}
 
-  if (searchBtn) {
-    searchBtn.addEventListener('click', () => performSearch(searchInput.value));
-  }
+function searchRules(query, rules = getRules()) {
+  const tokens = queryTokens(query);
+  if (!tokens.length) return [];
+  return rules
+    .map((rule) => ({ rule, score: scoreRule(rule, tokens) }))
+    .filter((entry) => entry.score > 0)
+    .sort((a, b) => b.score - a.score || a.rule.name.localeCompare(b.rule.name))
+    .map((entry) => entry.rule);
+}
 
-  if (searchInput) {
-    searchInput.addEventListener('keyup', (e) => {
-      if (e.key === 'Enter') performSearch(searchInput.value);
-    });
+/* ---- Shared markup ---- */
 
-    searchInput.addEventListener('input', (e) => {
-      if (e.target.value.length >= 3) {
-        performSearch(e.target.value);
-      } else if (e.target.value.length === 0) {
-        if (resultContainer) resultContainer.style.display = 'none';
+function statusBadge(status) {
+  const info = RULE_STATUS[status] || RULE_STATUS['not-recyclable'];
+  return `<span class="badge ${info.badge}"><i data-lucide="${info.icon}"></i> ${esc(info.label)}</span>`;
+}
+
+function itemCardHtml(rule, { open = false, canLog = false } = {}) {
+  const steps = rule.instructions.map((step) => `<li>${esc(step)}</li>`).join('');
+  return `
+    <article class="item-card" data-rule-id="${esc(rule.id)}">
+      <div class="item-card-head">
+        <h3>${esc(rule.name)}</h3>
+        ${statusBadge(rule.status)}
+      </div>
+      <dl class="item-meta">
+        <div><dt>Category:</dt><dd>${esc(rule.category)}</dd></div>
+        <div><dt>Where it goes:</dt><dd>${esc(rule.disposalMethod)}</dd></div>
+      </dl>
+      <details class="item-steps"${open ? ' open' : ''}>
+        <summary>Preparation steps (${rule.instructions.length})</summary>
+        <ol class="steps-list">${steps}</ol>
+      </details>
+      <div class="item-foot">
+        <span class="verify-note"><i data-lucide="shield-check"></i> ${esc(rule.adminNote)} • ${esc(formatDate(rule.updatedDate))}</span>
+        ${canLog ? `<button type="button" class="btn btn-sm btn-secondary" data-action="log-rule" data-id="${esc(rule.id)}"><i data-lucide="bookmark"></i> Log this item</button>` : ''}
+      </div>
+    </article>`;
+}
+
+/* ---- Combobox suggestions, on the home page and the search page ---- */
+
+function initSuggestions(input, list, onPick) {
+  let options = [];
+  let activeIndex = -1;
+
+  const close = () => {
+    list.hidden = true;
+    list.innerHTML = '';
+    options = [];
+    activeIndex = -1;
+    input.setAttribute('aria-expanded', 'false');
+    input.removeAttribute('aria-activedescendant');
+  };
+
+  const setActive = (index) => {
+    activeIndex = index;
+    $$('.suggestion', list).forEach((el, i) => {
+      el.classList.toggle('is-active', i === index);
+      el.setAttribute('aria-selected', String(i === index));
+      if (i === index) {
+        input.setAttribute('aria-activedescendant', el.id);
+        el.scrollIntoView({ block: 'nearest' });
       }
     });
+  };
+
+  const update = () => {
+    options = searchRules(input.value).slice(0, 6);
+    if (!options.length || !input.value.trim()) {
+      close();
+      return;
+    }
+    list.innerHTML = options.map((rule, i) => `
+      <li class="suggestion" id="suggestion-${i}" role="option" aria-selected="false" data-index="${i}">
+        <span class="suggestion-name">${esc(rule.name)}</span>
+        ${statusBadge(rule.status)}
+      </li>`).join('');
+    list.hidden = false;
+    input.setAttribute('aria-expanded', 'true');
+    activeIndex = -1;
+    input.removeAttribute('aria-activedescendant');
+    renderIcons();
+  };
+
+  input.addEventListener('input', update);
+  input.addEventListener('blur', () => setTimeout(close, 120));
+  input.addEventListener('keydown', (event) => {
+    if (event.key === 'Escape') {
+      if (!list.hidden) event.stopPropagation();
+      close();
+    } else if (event.key === 'ArrowDown' && options.length) {
+      event.preventDefault();
+      setActive((activeIndex + 1) % options.length);
+    } else if (event.key === 'ArrowUp' && options.length) {
+      event.preventDefault();
+      setActive((activeIndex - 1 + options.length) % options.length);
+    } else if (event.key === 'Enter' && activeIndex >= 0) {
+      event.preventDefault();
+      const rule = options[activeIndex];
+      close();
+      onPick(rule);
+    }
+  });
+  // Mousedown keeps focus in the input until the pick has been handled.
+  list.addEventListener('mousedown', (event) => {
+    const el = event.target.closest('.suggestion');
+    if (!el) return;
+    event.preventDefault();
+    const rule = options[Number(el.dataset.index)];
+    close();
+    if (rule) onPick(rule);
+  });
+  return { close };
+}
+
+/** Home page: the form submits to pages/waste-search.html?q=... (it works without JS too). */
+function initQuickSearch() {
+  const form = document.getElementById('quickSearchForm');
+  if (!form) return;
+  initSuggestions($('#wasteSearchInput', form), $('#searchSuggestions', form), (rule) => {
+    window.location.href = `${sitePath('pages/waste-search.html')}?q=${encodeURIComponent(rule.name)}`;
+  });
+}
+
+/* ---- Waste Search page ---- */
+
+const searchState = { query: '', category: 'all' };
+
+function syncSearchUrl() {
+  const params = new URLSearchParams();
+  if (searchState.query) params.set('q', searchState.query);
+  if (searchState.category !== 'all') params.set('category', searchState.category);
+  const qs = params.toString();
+  window.history.replaceState(null, '', qs ? `?${qs}` : window.location.pathname);
+}
+
+function renderSearchResults() {
+  const grid = document.getElementById('catalogueGrid');
+  if (!grid) return;
+
+  const rules = getRules();
+  const hasQuery = queryTokens(searchState.query).length > 0;
+  const matches = hasQuery
+    ? searchRules(searchState.query, rules)
+    : [...rules].sort((a, b) => a.name.localeCompare(b.name));
+  const visible = searchState.category === 'all' ? matches : matches.filter((rule) => rule.category === searchState.category);
+
+  const user = currentUser();
+  const canLog = Boolean(user && user.role === 'resident');
+  grid.innerHTML = visible.map((rule) => itemCardHtml(rule, { open: hasQuery && visible.length <= 3, canLog })).join('');
+  grid.hidden = visible.length === 0;
+
+  const noneAtAll = hasQuery && matches.length === 0;
+  const onlyFilteredOut = visible.length === 0 && !noneAtAll;
+
+  const noResults = document.getElementById('noResultsPanel');
+  noResults.hidden = !noneAtAll;
+  document.getElementById('filterEmptyPanel').hidden = !onlyFilteredOut;
+  if (onlyFilteredOut) {
+    $('#filterEmptyText').textContent = hasQuery
+      ? `No ${searchState.category} items match "${searchState.query.trim()}", but ${matches.length} ${matches.length === 1 ? 'item matches' : 'items match'} in other categories.`
+      : `There are no ${searchState.category} items published at the moment.`;
   }
 
-  searchChips.forEach(chip => {
-    chip.addEventListener('click', () => {
-      const term = chip.getAttribute('data-search') || chip.innerText.trim();
-      searchInput.value = term;
-      performSearch(term);
-      searchChips.forEach(c => c.classList.remove('active'));
-      chip.classList.add('active');
-    });
+  // One request form: it sits in the no-results panel when needed, otherwise in the banner.
+  const form = document.getElementById('requestForm');
+  const nameInput = $('#reqName');
+  if (noneAtAll) {
+    $('#noResultsTitle').textContent = `We couldn't find "${searchState.query.trim()}" yet`;
+    $('#noResultsFormSlot').appendChild(form);
+    if (nameInput.dataset.touched !== 'true') nameInput.value = searchState.query.trim();
+  } else {
+    $('#bannerFormSlot').appendChild(form);
+    if (nameInput.dataset.touched !== 'true') nameInput.value = '';
+  }
+  document.getElementById('requestSection').hidden = noneAtAll;
+
+  const noun = visible.length === 1 ? 'item' : 'items';
+  const where = searchState.category === 'all' ? '' : ` in ${searchState.category}`;
+  $('#searchSummary').textContent = noneAtAll
+    ? `No results for "${searchState.query.trim()}".`
+    : hasQuery
+      ? `${visible.length} ${noun} matching "${searchState.query.trim()}"${where}.`
+      : `Showing ${visible.length} ${noun}${where}.`;
+
+  $$('[data-action="filter-category"]').forEach((chip) => {
+    chip.setAttribute('aria-pressed', String(chip.dataset.category === searchState.category));
   });
-}
-
-function renderSearchResult(item) {
-  const container = document.getElementById('searchResultContainer');
-  if (!container) return;
-
-  let badgeHtml = item.recyclable === true
-    ? `<span class="badge badge-recyclable"><i data-lucide="check-circle-2"></i> Recyclable</span>`
-    : item.recyclable === 'special'
-    ? `<span class="badge badge-special"><i data-lucide="alert-triangle"></i> Special Drop-off</span>`
-    : `<span class="badge badge-non-recyclable"><i data-lucide="x-circle"></i> Not Recyclable</span>`;
-
-  const instructionsList = item.instructions
-    .map(step => `<li><i data-lucide="check"></i> <span>${step}</span></li>`)
-    .join('');
-
-  container.innerHTML = `
-    <div class="result-card">
-      <div class="result-header">
-        <div class="result-item-info">
-          <h3>${item.name}</h3>
-          <div class="result-category-meta">
-            <span><strong>Category:</strong> ${item.category}</span>
-          </div>
-        </div>
-        ${badgeHtml}
-      </div>
-
-      <div class="result-grid">
-        <div class="result-box">
-          <div class="result-box-label">Recommended Disposal</div>
-          <div class="result-box-val">${item.disposalMethod}</div>
-        </div>
-        <div class="result-box">
-          <div class="result-box-label">Kerbside Recyclability</div>
-          <div class="result-box-val">${item.recyclable === true ? 'Kerbside Bin Acceptable' : item.recyclable === 'special' ? 'Drop-off Facility Only' : 'Landfill / General Waste'}</div>
-        </div>
-      </div>
-
-      <div class="instructions-section">
-        <h4><i data-lucide="info" style="color: var(--main-green)"></i> Step-by-Step Instructions</h4>
-        <ul class="instructions-list">
-          ${instructionsList}
-        </ul>
-      </div>
-
-      <div class="result-footer-meta">
-        <span><i data-lucide="shield-check" style="vertical-align: middle"></i> ${item.adminNote}</span>
-        <button class="btn btn-sm btn-secondary" onclick="logSearchToActivity('${item.name}', '${item.category}', '${item.disposalMethod}')">
-          <i data-lucide="bookmark"></i> Save to Dashboard Log
-        </button>
-      </div>
-    </div>
-  `;
-
-  container.style.display = 'block';
-  if (window.lucide) lucide.createIcons();
-  container.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-}
-
-function renderNotFoundResult(query) {
-  const container = document.getElementById('searchResultContainer');
-  if (!container) return;
-
-  container.innerHTML = `
-    <div class="result-card" style="text-align: center; padding: 3rem 2rem;">
-      <div style="font-size: 3rem; margin-bottom: 1rem;">🔍</div>
-      <h3 style="margin-bottom: 0.5rem;">No item found for "${query}"</h3>
-      <p style="color: var(--secondary-text); max-width: 500px; margin: 0 auto 1.5rem auto;">
-        This item isn't in our instant index yet. Submit a guidance request to our Admin Operations queue.
-      </p>
-      <div style="display: flex; justify-content: center; gap: 1rem;">
-        <button class="btn btn-primary" onclick="submitItemRequest('${query}')">
-          Submit Request to Admin Queue
-        </button>
-        <button class="btn btn-secondary" onclick="document.getElementById('wasteSearchInput').value=''; document.getElementById('searchResultContainer').style.display='none';">
-          Clear Search
-        </button>
-      </div>
-    </div>
-  `;
-  container.style.display = 'block';
-}
-
-function submitItemRequest(itemName) {
-  const currentUser = getCurrentUser() || { email: 'alex.johnson@example.com' };
-  PENDING_SUBMISSIONS.unshift({
-    id: 'req-' + Date.now(),
-    name: itemName,
-    category: 'Under Review',
-    disposalMethod: 'Pending Admin Classification',
-    submittedBy: currentUser.email || 'alex.johnson@example.com',
-    dateSubmitted: 'Just Now',
-    reason: 'Citizen requested guidance on unlisted item.'
+  $$('[data-action="popular-search"]').forEach((chip) => {
+    chip.setAttribute('aria-pressed', String(chip.dataset.search === searchState.query.trim().toLowerCase()));
   });
-  showToast(`Item "${itemName}" submitted to Admin queue for review.`);
-  document.getElementById('searchResultContainer').style.display = 'none';
+
+  renderIcons();
+}
+
+function runSearch({ scroll = false } = {}) {
+  syncSearchUrl();
+  renderSearchResults();
+  if (scroll) document.getElementById('resultsHeading').scrollIntoView({ block: 'start' });
+}
+
+ACTIONS['filter-category'] = (trigger) => {
+  searchState.category = trigger.dataset.category;
+  runSearch();
+};
+
+ACTIONS['popular-search'] = (trigger) => {
+  searchState.query = trigger.dataset.search;
+  $('#wasteSearchInput').value = trigger.dataset.search;
+  runSearch({ scroll: true });
+};
+
+ACTIONS['clear-search'] = () => {
+  searchState.query = '';
+  searchState.category = 'all';
+  const input = $('#wasteSearchInput');
+  input.value = '';
+  runSearch();
+  input.focus();
+};
+
+ACTIONS['show-all-categories'] = () => {
+  searchState.category = 'all';
+  runSearch();
+};
+
+ACTIONS['log-rule'] = (trigger) => {
+  const user = currentUser();
+  const rule = getRules().find((candidate) => candidate.id === trigger.dataset.id);
+  if (!user || user.role !== 'resident' || !rule) return;
+  addActivityEntry(user.id, {
+    item: rule.name,
+    category: rule.category,
+    disposal: rule.disposalMethod,
+    kg: 0.2,
+    status: RULE_STATUS[rule.status].logStatus,
+  });
+  showToast(`"${rule.name}" added to your recycling log.`);
+};
+
+/** Adds a row to a resident's history log (newest first). */
+function addActivityEntry(userId, entry) {
+  const row = { id: `log-${Date.now()}`, date: toISODate(), ...entry };
+  saveActivity(userId, [row, ...getActivity(userId)]);
+  return row;
+}
+
+function initWasteSearchPage() {
+  if (!document.getElementById('catalogueGrid')) return;
+
+  const params = new URLSearchParams(window.location.search);
+  const input = $('#wasteSearchInput');
+  searchState.query = (params.get('q') || '').slice(0, 100);
+  const category = params.get('category');
+  searchState.category = CATEGORIES.includes(category) ? category : 'all';
+  input.value = searchState.query;
+
+  let timer;
+  input.addEventListener('input', () => {
+    clearTimeout(timer);
+    timer = setTimeout(() => {
+      searchState.query = input.value;
+      runSearch();
+    }, 100);
+  });
+
+  initSuggestions(input, $('#searchSuggestions'), (rule) => {
+    input.value = rule.name;
+    searchState.query = rule.name;
+    runSearch({ scroll: true });
+  });
+
+  $('#wasteSearchForm').addEventListener('submit', (event) => {
+    event.preventDefault();
+    clearTimeout(timer);
+    searchState.query = input.value;
+    runSearch({ scroll: true });
+  });
+
+  const form = document.getElementById('requestForm');
+  form.addEventListener('submit', handleRequestSubmit);
+  $('#reqName').addEventListener('input', (event) => {
+    event.target.dataset.touched = 'true';
+  });
+
+  const user = currentUser();
+  if (user) $('#reqEmail').value = user.email;
+
+  // An admin publishing in another tab shows up here without a refresh.
+  window.addEventListener('storage', (event) => {
+    if (event.key === KEYS.rules) renderSearchResults();
+  });
+
+  renderSearchResults();
+}
+
+function handleRequestSubmit(event) {
+  event.preventDefault();
+  const form = event.currentTarget;
+  const name = $('#reqName').value.trim();
+  const category = $('#reqCategory').value;
+  const email = $('#reqEmail').value.trim();
+  const note = $('#reqNote').value.trim();
+  const key = name.toLowerCase();
+
+  const errors = {};
+  if (name.length < 2) errors.reqName = 'Enter the name of the item (at least 2 characters).';
+  else if (name.length > 80) errors.reqName = 'Keep the item name under 80 characters.';
+  else if (getRules().some((rule) => rule.name.toLowerCase() === key)) errors.reqName = 'This item is already in the directory.';
+  else if (getPending().some((request) => request.name.toLowerCase() === key)) errors.reqName = 'This item is already waiting for admin review.';
+  if (!category) errors.reqCategory = 'Choose a category, or "Not sure".';
+  if (email && !isValidEmail(email)) errors.reqEmail = 'Enter a valid email address, or leave this blank.';
+  if (note.length > 300) errors.reqNote = 'Keep your note under 300 characters.';
+  if (!applyFormErrors(form, errors)) return;
+
+  savePending([{
+    id: `req-${Date.now()}`,
+    name,
+    category: category === 'unknown' ? '' : category,
+    status: '',
+    disposalMethod: '',
+    instructions: [],
+    submittedBy: email || 'Guest resident',
+    dateSubmitted: toISODate(),
+    reason: note || 'Citizen requested guidance on an unlisted item.',
+  }, ...getPending()]);
+
+  form.reset();
+  $('#reqName').dataset.touched = 'false';
+  const user = currentUser();
+  if (user) $('#reqEmail').value = user.email;
+  $('#reqName').value = '';
+  showFormAlert(form, `"${name}" has been sent to the Admin Queue for review.`, 'success');
+  showToast(`Thanks! "${name}" was submitted to the Admin Queue.`);
 }
 
 // --- 8. LOCATION FINDER LOGIC ---
@@ -1533,7 +1756,8 @@ document.addEventListener('DOMContentLoaded', () => {
   initStorage();
   initMobileMenu();
   renderNavActions();
-  initWasteSearch();
+  initQuickSearch();
+  initWasteSearchPage();
   initLocationFinder();
   initAuthPage();
   initDashboard();
