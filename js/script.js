@@ -2018,119 +2018,333 @@ ACTIONS['contact-again'] = () => {
   $('#contactName').focus();
 };
 
-// --- 11. DASHBOARD CONTROLLER & PERMISSION ENFORCEMENT ---
+/* ==========================================================================
+   12. DASHBOARD
+   ========================================================================== */
+
+/* Tabs are addressed by URL hash, so a refresh stays on the same module. */
+const DASHBOARD_TABS = {
+  resident: ['overview', 'schedule', 'history', 'saved', 'notifications', 'settings'],
+  admin: ['admin', 'admin-directory', 'admin-pending'],
+};
+
+function dashboardRole(user) {
+  return user.role === 'admin' ? 'admin' : 'resident';
+}
+
+/* ---- Route guard and tab switching ---- */
+
+function showAuthLock() {
+  const overlay = document.getElementById('authLockOverlay');
+  overlay.hidden = false;
+  $$('body > header, body > main, body > footer, .skip-link').forEach((el) => {
+    el.inert = true;
+  });
+  $('a', overlay).focus();
+}
+
+function showDashboardTab(requested) {
+  const user = currentUser();
+  if (!user) return;
+  const role = dashboardRole(user);
+  const allowed = DASHBOARD_TABS[role];
+  let tab = requested;
+
+  // Residents cannot open administrator modules, even by editing the URL.
+  if (role === 'resident' && DASHBOARD_TABS.admin.includes(tab)) {
+    showToast('Access denied: this module needs an administrator account.', 'error');
+    tab = allowed[0];
+    window.history.replaceState(null, '', `#${tab}`);
+  }
+  if (!allowed.includes(tab)) tab = allowed[0];
+
+  $$('.dash-module').forEach((module) => {
+    module.hidden = module.dataset.module !== tab;
+  });
+  $$('.sidebar-link').forEach((link) => {
+    const active = link.dataset.tab === tab;
+    link.classList.toggle('active', active);
+    if (active) link.setAttribute('aria-current', 'page');
+    else link.removeAttribute('aria-current');
+  });
+}
+
+/* ---- Profile and shared rendering ---- */
+
+function greeting() {
+  const hour = new Date().getHours();
+  if (hour < 12) return 'Good morning';
+  return hour < 18 ? 'Good afternoon' : 'Good evening';
+}
+
+function renderDashboardProfile(user) {
+  $$('.user-info-name').forEach((el) => { el.textContent = user.name; });
+  $$('.user-info-role').forEach((el) => { el.textContent = user.roleTitle; });
+  $('#sidebarAvatar').textContent = initialsOf(user.name);
+  $('#welcomeSub').textContent = user.role === 'admin'
+    ? `Welcome, ${user.name} • City Waste Operations Control Portal`
+    : `${greeting()}, ${user.name} • Household waste and collection schedule`;
+  renderNavActions();
+}
+
+/* ---- Resident: stats ---- */
+
+function residentStats(user) {
+  const rows = getActivity(user.id);
+  const base = { items: 0, diverted: 0, kg: 0, ...(user.baseline || {}) };
+  const divertedRows = rows.filter((row) => row.status !== 'Landfill');
+  const items = base.items + rows.length;
+  const diverted = base.diverted + divertedRows.length;
+  const kg = divertedRows.reduce((sum, row) => sum + (Number(row.kg) || 0), base.kg);
+  return { items, diverted, kg, score: items ? Math.round((diverted / items) * 100) : 0 };
+}
+
+function ecoLevel(score, items) {
+  if (!items) return 'Log your first item to start';
+  if (score >= 75) return 'Level 3 Champion';
+  return score >= 50 ? 'Level 2 Sorter' : 'Level 1 Starter';
+}
+
+function renderResidentStats(user) {
+  const stats = residentStats(user);
+  $('[data-stat="items"]').textContent = stats.items;
+  $('[data-stat="diverted"]').textContent = stats.diverted;
+  $('[data-stat="kg"]').textContent = `${stats.kg.toFixed(1)} kg`;
+  $('[data-stat="score"]').textContent = `${stats.score}%`;
+  $('[data-stat="level"]').textContent = ecoLevel(stats.score, stats.items);
+}
+
+/* ---- Resident: history log ---- */
+
+function activityRowHtml(row) {
+  return `
+    <tr>
+      <td data-label="Item"><strong>${esc(row.item)}</strong></td>
+      <td data-label="Category">${esc(row.category)}</td>
+      <td data-label="Disposal">${esc(row.disposal)}</td>
+      <td data-label="Weight">${esc((Number(row.kg) || 0).toFixed(1))} kg</td>
+      <td data-label="Date">${esc(formatDate(row.date))}</td>
+      <td data-label="Status"><span class="badge ${LOG_STATUS_BADGE[row.status] || 'badge-info'}">${esc(row.status)}</span></td>
+    </tr>`;
+}
+
+function renderActivityLog(user) {
+  const rows = getActivity(user.id);
+  const label = rows.length === 1 ? '1 Logged Entry' : `${rows.length} Logged Entries`;
+  $$('.js-activity-count').forEach((el) => { el.textContent = label; });
+  $$('.js-activity-rows').forEach((tbody) => {
+    const limit = Number(tbody.dataset.limit) || rows.length;
+    tbody.innerHTML = rows.length
+      ? rows.slice(0, limit).map(activityRowHtml).join('')
+      : '<tr><td colspan="6" class="cell-full muted">No items logged yet. Use "Log Recycled Item" to add your first one.</td></tr>';
+  });
+}
+
+function refreshResidentLog() {
+  const user = currentUser();
+  if (!user || user.role !== 'resident') return;
+  renderResidentStats(user);
+  renderActivityLog(user);
+}
+
+/* ---- Resident: log item modal ---- */
+
+ACTIONS['open-log-modal'] = () => {
+  const form = document.getElementById('logItemForm');
+  form.reset();
+  clearFormErrors(form);
+  $('#logItemKg').value = '0.5';
+  $('#logItemNames').innerHTML = getRules().map((rule) => `<option value="${esc(rule.name)}"></option>`).join('');
+  openModal('logItemModal');
+};
+
+const LOG_DISPOSAL_STATUS = {
+  'Yellow Recycling Bin': 'Recycled',
+  'Green FOGO Bin': 'Recycled',
+  'Drop-off Centre': 'Drop-off',
+  'Red General Waste Bin': 'Landfill',
+};
+
+/** Picks the matching bin choice for a known item name. */
+function disposalChoiceForRule(rule) {
+  if (rule.status === 'special') return 'Drop-off Centre';
+  if (rule.status === 'not-recyclable') return 'Red General Waste Bin';
+  return rule.disposalMethod === GREEN_BIN ? 'Green FOGO Bin' : 'Yellow Recycling Bin';
+}
+
+function initLogItemForm() {
+  const form = document.getElementById('logItemForm');
+  if (!form) return;
+
+  $('#logItemName').addEventListener('change', (event) => {
+    const rule = getRules().find((candidate) => candidate.name.toLowerCase() === event.target.value.trim().toLowerCase());
+    if (!rule) return;
+    $('#logItemCategory').value = rule.category;
+    $('#logItemDisposal').value = disposalChoiceForRule(rule);
+  });
+
+  form.addEventListener('submit', (event) => {
+    event.preventDefault();
+    const user = currentUser();
+    if (!user || user.role !== 'resident') return;
+
+    const item = $('#logItemName').value.trim();
+    const category = $('#logItemCategory').value;
+    const disposal = $('#logItemDisposal').value;
+    const kg = Number($('#logItemKg').value);
+
+    const errors = {};
+    if (item.length < 2) errors.logItemName = 'Enter the item name.';
+    if (!category) errors.logItemCategory = 'Choose a category.';
+    if (!disposal) errors.logItemDisposal = 'Choose where the item went.';
+    if (!Number.isFinite(kg) || kg <= 0 || kg > 100) errors.logItemKg = 'Enter a weight between 0.1 and 100 kg.';
+    if (!applyFormErrors(form, errors)) return;
+
+    addActivityEntry(user.id, { item, category, disposal, kg, status: LOG_DISPOSAL_STATUS[disposal] });
+    closeModal('logItemModal');
+    refreshResidentLog();
+    showToast(`"${item}" added to your recycling log.`);
+  });
+}
+
+/* ---- Resident: saved hubs ---- */
+
+function renderSavedHubs() {
+  const container = document.getElementById('savedHubsList');
+  const user = currentUser();
+  if (!container || !user || user.role !== 'resident') return;
+  const hubs = getSavedHubIds(user.id).map(findHub).filter(Boolean);
+  container.innerHTML = hubs.length
+    ? hubs.map((hub) => hubCardHtml(hub)).join('')
+    : `<div class="empty-state">
+         <h3>No saved hubs yet</h3>
+         <p>Save the drop-off hubs you use most, and they will appear here.</p>
+         <a class="btn btn-primary btn-sm" href="locations.html"><i data-lucide="map-pin"></i> Find a Hub</a>
+       </div>`;
+  renderIcons();
+}
+
+/* ---- Resident: notifications and settings ---- */
+
+function initNotificationToggles(user) {
+  const prefs = getPreferences(user.id);
+  $$('[data-pref]').forEach((input) => {
+    input.checked = Boolean(prefs[input.dataset.pref]);
+    input.addEventListener('change', () => {
+      const current = getPreferences(user.id);
+      current[input.dataset.pref] = input.checked;
+      savePreferences(user.id, current);
+      const name = input.dataset.pref === 'sms' ? 'SMS' : 'Email';
+      showToast(`${name} bin reminders turned ${input.checked ? 'on' : 'off'}.`, 'info');
+    });
+  });
+}
+
+function fillSettingsForm(user) {
+  $('#settingsName').value = user.name;
+  $('#settingsEmail').value = user.email;
+  $('#settingsAddress').value = user.address || '';
+  $('#settingsEmail').readOnly = Boolean(user.demo);
+  $('#settingsEmailHint').hidden = !user.demo;
+}
+
+function initSettingsForm(user) {
+  const form = document.getElementById('settingsForm');
+  fillSettingsForm(user);
+  form.addEventListener('submit', (event) => {
+    event.preventDefault();
+    const name = $('#settingsName').value.trim();
+    const email = $('#settingsEmail').value.trim();
+    const address = $('#settingsAddress').value.trim();
+    const users = getUsers();
+    const me = users.find((candidate) => candidate.id === user.id);
+    if (!me) return;
+
+    const errors = {};
+    if (name.length < 2) errors.settingsName = 'Enter your full name.';
+    if (!email) errors.settingsEmail = 'Enter your email address.';
+    else if (!isValidEmail(email)) errors.settingsEmail = 'Enter a valid email address, for example name@example.com.';
+    else if (users.some((other) => other.id !== me.id && normaliseEmail(other.email) === normaliseEmail(email))) {
+      errors.settingsEmail = 'Another account already uses this email.';
+    }
+    if (!applyFormErrors(form, errors)) return;
+
+    me.name = name;
+    if (!me.demo) me.email = normaliseEmail(email);
+    me.address = address;
+    saveUsers(users);
+    renderDashboardProfile(me);
+    renderAccountBanner(me);
+    showToast('Your account details have been updated.');
+  });
+}
+
+function renderAccountBanner(user) {
+  $('#accountBadge').textContent = user.demo ? 'Demo Account (dummy data)' : 'Resident Account';
+  $('#accountName').textContent = `${user.name} — Suburb Zone 4`;
+  const parts = [
+    user.address ? `Address: ${user.address}` : 'Address not set',
+    `Account ID: ${user.accountId || 'n/a'}`,
+    `Member since ${formatDate(user.createdAt, { month: 'short', year: 'numeric' })}`,
+  ];
+  $('#accountDetails').textContent = parts.join(' • ');
+}
+
+function initResidentDashboard(user) {
+  renderAccountBanner(user);
+  renderResidentStats(user);
+  renderActivityLog(user);
+  renderSavedHubs();
+  initLogItemForm();
+  initNotificationToggles(user);
+  initSettingsForm(user);
+  document.addEventListener('hubs:changed', () => {
+    renderSavedHubs();
+  });
+}
+
+/* ---- Start-up ---- */
+
 function initDashboard() {
-  const dashboardMain = document.querySelector('.dashboard-main');
-  if (!dashboardMain) return;
+  const app = document.getElementById('dashboardApp');
+  if (!app) return;
 
-  const currentUser = getCurrentUser();
-  const authLockOverlay = document.getElementById('authLockOverlay');
-
-  if (!currentUser || !currentUser.loggedIn) {
-    if (authLockOverlay) authLockOverlay.style.display = 'flex';
-    return;
-  } else {
-    if (authLockOverlay) authLockOverlay.style.display = 'none';
-  }
-
-  // Update UI Elements with User Info & Role Badges
-  const welcomeHeading = document.getElementById('welcomeHeading');
-  const welcomeSub = document.getElementById('welcomeSub');
-  const sidebarAvatar = document.getElementById('sidebarAvatar');
-  const topActionBtn = document.getElementById('topActionBtn');
-
-  // Update User Profiles
-  document.querySelectorAll('.user-info-name').forEach(el => el.innerText = currentUser.name);
-  document.querySelectorAll('.user-info-role').forEach(el => el.innerText = currentUser.roleTitle);
-
-  if (sidebarAvatar) {
-    sidebarAvatar.innerText = currentUser.avatar || (currentUser.role === 'admin' ? 'TN' : 'AJ');
-  }
-
-  const residentNav = document.getElementById('residentSidebarNav');
-  const adminNav = document.getElementById('adminSidebarNav');
-
-  if (currentUser.role === 'admin') {
-    // ADMIN DASHBOARD SETUP
-    if (welcomeHeading) welcomeHeading.innerText = `Dashboard`;
-    if (welcomeSub) welcomeSub.innerText = 'Welcome, Tanu • City Environmental Protection Services Control Portal';
-    
-    if (topActionBtn) {
-      topActionBtn.innerHTML = `<button class="btn btn-primary" onclick="openModal('addAdminItemModal')"><i data-lucide="plus-circle"></i> Publish Waste Rule</button>`;
-    }
-
-    if (residentNav) residentNav.style.display = 'none';
-    if (adminNav) adminNav.style.display = 'flex';
-
-    renderAdminWasteTable();
-    renderAdminPendingQueue();
-    switchDashboardTab('admin-tab');
-
-  } else {
-    // RESIDENT DASHBOARD SETUP
-    if (welcomeHeading) welcomeHeading.innerText = `Dashboard`;
-    if (welcomeSub) welcomeSub.innerText = 'Good Morning, Alex Johnson • Household Waste Separation & Collection Schedules';
-
-    if (topActionBtn) {
-      topActionBtn.innerHTML = `<button class="btn btn-primary" onclick="openModal('addActivityModal')"><i data-lucide="plus"></i> Log Recycled Item</button>`;
-    }
-
-    if (residentNav) residentNav.style.display = 'flex';
-    if (adminNav) adminNav.style.display = 'none';
-
-    renderResidentActivityTable();
-    switchDashboardTab('overview-tab');
-  }
-}
-
-// Permission Guarded Dashboard Module Switcher
-function switchDashboardTab(tabId, el) {
-  const currentUser = getCurrentUser();
-
-  // STRICT AUTHORIZATION CHECK FOR ADMIN MODULES
-  if (tabId.includes('admin') && (!currentUser || currentUser.role !== 'admin')) {
-    showToast('⛔ Access Denied: Administrator account authorization required.');
+  const user = currentUser();
+  if (!user) {
+    showAuthLock();
     return;
   }
 
-  document.querySelectorAll('.dash-module').forEach(m => m.style.display = 'none');
-  document.querySelectorAll('.sidebar-link').forEach(l => l.classList.remove('active'));
+  const role = dashboardRole(user);
+  // Modules for the other role are removed from the page, not just hidden.
+  $$('[data-role]').forEach((el) => {
+    if (el.dataset.role !== role) el.remove();
+  });
+  app.hidden = false;
 
-  const targetModule = document.getElementById(tabId);
-  if (targetModule) {
-    targetModule.style.display = 'block';
-  }
+  renderDashboardProfile(user);
+  if (role === 'admin') initAdminDashboard(user);
+  else initResidentDashboard(user);
 
-  if (el) {
-    el.classList.add('active');
-  } else {
-    // Auto highlight matching link
-    const matchLink = document.querySelector(`.sidebar-link[onclick*="${tabId}"]`);
-    if (matchLink) matchLink.classList.add('active');
-  }
+  showDashboardTab(window.location.hash.slice(1));
+  window.addEventListener('hashchange', () => showDashboardTab(window.location.hash.slice(1)));
 
-  if (window.lucide) lucide.createIcons();
+  // Keep data current if another tab changes it; log out here if that tab logged out.
+  window.addEventListener('storage', () => {
+    const latest = currentUser();
+    if (!latest) {
+      window.location.reload();
+      return;
+    }
+    if (dashboardRole(latest) === 'admin') renderAdminDashboard();
+    else refreshResidentLog();
+  });
 }
 
-// Render Resident Activity Log Table
-function renderResidentActivityTable() {
-  const tbody = document.getElementById('activityTableBody');
-  if (!tbody) return;
-
-  tbody.innerHTML = RESIDENT_ACTIVITY.map(entry => {
-    let badgeClass = entry.status === 'Recycled' ? 'badge-recyclable' : entry.status === 'Drop-off' ? 'badge-special' : 'badge-non-recyclable';
-    return `
-      <tr>
-        <td><strong>${entry.item}</strong></td>
-        <td>${entry.category}</td>
-        <td>${entry.disposal}</td>
-        <td>${entry.date}</td>
-        <td><span class="badge ${badgeClass}">${entry.status}</span></td>
-      </tr>
-    `;
-  }).join('');
-}
-
+/* TEMPORARY: administrator logic pending migration */
+function initAdminDashboard() { renderAdminWasteTable(); renderAdminPendingQueue(); }
+function renderAdminDashboard() { initAdminDashboard(); }
+ACTIONS['new-rule'] = () => openModal('addAdminItemModal');
 // Render Admin Master Database Table
 function renderAdminWasteTable() {
   const tableBody = document.getElementById('adminWasteTableBody');
@@ -2294,13 +2508,6 @@ function addAdminWasteItem(e) {
   renderAdminWasteTable();
   closeModal('addAdminItemModal');
   showToast(`Successfully published "${name}" to system database.`);
-}
-
-function logSearchToActivity(name, category, disposal) {
-  showToast(`Saved "${name}" to your Activity Log.`);
-  const today = new Date().toLocaleDateString('en-US', { month: 'short', day: '2-digit' });
-  RESIDENT_ACTIVITY.unshift({ id: Date.now(), item: name, category: category, disposal: disposal, date: today, status: 'Recycled' });
-  renderResidentActivityTable();
 }
 
 /* ==========================================================================

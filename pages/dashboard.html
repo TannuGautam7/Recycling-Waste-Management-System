@@ -11,22 +11,6 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Outfit:wght@600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap">
   <link rel="stylesheet" href="../css/style.css">
-  <style>
-    .auth-lock-overlay {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100vw;
-      height: 100vh;
-      background: rgba(15, 23, 42, 0.75);
-      backdrop-filter: blur(8px);
-      z-index: 4000;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      padding: 1.5rem;
-    }
-  </style>
   <script defer src="https://unpkg.com/lucide@0.468.0/dist/umd/lucide.min.js" integrity="sha384-uTYyvsSSUZeaPhb5RbKlQa0zY/WpX/QHfvg2mczXyBQOpkWPEDy9lczyp+w7SKXu" crossorigin="anonymous"></script>
   <script defer src="../js/script.js"></script>
 </head>
@@ -65,312 +49,233 @@
     </div>
   </header>
 
-  <!-- AUTHENTICATION REQUIRED LOCK OVERLAY -->
-  <div id="authLockOverlay" class="auth-lock-overlay" style="display: none;">
-    <div class="card" style="max-width: 460px; width: 100%; text-align: center; padding: 2.5rem; border: 2px solid var(--border-green);">
-      <div style="width: 64px; height: 64px; background-color: var(--light-green); color: var(--primary-green); border-radius: var(--radius-full); display: inline-flex; align-items: center; justify-content: center; font-size: 2rem; margin-bottom: 1rem;">
-        <i data-lucide="lock"></i>
-      </div>
-      <h2 style="font-size: 1.8rem; margin-bottom: 0.5rem;">Sign In Required</h2>
-      <p style="color: var(--secondary-text); margin-bottom: 2rem;">
-        Please sign in with your email address to access your user dashboard.
-      </p>
-
-      <a href="login.html" class="btn btn-primary" style="width: 100%;">
-        <i data-lucide="log-in"></i> Go to Sign In Page
-      </a>
+  <!-- SHOWN TO SIGNED-OUT VISITORS -->
+  <div id="authLockOverlay" class="auth-lock-overlay" role="dialog" aria-modal="true" aria-labelledby="lockHeading" hidden>
+    <div class="card lock-card">
+      <div class="icon-tile"><i data-lucide="lock"></i></div>
+      <h2 id="lockHeading">Sign In Required</h2>
+      <p>Please sign in to open your dashboard.</p>
+      <a href="login.html" class="btn btn-primary btn-block"><i data-lucide="log-in"></i> Go to Sign In</a>
+      <a href="../index.html" class="btn btn-secondary btn-block mt-sm"><i data-lucide="home"></i> Back to Home</a>
     </div>
   </div>
 
-  <div class="dashboard-wrapper">
-    
-    <!-- SIDEBAR -->
-    <aside class="sidebar" id="dashboardSidebar">
-      <div class="sidebar-header">
-        <a href="../index.html" class="brand-logo">
-          <div class="logo-icon-box">
-            <i data-lucide="recycle"></i>
-          </div>
-          <div class="brand-text">
-            <span class="brand-name">EcoRecycle</span>
-            <span class="brand-subtitle">Smart Portal</span>
-          </div>
-        </a>
-      </div>
-
-      <!-- RESIDENT NAVIGATION MENU -->
-      <nav class="sidebar-nav" id="residentSidebarNav">
-        <a href="javascript:void(0)" class="sidebar-link active" onclick="switchDashboardTab('overview-tab', this)">
-          <i data-lucide="layout-dashboard"></i> Overview & Impact
-        </a>
-        <a href="javascript:void(0)" class="sidebar-link" onclick="switchDashboardTab('schedule-tab', this)">
-          <i data-lucide="calendar"></i> Household Bin Schedule
-        </a>
-        <a href="javascript:void(0)" class="sidebar-link" onclick="switchDashboardTab('activity-tab', this)">
-          <i data-lucide="history"></i> Recycling History Log
-        </a>
-        <a href="javascript:void(0)" class="sidebar-link" onclick="switchDashboardTab('saved-tab', this)">
-          <i data-lucide="bookmark"></i> Saved Drop-off Hubs
-        </a>
-        <a href="javascript:void(0)" class="sidebar-link" onclick="switchDashboardTab('notifications-tab', this)">
-          <i data-lucide="bell"></i> Notifications & Alerts
-        </a>
-        <a href="javascript:void(0)" class="sidebar-link" onclick="switchDashboardTab('settings-tab', this)">
-          <i data-lucide="settings"></i> Account Settings
-        </a>
-      </nav>
-
-      <!-- ADMIN NAVIGATION MENU -->
-      <nav class="sidebar-nav" id="adminSidebarNav" style="display: none;">
-        <a href="javascript:void(0)" class="sidebar-link active" onclick="switchDashboardTab('admin-tab', this)">
-          <i data-lucide="shield-check"></i> System Control Center
-        </a>
-        <a href="javascript:void(0)" class="sidebar-link" onclick="switchDashboardTab('admin-directory-tab', this)">
-          <i data-lucide="database"></i> Master Waste Directory
-        </a>
-        <a href="javascript:void(0)" class="sidebar-link" onclick="switchDashboardTab('admin-pending-tab', this)">
-          <i data-lucide="inbox"></i> Pending Citizen Requests
-        </a>
-      </nav>
-
-      <div class="sidebar-footer">
-        <div class="user-avatar" id="sidebarAvatar">AJ</div>
-        <div class="user-info">
-          <div class="user-info-name">Alex Johnson</div>
-          <div class="user-info-role">Resident • Suburb Zone 4</div>
-        </div>
-        <button onclick="logoutUser()" style="margin-left: auto; color: var(--error);" title="Logout">
-          <i data-lucide="log-out"></i>
-        </button>
-      </div>
-    </aside>
-
-    <!-- DASHBOARD MAIN CONTENT -->
-    <main class="dashboard-main" id="main" tabindex="-1">
-      
-      <!-- TOPBAR WITH EXPLICIT "Dashboard" TITLE -->
-      <div class="dashboard-topbar">
-        <div>
-          <h1 style="font-size: 2.4rem; color: var(--dark-text);" id="welcomeHeading">Dashboard</h1>
-          <p style="color: var(--secondary-text); font-size: 1.05rem;" id="welcomeSub">Managing waste separation and collection schedules.</p>
-        </div>
-
-        <div style="display: flex; gap: 1rem; align-items: center;">
-          <div id="topActionBtn">
-            <button class="btn btn-primary" onclick="openModal('addActivityModal')">
-              <i data-lucide="plus"></i> Log Recycled Item
-            </button>
-          </div>
-          <a href="../index.html" class="btn btn-secondary" title="Public Site">
-            <i data-lucide="globe"></i> Public Website
-          </a>
-        </div>
-      </div>
-
-      <!-- RESIDENT MODULE 1: OVERVIEW & IMPACT -->
-      <div id="overview-tab" class="dash-module">
-        <div class="card" style="padding: 1.5rem 2rem; margin-bottom: 2rem; background: linear-gradient(135deg, var(--soft-green), var(--white)); border: 1px solid var(--border-green);">
-          <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
-            <div>
-              <span class="badge badge-recyclable" style="margin-bottom: 0.35rem;">Verified Member Account</span>
-              <h2 style="font-size: 1.5rem; color: var(--primary-green);">Alex Johnson — Suburb Zone 4</h2>
-              <p style="color: var(--secondary-text); font-size: 0.9rem;">Address: 142 Greenpoint Avenue • Account ID: ECO-88421 • Member Since Jan 2026</p>
-            </div>
-            <a href="contact.html" class="btn btn-sm btn-secondary"><i data-lucide="phone"></i> Contact Australia Support</a>
+  <main id="main" tabindex="-1">
+    <div class="dashboard-wrapper" id="dashboardApp" hidden>
+      <aside class="sidebar" aria-label="Dashboard">
+        <nav class="sidebar-nav" data-role="resident" aria-label="Resident modules">
+          <a href="#overview" class="sidebar-link" data-tab="overview"><i data-lucide="layout-dashboard"></i> Overview &amp; Impact</a>
+          <a href="#schedule" class="sidebar-link" data-tab="schedule"><i data-lucide="calendar"></i> Bin Schedule</a>
+          <a href="#history" class="sidebar-link" data-tab="history"><i data-lucide="history"></i> History Log</a>
+          <a href="#saved" class="sidebar-link" data-tab="saved"><i data-lucide="bookmark"></i> Saved Hubs</a>
+          <a href="#notifications" class="sidebar-link" data-tab="notifications"><i data-lucide="bell"></i> Notifications</a>
+          <a href="#settings" class="sidebar-link" data-tab="settings"><i data-lucide="settings"></i> Account Settings</a>
+        </nav>
+        <nav class="sidebar-nav" data-role="admin" aria-label="Administrator modules">
+          <a href="#admin" class="sidebar-link" data-tab="admin"><i data-lucide="shield-check"></i> Control Centre</a>
+          <a href="#admin-directory" class="sidebar-link" data-tab="admin-directory"><i data-lucide="database"></i> Master Rule Registry</a>
+          <a href="#admin-pending" class="sidebar-link" data-tab="admin-pending"><i data-lucide="inbox"></i> Citizen Requests</a>
+        </nav>
+        <div class="sidebar-footer">
+          <div class="user-avatar" id="sidebarAvatar" aria-hidden="true"></div>
+          <div class="user-info">
+            <div class="user-info-name"></div>
+            <div class="user-info-role"></div>
           </div>
         </div>
+      </aside>
 
-        <div class="dashboard-stats-grid">
-          <div class="dash-stat-card">
-            <div>
-              <div style="font-size: 0.85rem; color: var(--secondary-text); font-weight: 700; text-transform: uppercase;">Items Scanned & Checked</div>
-              <div class="dash-stat-val">42</div>
-            </div>
-            <div class="dash-stat-icon"><i data-lucide="search"></i></div>
+      <div class="dashboard-main">
+        <div class="dashboard-topbar">
+          <div>
+            <h1>Dashboard</h1>
+            <p class="muted" id="welcomeSub"></p>
           </div>
-
-          <div class="dash-stat-card">
-            <div>
-              <div style="font-size: 0.85rem; color: var(--secondary-text); font-weight: 700; text-transform: uppercase;">Recyclable Items</div>
-              <div class="dash-stat-val" style="color: var(--main-green);">31</div>
-            </div>
-            <div class="dash-stat-icon" style="background-color: var(--light-green);"><i data-lucide="check-circle-2"></i></div>
-          </div>
-
-          <div class="dash-stat-card">
-            <div>
-              <div style="font-size: 0.85rem; color: var(--secondary-text); font-weight: 700; text-transform: uppercase;">Waste Diverted</div>
-              <div class="dash-stat-val">24.5 kg</div>
-            </div>
-            <div class="dash-stat-icon"><i data-lucide="recycle"></i></div>
-          </div>
-
-          <div class="dash-stat-card">
-            <div>
-              <div style="font-size: 0.85rem; color: var(--secondary-text); font-weight: 700; text-transform: uppercase;">Eco Score</div>
-              <div class="dash-stat-val" style="color: var(--primary-green);">86% <span style="font-size: 0.75rem; color: var(--main-green); font-weight: 600;">(Level 3 Champion)</span></div>
-            </div>
-            <div class="dash-stat-icon" style="background-color: var(--light-green);"><i data-lucide="award"></i></div>
-          </div>
+          <button type="button" class="btn btn-primary" data-role="resident" data-action="open-log-modal"><i data-lucide="plus"></i> Log Recycled Item</button>
+          <button type="button" class="btn btn-primary" data-role="admin" data-action="new-rule"><i data-lucide="plus-circle"></i> Publish Waste Rule</button>
         </div>
 
-        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; margin-bottom: 2.5rem;">
-          <div style="background-color: var(--soft-green); padding: 2rem; border-radius: var(--radius-lg); border: 1px solid var(--border-green);">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem;">
-              <span class="badge badge-recyclable">Next Pickup Tomorrow</span>
-              <span style="font-size: 0.85rem; color: var(--secondary-text);">Zone 4 • Greenpoint</span>
-            </div>
-            <h3 style="font-size: 1.6rem; color: var(--primary-green); margin-bottom: 0.5rem;">🟢 Kerbside Recycling & 🟤 Organics</h3>
-            <p style="color: var(--dark-text); font-weight: 600; margin-bottom: 1.25rem;">
-              Friday, 10 October 2026 • Place bins kerbside by 7:00 AM
-            </p>
-            <button class="btn btn-sm btn-primary" onclick="showToast('Bin collection alert set for 7:00 PM tonight!')">
-              <i data-lucide="bell"></i> Set Evening Push Reminder
-            </button>
-          </div>
-
-          <div class="card" style="padding: 2rem; display: flex; flex-direction: column; justify-content: space-between;">
-            <div>
-              <h3 style="font-size: 1.35rem; margin-bottom: 0.5rem;">Quick Waste Verification</h3>
-              <p style="color: var(--secondary-text); font-size: 0.95rem; margin-bottom: 1.25rem;">
-                Not sure if an item goes into your regular kerbside bin? Use the instant search lookup.
-              </p>
-            </div>
-            <div style="display: flex; gap: 0.75rem; flex-wrap: wrap;">
-              <a href="waste-search.html" class="btn btn-secondary btn-sm"><i data-lucide="search"></i> Lookup Item Disposal Rules</a>
-              <button class="btn btn-primary btn-sm" onclick="openModal('addActivityModal')"><i data-lucide="plus"></i> Log Household Recycling</button>
+        <!-- RESIDENT: OVERVIEW -->
+        <section class="dash-module" data-module="overview" data-role="resident" aria-label="Overview and impact" hidden>
+          <div class="card account-banner">
+            <div class="row-between">
+              <div>
+                <span class="badge badge-recyclable" id="accountBadge">Resident Account</span>
+                <h2 id="accountName"></h2>
+                <p class="muted small" id="accountDetails"></p>
+              </div>
+              <a href="contact.html" class="btn btn-sm btn-secondary"><i data-lucide="phone"></i> Contact Support</a>
             </div>
           </div>
-        </div>
 
-        <div class="table-wrapper">
-          <div class="table-header-box">
-            <div>
-              <h3 style="font-size: 1.35rem;">My Recent Recycling History Log</h3>
-              <p style="font-size: 0.875rem; color: var(--secondary-text);">Items verified and placed into proper disposal channels this month.</p>
+          <div class="dashboard-stats-grid">
+            <div class="dash-stat-card">
+              <div>
+                <div class="dash-stat-label">Total Items Logged</div>
+                <div class="dash-stat-val" data-stat="items">0</div>
+              </div>
+              <div class="dash-stat-icon"><i data-lucide="package"></i></div>
             </div>
-            <span class="badge badge-recyclable">6 Logged Entries</span>
+            <div class="dash-stat-card">
+              <div>
+                <div class="dash-stat-label">Recycled or Dropped Off</div>
+                <div class="dash-stat-val" data-stat="diverted">0</div>
+              </div>
+              <div class="dash-stat-icon"><i data-lucide="check-circle-2"></i></div>
+            </div>
+            <div class="dash-stat-card">
+              <div>
+                <div class="dash-stat-label">Landfill Waste Diverted</div>
+                <div class="dash-stat-val" data-stat="kg">0 kg</div>
+              </div>
+              <div class="dash-stat-icon"><i data-lucide="recycle"></i></div>
+            </div>
+            <div class="dash-stat-card">
+              <div>
+                <div class="dash-stat-label">Community Eco Score</div>
+                <div class="dash-stat-val" data-stat="score">0%</div>
+                <div class="dash-stat-note" data-stat="level"></div>
+              </div>
+              <div class="dash-stat-icon"><i data-lucide="award"></i></div>
+            </div>
           </div>
 
-          <div style="overflow-x: auto;">
+          <div class="grid-2 mb-lg">
+            <div data-next-collection></div>
+            <div class="card">
+              <h2 class="h-card mb-sm">Quick Waste Check</h2>
+              <p class="muted small mb">Not sure if an item goes in your kerbside bin? Look it up in seconds.</p>
+              <div class="row-wrap">
+                <a href="waste-search.html" class="btn btn-secondary btn-sm"><i data-lucide="search"></i> Look Up an Item</a>
+                <button type="button" class="btn btn-primary btn-sm" data-action="open-log-modal"><i data-lucide="plus"></i> Log Recycled Item</button>
+              </div>
+            </div>
+          </div>
+
+          <div class="table-wrapper">
+            <div class="table-header-box">
+              <div>
+                <h2>My Recent Recycling History</h2>
+                <p class="muted small"><a class="text-link" href="#history">View the full log</a></p>
+              </div>
+              <span class="badge badge-recyclable js-activity-count"></span>
+            </div>
             <table class="custom-table">
-              <thead>
-                <tr>
-                  <th>Item Name</th>
-                  <th>Category</th>
-                  <th>Disposal Channel</th>
-                  <th>Date Logged</th>
-                  <th>Status</th>
-                </tr>
-              </thead>
-              <tbody id="activityTableBody"></tbody>
+              <thead><tr><th scope="col">Item</th><th scope="col">Category</th><th scope="col">Disposal</th><th scope="col">Weight</th><th scope="col">Date</th><th scope="col">Status</th></tr></thead>
+              <tbody class="js-activity-rows" data-limit="5"></tbody>
             </table>
           </div>
-        </div>
-      </div>
+        </section>
 
-      <!-- RESIDENT MODULE 2: HOUSEHOLD BIN SCHEDULE -->
-      <div id="schedule-tab" class="dash-module" style="display: none;">
-        <div class="card" style="padding: 2.5rem; margin-bottom: 2rem;">
-          <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 1.5rem;">
-            <div>
-              <span class="badge badge-recyclable" style="margin-bottom: 0.5rem;">Address: 142 Greenpoint Avenue</span>
-              <h2 style="font-size: 1.8rem;">Household Waste Collection Schedule</h2>
-              <p style="color: var(--secondary-text);">Suburb Zone 4 • City Environmental Waste Management Service</p>
-            </div>
-            <button class="btn btn-primary" onclick="showToast('Schedule synced with phone calendar!')">
-              <i data-lucide="calendar"></i> Sync with Phone Calendar
-            </button>
+        <!-- RESIDENT: BIN SCHEDULE -->
+        <section class="dash-module" data-module="schedule" data-role="resident" aria-labelledby="scheduleHeading" hidden>
+          <div class="mb">
+            <h2 class="h-section" id="scheduleHeading">Household Collection Schedule</h2>
+            <p class="muted">Suburb Zone 4 • Put bins out by 7:00 AM on collection day</p>
           </div>
 
-          <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.5rem; margin-bottom: 2rem;">
-            <div style="background-color: var(--soft-green); padding: 1.5rem; border-radius: var(--radius-md); border: 1px solid var(--border-green);">
-              <div style="color: var(--primary-green); font-weight: 700; text-transform: uppercase; font-size: 0.8rem; margin-bottom: 0.35rem;">Next Pickup</div>
-              <h3 style="font-size: 1.4rem; color: var(--primary-green);">🟢 Recycling</h3>
-              <p style="font-size: 0.95rem; font-weight: 600; margin-top: 0.5rem;">Friday, 10 Oct (8:00 AM)</p>
+          <div class="grid-3 mb">
+            <div class="bin-card yellow">
+              <h3>Yellow Bin</h3>
+              <p class="muted small mb-sm">Recycling • Every Tuesday</p>
+              <p><strong>Next:</strong> <span data-next-bin="yellow"></span></p>
             </div>
-
-            <div style="background-color: #FEF3C7; padding: 1.5rem; border-radius: var(--radius-md); border: 1px solid #FDE68A;">
-              <div style="color: #92400E; font-weight: 700; text-transform: uppercase; font-size: 0.8rem; margin-bottom: 0.35rem;">Organics Pickup</div>
-              <h3 style="font-size: 1.4rem; color: #854D0E;">🟤 Food & Garden</h3>
-              <p style="font-size: 0.95rem; font-weight: 600; margin-top: 0.5rem;">Friday, 10 Oct (8:00 AM)</p>
+            <div class="bin-card green">
+              <h3>Green Bin</h3>
+              <p class="muted small mb-sm">Organics / FOGO • Every Tuesday</p>
+              <p><strong>Next:</strong> <span data-next-bin="green"></span></p>
             </div>
-
-            <div style="background-color: #F1F5F9; padding: 1.5rem; border-radius: var(--radius-md); border: 1px solid #E2E8F0;">
-              <div style="color: #475569; font-weight: 700; text-transform: uppercase; font-size: 0.8rem; margin-bottom: 0.35rem;">Landfill Pickup</div>
-              <h3 style="font-size: 1.4rem; color: #334155;">⚫ General Waste</h3>
-              <p style="font-size: 0.95rem; font-weight: 600; margin-top: 0.5rem;">Friday, 17 Oct (8:00 AM)</p>
+            <div class="bin-card red">
+              <h3>Red Bin</h3>
+              <p class="muted small mb-sm">General waste • Alternating Tuesdays</p>
+              <p><strong>Next:</strong> <span data-next-bin="red"></span></p>
             </div>
           </div>
-        </div>
-      </div>
 
-      <!-- RESIDENT MODULE 3: RECYCLING HISTORY LOG -->
-      <div id="activity-tab" class="dash-module" style="display: none;">
-        <div class="card" style="padding: 2rem;">
-          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
-            <div>
-              <h2 style="font-size: 1.75rem;">Full Personal Recycling Log</h2>
-              <p style="color: var(--secondary-text);">Complete record of scanned and logged household waste items.</p>
+          <div class="grid-2">
+            <div class="calendar-card" data-collection-calendar></div>
+            <div class="card">
+              <h3 class="h-card mb-sm">Next Four Collections</h3>
+              <div class="upcoming-list" data-upcoming-collections></div>
             </div>
-            <button class="btn btn-primary btn-sm" onclick="openModal('addActivityModal')"><i data-lucide="plus"></i> Add Item Entry</button>
           </div>
-        </div>
-      </div>
+        </section>
 
-      <!-- RESIDENT MODULE 4: SAVED DROP-OFF HUBS -->
-      <div id="saved-tab" class="dash-module" style="display: none;">
-        <div class="card" style="padding: 2rem;">
-          <h2 style="font-size: 1.75rem; margin-bottom: 1.5rem;">My Saved Drop-off Hubs</h2>
-          <div class="location-list">
-            <div class="location-card">
-              <div class="location-card-header">
-                <h4 class="location-name">GreenPoint Community Recycling Centre</h4>
-                <span class="location-distance">1.8 km</span>
+        <!-- RESIDENT: HISTORY LOG -->
+        <section class="dash-module" data-module="history" data-role="resident" aria-labelledby="historyHeading" hidden>
+          <div class="table-wrapper">
+            <div class="table-header-box">
+              <div>
+                <h2 id="historyHeading">Full Recycling History Log</h2>
+                <p class="muted small js-activity-count"></p>
               </div>
-              <p class="location-meta"><i data-lucide="map-pin"></i> 142 Environmental Way, Greenpoint</p>
-              <p class="location-meta"><i data-lucide="clock"></i> Mon–Sat: 8:00 AM – 5:00 PM</p>
-              <p class="location-meta"><i data-lucide="phone"></i> (02) 9876 54321</p>
+              <button type="button" class="btn btn-primary btn-sm" data-action="open-log-modal"><i data-lucide="plus"></i> Log Recycled Item</button>
             </div>
+            <table class="custom-table">
+              <thead><tr><th scope="col">Item</th><th scope="col">Category</th><th scope="col">Disposal</th><th scope="col">Weight</th><th scope="col">Date</th><th scope="col">Status</th></tr></thead>
+              <tbody class="js-activity-rows"></tbody>
+            </table>
           </div>
-        </div>
-      </div>
+        </section>
 
-      <!-- RESIDENT MODULE 5: NOTIFICATIONS & ALERTS -->
-      <div id="notifications-tab" class="dash-module" style="display: none;">
-        <div class="card" style="padding: 2rem;">
-          <h2 style="font-size: 1.75rem; margin-bottom: 1.5rem;">Notifications & Household Alerts</h2>
-          <div style="display: flex; flex-direction: column; gap: 1rem;">
-            <div style="padding: 1.25rem; background-color: var(--soft-green); border-radius: var(--radius-md); border-left: 4px solid var(--main-green);">
-              <strong>Collection Reminder:</strong> Your recycling and organic bins are scheduled for collection tomorrow morning.
-            </div>
-            <div style="padding: 1.25rem; background-color: var(--soft-green); border-radius: var(--radius-md); border-left: 4px solid var(--primary-green);">
-              <strong>Recycling Contamination Tip:</strong> Remember to tear off greasy pizza box bottoms before recycling the clean cardboard lids.
-            </div>
+        <!-- RESIDENT: SAVED HUBS -->
+        <section class="dash-module" data-module="saved" data-role="resident" aria-labelledby="savedHeading" hidden>
+          <div class="row-between mb">
+            <h2 class="h-section" id="savedHeading">My Saved Drop-off Hubs</h2>
+            <a class="btn btn-sm btn-secondary" href="locations.html"><i data-lucide="map-pin"></i> Find More Hubs</a>
           </div>
-        </div>
-      </div>
+          <div class="location-list" id="savedHubsList"></div>
+        </section>
 
-      <!-- RESIDENT MODULE 6: ACCOUNT SETTINGS -->
-      <div id="settings-tab" class="dash-module" style="display: none;">
-        <div class="card" style="padding: 2rem;">
-          <h2 style="font-size: 1.75rem; margin-bottom: 1.5rem;">Account Settings & Preferences</h2>
-          <form onsubmit="event.preventDefault(); showToast('Preferences updated successfully.');">
-            <div class="form-group" style="margin-bottom: 1rem;">
-              <label class="form-label">Full Name</label>
-              <input type="text" class="form-control" value="Alex Johnson">
-            </div>
-            <div class="form-group" style="margin-bottom: 1.5rem;">
-              <label class="form-label">Email Address</label>
-              <input type="email" class="form-control" value="alex.johnson@example.com">
-            </div>
-            <button type="submit" class="btn btn-primary">Save Changes</button>
-          </form>
-        </div>
-      </div>
+        <!-- RESIDENT: NOTIFICATIONS -->
+        <section class="dash-module" data-module="notifications" data-role="resident" aria-labelledby="notificationsHeading" hidden>
+          <h2 class="h-section mb" id="notificationsHeading">Notifications &amp; Reminders</h2>
+          <div class="stack mb">
+            <label class="switch-row">
+              <span>
+                <strong>Email bin reminders</strong>
+                <span class="muted small" style="display:block">The evening before each collection</span>
+              </span>
+              <span class="switch"><input type="checkbox" role="switch" id="prefEmail" data-pref="email"><span class="switch-track"></span></span>
+            </label>
+            <label class="switch-row">
+              <span>
+                <strong>SMS bin reminders</strong>
+                <span class="muted small" style="display:block">A text message on the morning of collection</span>
+              </span>
+              <span class="switch"><input type="checkbox" role="switch" id="prefSms" data-pref="sms"><span class="switch-track"></span></span>
+            </label>
+          </div>
+          <p class="notice-warning notice mb">Prototype note: your choices are saved, but no emails or SMS messages are actually sent.</p>
+          <div data-next-collection class="mb"></div>
+          <p class="notice"><strong>Contamination tip:</strong> Tear off greasy pizza box bases before recycling the clean cardboard lid.</p>
+        </section>
 
-      <!-- ADMINISTRATOR MODULE 1: SYSTEM OVERVIEW & CONTROL CENTER (Tanu Admin) -->
-      <div id="admin-tab" class="dash-module" style="display: none;">
+        <!-- RESIDENT: SETTINGS -->
+        <section class="dash-module" data-module="settings" data-role="resident" aria-labelledby="settingsHeading" hidden>
+          <div class="card">
+            <h2 class="h-section mb" id="settingsHeading">Account Settings</h2>
+            <form id="settingsForm" class="form-stack" novalidate>
+              <div class="form-group">
+                <label class="form-label" for="settingsName">Full Name</label>
+                <input type="text" id="settingsName" class="form-control" autocomplete="name">
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="settingsEmail">Email Address</label>
+                <input type="email" id="settingsEmail" class="form-control" autocomplete="email">
+                <p class="form-hint" id="settingsEmailHint" hidden>The email address of a demo account can't be changed.</p>
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="settingsAddress">Household Address (optional)</label>
+                <input type="text" id="settingsAddress" class="form-control" autocomplete="street-address">
+              </div>
+              <div><button type="submit" class="btn btn-primary"><i data-lucide="save"></i> Save Changes</button></div>
+            </form>
+          </div>
+        </section>
+
+        <!-- ADMINISTRATOR MODULE 1: SYSTEM OVERVIEW & CONTROL CENTER (Tanu Admin) -->
+      <section class="dash-module" data-module="admin" data-role="admin" hidden>
         <div class="card" style="padding: 2.5rem; border: 2px solid var(--primary-green); margin-bottom: 2.5rem;">
           
           <div style="margin-bottom: 1.5rem;">
@@ -433,10 +338,10 @@
           </div>
 
         </div>
-      </div>
+      </section>
 
       <!-- ADMINISTRATOR MODULE 2: MASTER WASTE DIRECTORY MODULE -->
-      <div id="admin-directory-tab" class="dash-module" style="display: none;">
+      <section class="dash-module" data-module="admin-directory" data-role="admin" hidden>
         <div class="card" style="padding: 2.5rem; margin-bottom: 2rem;">
           <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
             <div>
@@ -463,128 +368,20 @@
             </table>
           </div>
         </div>
-      </div>
+      </section>
 
       <!-- ADMINISTRATOR MODULE 3: PENDING CITIZEN REQUESTS MODULE -->
-      <div id="admin-pending-tab" class="dash-module" style="display: none;">
+      <section class="dash-module" data-module="admin-pending" data-role="admin" hidden>
         <div class="card" style="padding: 2.5rem; margin-bottom: 2rem;">
           <h2 style="font-size: 1.75rem; color: var(--primary-green); margin-bottom: 0.5rem;">Citizen Guidance Requests Queue</h2>
           <p style="color: var(--secondary-text); margin-bottom: 1.5rem;">Approve or reject unindexed waste items requested by city residents.</p>
           
           <div id="adminPendingQueueContainer2" style="display: flex; flex-direction: column; gap: 1rem;"></div>
         </div>
+      </section>
       </div>
-
-    </main>
-  </div>
-
-  <!-- ADD ACTIVITY MODAL -->
-  <div id="addActivityModal" class="modal-overlay">
-    <div class="modal-box">
-      <span class="modal-close" onclick="closeModal('addActivityModal')">&times;</span>
-      <h3 style="font-size: 1.5rem; margin-bottom: 1rem;">Log Household Recycling Entry</h3>
-      
-      <form onsubmit="event.preventDefault(); addNewActivityRow(); closeModal('addActivityModal');">
-        <div class="form-group" style="margin-bottom: 1rem;">
-          <label class="form-label">Item Name</label>
-          <input type="text" id="modalItemName" class="form-control" placeholder="e.g. Glass Jam Jar" required>
-        </div>
-
-        <div class="form-group" style="margin-bottom: 1rem;">
-          <label class="form-label">Waste Category</label>
-          <select id="modalItemCategory" class="form-control">
-            <option value="Plastic">Plastic</option>
-            <option value="Paper & Cardboard">Paper & Cardboard</option>
-            <option value="Glass">Glass</option>
-            <option value="Metal">Metal</option>
-            <option value="E-Waste">E-Waste</option>
-            <option value="General Waste">General Waste</option>
-          </select>
-        </div>
-
-        <div class="form-group" style="margin-bottom: 1.5rem;">
-          <label class="form-label">Disposal Bin / Location</label>
-          <input type="text" id="modalItemDisposal" class="form-control" placeholder="e.g. Yellow Recycling Bin" required>
-        </div>
-
-        <button type="submit" class="btn btn-primary" style="width: 100%;">
-          <i data-lucide="plus"></i> Add Item to Activity Log
-        </button>
-      </form>
     </div>
-  </div>
-
-  <!-- ADD ADMIN ITEM MODAL -->
-  <div id="addAdminItemModal" class="modal-overlay">
-    <div class="modal-box">
-      <span class="modal-close" onclick="closeModal('addAdminItemModal')">&times;</span>
-      <h3 style="font-size: 1.5rem; margin-bottom: 1rem;">Publish New Master Waste Rule</h3>
-      
-      <form onsubmit="addAdminWasteItem(event)">
-        <div class="form-group" style="margin-bottom: 1rem;">
-          <label class="form-label">Item Name</label>
-          <input type="text" id="adminNewName" class="form-control" placeholder="e.g. Aluminium Foil Tray" required>
-        </div>
-
-        <div class="form-group" style="margin-bottom: 1rem;">
-          <label class="form-label">Category</label>
-          <select id="adminNewCategory" class="form-control">
-            <option value="Metal">Metal</option>
-            <option value="Plastic">Plastic</option>
-            <option value="Paper & Cardboard">Paper & Cardboard</option>
-            <option value="Glass">Glass</option>
-            <option value="E-Waste">E-Waste</option>
-            <option value="General Waste">General Waste</option>
-          </select>
-        </div>
-
-        <div class="form-group" style="margin-bottom: 1.5rem;">
-          <label class="form-label">Disposal Channel</label>
-          <input type="text" id="adminNewDisposal" class="form-control" placeholder="e.g. Yellow Recycling Bin" required>
-        </div>
-
-        <button type="submit" class="btn btn-primary" style="width: 100%;">
-          <i data-lucide="shield-check"></i> Publish Waste Rule to System (Admin)
-        </button>
-      </form>
-    </div>
-  </div>
-
-  <!-- EDIT ADMIN ITEM MODAL -->
-  <div id="editAdminItemModal" class="modal-overlay">
-    <div class="modal-box">
-      <span class="modal-close" onclick="closeModal('editAdminItemModal')">&times;</span>
-      <h3 style="font-size: 1.5rem; margin-bottom: 1rem;">Edit Master Waste Rule</h3>
-      
-      <form onsubmit="saveEditedAdminWasteItem(event)">
-        <div class="form-group" style="margin-bottom: 1rem;">
-          <label class="form-label">Item Name</label>
-          <input type="text" id="editAdminName" class="form-control" required>
-        </div>
-
-        <div class="form-group" style="margin-bottom: 1rem;">
-          <label class="form-label">Category</label>
-          <select id="editAdminCategory" class="form-control">
-            <option value="Metal">Metal</option>
-            <option value="Plastic">Plastic</option>
-            <option value="Paper & Cardboard">Paper & Cardboard</option>
-            <option value="Glass">Glass</option>
-            <option value="E-Waste">E-Waste</option>
-            <option value="General Waste">General Waste</option>
-          </select>
-        </div>
-
-        <div class="form-group" style="margin-bottom: 1.5rem;">
-          <label class="form-label">Disposal Channel</label>
-          <input type="text" id="editAdminDisposal" class="form-control" required>
-        </div>
-
-        <button type="submit" class="btn btn-primary" style="width: 100%;">
-          <i data-lucide="save"></i> Save Changes to Waste Rule
-        </button>
-      </form>
-    </div>
-  </div>
+  </main>
 
   <footer class="footer">
     <div class="container">
@@ -637,13 +434,121 @@
     </div>
   </footer>
 
-  <script>
-    function addNewActivityRow() {
-      const name = document.getElementById('modalItemName').value;
-      const category = document.getElementById('modalItemCategory').value;
-      const disposal = document.getElementById('modalItemDisposal').value;
-      logSearchToActivity(name, category, disposal);
-    }
-  </script>
+  <!-- RESIDENT: LOG ITEM -->
+  <div id="logItemModal" class="modal-overlay" data-role="resident">
+    <div class="modal-box" role="dialog" aria-modal="true" aria-labelledby="logItemModalTitle">
+      <button type="button" class="modal-close" data-action="close-modal" aria-label="Close dialog"><i data-lucide="x"></i></button>
+      <h2 class="modal-title" id="logItemModalTitle">Log Recycled Item</h2>
+      <form id="logItemForm" class="form-stack" novalidate>
+        <div class="form-group">
+          <label class="form-label" for="logItemName">Item Name</label>
+          <input type="text" id="logItemName" class="form-control" list="logItemNames" maxlength="100" placeholder="e.g. Glass Food Jar" autocomplete="off">
+          <datalist id="logItemNames"></datalist>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label" for="logItemCategory">Category</label>
+            <select id="logItemCategory" class="form-control">
+              <option value="">Choose a category</option>
+              <option value="Plastic">Plastic</option>
+              <option value="Paper &amp; Cardboard">Paper &amp; Cardboard</option>
+              <option value="Glass">Glass</option>
+              <option value="Metal">Metal</option>
+              <option value="E-Waste">E-Waste</option>
+              <option value="Organics">Organics</option>
+              <option value="General Waste">General Waste</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="logItemKg">Approximate Weight (kg)</label>
+            <input type="number" id="logItemKg" class="form-control" min="0.1" max="100" step="0.1" value="0.5">
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="logItemDisposal">Where Did It Go?</label>
+          <select id="logItemDisposal" class="form-control">
+            <option value="">Choose a disposal method</option>
+            <option value="Yellow Recycling Bin">Yellow Recycling Bin</option>
+            <option value="Green FOGO Bin">Green FOGO Bin</option>
+            <option value="Drop-off Centre">Drop-off Centre</option>
+            <option value="Red General Waste Bin">Red General Waste Bin</option>
+          </select>
+        </div>
+        <button type="submit" class="btn btn-primary btn-block"><i data-lucide="plus"></i> Add to Log</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- ADD ADMIN ITEM MODAL -->
+  <div id="addAdminItemModal" class="modal-overlay" data-role="admin">
+    <div class="modal-box">
+      <span class="modal-close" onclick="closeModal('addAdminItemModal')">&times;</span>
+      <h3 style="font-size: 1.5rem; margin-bottom: 1rem;">Publish New Master Waste Rule</h3>
+      
+      <form onsubmit="addAdminWasteItem(event)">
+        <div class="form-group" style="margin-bottom: 1rem;">
+          <label class="form-label">Item Name</label>
+          <input type="text" id="adminNewName" class="form-control" placeholder="e.g. Aluminium Foil Tray" required>
+        </div>
+
+        <div class="form-group" style="margin-bottom: 1rem;">
+          <label class="form-label">Category</label>
+          <select id="adminNewCategory" class="form-control">
+            <option value="Metal">Metal</option>
+            <option value="Plastic">Plastic</option>
+            <option value="Paper & Cardboard">Paper & Cardboard</option>
+            <option value="Glass">Glass</option>
+            <option value="E-Waste">E-Waste</option>
+            <option value="General Waste">General Waste</option>
+          </select>
+        </div>
+
+        <div class="form-group" style="margin-bottom: 1.5rem;">
+          <label class="form-label">Disposal Channel</label>
+          <input type="text" id="adminNewDisposal" class="form-control" placeholder="e.g. Yellow Recycling Bin" required>
+        </div>
+
+        <button type="submit" class="btn btn-primary" style="width: 100%;">
+          <i data-lucide="shield-check"></i> Publish Waste Rule to System (Admin)
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <!-- EDIT ADMIN ITEM MODAL -->
+  <div id="editAdminItemModal" class="modal-overlay" data-role="admin">
+    <div class="modal-box">
+      <span class="modal-close" onclick="closeModal('editAdminItemModal')">&times;</span>
+      <h3 style="font-size: 1.5rem; margin-bottom: 1rem;">Edit Master Waste Rule</h3>
+      
+      <form onsubmit="saveEditedAdminWasteItem(event)">
+        <div class="form-group" style="margin-bottom: 1rem;">
+          <label class="form-label">Item Name</label>
+          <input type="text" id="editAdminName" class="form-control" required>
+        </div>
+
+        <div class="form-group" style="margin-bottom: 1rem;">
+          <label class="form-label">Category</label>
+          <select id="editAdminCategory" class="form-control">
+            <option value="Metal">Metal</option>
+            <option value="Plastic">Plastic</option>
+            <option value="Paper & Cardboard">Paper & Cardboard</option>
+            <option value="Glass">Glass</option>
+            <option value="E-Waste">E-Waste</option>
+            <option value="General Waste">General Waste</option>
+          </select>
+        </div>
+
+        <div class="form-group" style="margin-bottom: 1.5rem;">
+          <label class="form-label">Disposal Channel</label>
+          <input type="text" id="editAdminDisposal" class="form-control" required>
+        </div>
+
+        <button type="submit" class="btn btn-primary" style="width: 100%;">
+          <i data-lucide="save"></i> Save Changes to Waste Rule
+        </button>
+      </form>
+    </div>
+  </div>
 </body>
 </html>
