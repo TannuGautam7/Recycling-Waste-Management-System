@@ -1394,6 +1394,67 @@ function handleRequestSubmit(event) {
   showToast(`Thanks! "${name}" was submitted to the Admin Queue.`);
 }
 
+/* ==========================================================================
+   9. GUIDE
+   ========================================================================== */
+
+function selectResinCode(code) {
+  const resin = RESIN_CODES.find((item) => item.code === code);
+  if (!resin) return;
+  $$('.resin-btn').forEach((btn) => {
+    btn.setAttribute('aria-pressed', String(Number(btn.dataset.code) === code));
+  });
+  $('#resinPanel').innerHTML = `
+    <div class="row-between mb-sm">
+      <h3>#${resin.code} ${esc(resin.abbr)}: ${esc(resin.name)}</h3>
+      ${statusBadge(resin.status)}
+    </div>
+    <dl>
+      <div><dt>Common examples</dt><dd>${esc(resin.examples)}</dd></div>
+      <div><dt>Kerbside recycling</dt><dd>${esc(resin.kerbside)}</dd></div>
+      <div><dt>Environmental tip</dt><dd>${esc(resin.tip)}</dd></div>
+    </dl>`;
+  renderIcons();
+}
+
+ACTIONS['resin-select'] = (trigger) => selectResinCode(Number(trigger.dataset.code));
+
+function initRecyclingGuide() {
+  const nav = document.getElementById('guideNav');
+  if (!nav) return;
+
+  $('#resinButtons').innerHTML = RESIN_CODES.map((resin) => `
+    <button type="button" class="resin-btn" data-action="resin-select" data-code="${resin.code}" aria-pressed="false" aria-label="Code ${resin.code}, ${esc(resin.abbr)}">
+      <span class="resin-num">#${resin.code}</span>
+      <span class="resin-abbr">${esc(resin.abbr)}</span>
+    </button>`).join('');
+  selectResinCode(1);
+
+  // Highlight the category currently on screen.
+  const chips = $$('a', nav);
+  const setCurrent = (id) => {
+    chips.forEach((chip) => {
+      if (chip.getAttribute('href') === `#${id}`) {
+        chip.setAttribute('aria-current', 'true');
+        if (nav.scrollWidth > nav.clientWidth) nav.scrollLeft = chip.offsetLeft - nav.offsetLeft - 16;
+      } else {
+        chip.removeAttribute('aria-current');
+      }
+    });
+  };
+  if ('IntersectionObserver' in window) {
+    const observer = new IntersectionObserver((entries) => {
+      entries.filter((entry) => entry.isIntersecting).forEach((entry) => setCurrent(entry.target.id));
+    }, { rootMargin: '-30% 0px -60% 0px' });
+    $$('.guide-section').forEach((section) => observer.observe(section));
+  }
+  if (window.location.hash) setCurrent(window.location.hash.slice(1));
+  nav.addEventListener('click', (event) => {
+    const chip = event.target.closest('a');
+    if (chip) setCurrent(chip.getAttribute('href').slice(1));
+  });
+}
+
 // --- 8. LOCATION FINDER LOGIC ---
 function initLocationFinder() {
   const locationSearch = document.getElementById('locationSearchInput');
@@ -1758,6 +1819,7 @@ document.addEventListener('DOMContentLoaded', () => {
   renderNavActions();
   initQuickSearch();
   initWasteSearchPage();
+  initRecyclingGuide();
   initLocationFinder();
   initAuthPage();
   initDashboard();

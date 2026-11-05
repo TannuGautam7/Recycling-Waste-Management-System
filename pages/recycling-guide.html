@@ -50,196 +50,284 @@
   </header>
 
   <main id="main" tabindex="-1">
+    <section class="section-sm section-bg">
+      <div class="container">
+        <div class="section-header flush">
+          <span class="section-badge"><i data-lucide="book-open"></i> Complete Sorting Handbook</span>
+          <h1 class="section-title">Recycling Guide</h1>
+          <p class="section-subtitle">Simple guidance for sorting everyday waste correctly into kerbside bins and drop-off hubs.</p>
+        </div>
+      </div>
+    </section>
 
+    <div class="guide-nav-wrap">
+      <nav class="container guide-nav" id="guideNav" aria-label="Guide categories">
+          <a class="search-chip" href="#plastic">Plastic</a>
+          <a class="search-chip" href="#paper">Paper &amp; Cardboard</a>
+          <a class="search-chip" href="#glass">Glass</a>
+          <a class="search-chip" href="#metal">Metal</a>
+          <a class="search-chip" href="#ewaste">E-Waste</a>
+          <a class="search-chip" href="#organics">Organics</a>
+          <a class="search-chip" href="#general">General Waste</a>
+          <a class="search-chip" href="#resin-codes">Plastic Symbols #1–#7</a>
+      </nav>
+    </div>
 
-  <!-- PAGE HEADER -->
-  <section class="section section-bg" style="padding: 3.5rem 0;">
-    <div class="container">
-      <div class="section-header" style="margin-bottom: 0;">
-        <span class="section-badge"><i data-lucide="book-open"></i> Complete Sorting Handbook</span>
-        <h1 class="section-title">Recycling Guide</h1>
-        <p class="section-subtitle">Simple guidance for sorting everyday waste correctly into kerbside bins and drop-off hubs.</p>
+    <div class="section-sm">
+      <div class="container guide-sections">
+        <section id="plastic" class="card guide-section" aria-labelledby="plasticHeading">
+          <div class="guide-head">
+            <div class="icon-tile"><i data-lucide="package"></i></div>
+            <div>
+              <h2 id="plasticHeading">Plastic Waste Guide</h2>
+              <p class="muted">Rigid plastic containers vs soft film plastic.</p>
+            </div>
+          </div>
+          <div class="guide-lists">
+            <div class="guide-list">
+              <h3><i data-lucide="check-circle-2"></i> What CAN go in the yellow bin</h3>
+              <ul>
+                <li><i data-lucide="check"></i><span>Plastic water and soft drink bottles (PET #1)</span></li>
+                <li><i data-lucide="check"></i><span>Milk jugs and detergent bottles (HDPE #2)</span></li>
+                <li><i data-lucide="check"></i><span>Rigid food containers and punnets</span></li>
+                <li><i data-lucide="check"></i><span>Shampoo and body wash bottles, rinsed</span></li>
+              </ul>
+            </div>
+            <div class="guide-list prohibited">
+              <h3><i data-lucide="x-circle"></i> What CANNOT go in the yellow bin</h3>
+              <ul>
+                <li><i data-lucide="x"></i><span>Plastic shopping bags and soft wrappers</span></li>
+                <li><i data-lucide="x"></i><span>Polystyrene foam boxes and meat trays</span></li>
+                <li><i data-lucide="x"></i><span>Plastic cutlery and straws</span></li>
+                <li><i data-lucide="x"></i><span>Garden hoses and PVC piping</span></li>
+              </ul>
+            </div>
+          </div>
+          <p class="guide-tip"><strong>Tip:</strong> Empty liquids, rinse off food and screw caps back on. <strong>Soft plastics advisory:</strong> if it scrunches, keep it out of the yellow bin and use a soft plastics collection where one is available.</p>
+          <div class="row-wrap mt">
+            <a href="waste-search.html?category=Plastic" class="btn btn-sm btn-secondary"><i data-lucide="search"></i> See all Plastic items</a>
+          </div>
+        </section>
+
+        <section id="paper" class="card guide-section" aria-labelledby="paperHeading">
+          <div class="guide-head">
+            <div class="icon-tile"><i data-lucide="file-text"></i></div>
+            <div>
+              <h2 id="paperHeading">Paper &amp; Cardboard Guide</h2>
+              <p class="muted">Clean paper, boxes and cartons.</p>
+            </div>
+          </div>
+          <div class="guide-lists">
+            <div class="guide-list">
+              <h3><i data-lucide="check-circle-2"></i> Recyclable</h3>
+              <ul>
+                <li><i data-lucide="check"></i><span>Flattened delivery boxes and cereal boxes</span></li>
+                <li><i data-lucide="check"></i><span>Newspapers, magazines and office paper</span></li>
+                <li><i data-lucide="check"></i><span>Milk and juice cartons</span></li>
+                <li><i data-lucide="check"></i><span>Paper bags and greeting cards (no foil or glitter)</span></li>
+              </ul>
+            </div>
+            <div class="guide-list prohibited">
+              <h3><i data-lucide="x-circle"></i> Not recyclable</h3>
+              <ul>
+                <li><i data-lucide="x"></i><span>Greasy pizza box bases and food wrappers</span></li>
+                <li><i data-lucide="x"></i><span>Used paper towels, napkins and tissues</span></li>
+                <li><i data-lucide="x"></i><span>Waxed paper and thermal receipts</span></li>
+                <li><i data-lucide="x"></i><span>Takeaway coffee cups</span></li>
+              </ul>
+            </div>
+          </div>
+          <p class="guide-tip"><strong>Tip:</strong> Flatten boxes completely and keep paper dry, because wet fibres break down and cannot be remade into paper.</p>
+          <div class="row-wrap mt">
+            <a href="waste-search.html?category=Paper%20%26%20Cardboard" class="btn btn-sm btn-secondary"><i data-lucide="search"></i> See all Paper &amp; Cardboard items</a>
+          </div>
+        </section>
+
+        <section id="glass" class="card guide-section" aria-labelledby="glassHeading">
+          <div class="guide-head">
+            <div class="icon-tile"><i data-lucide="wine"></i></div>
+            <div>
+              <h2 id="glassHeading">Glass Bottles &amp; Jars Guide</h2>
+              <p class="muted">Food and drink containers only.</p>
+            </div>
+          </div>
+          <div class="guide-lists">
+            <div class="guide-list">
+              <h3><i data-lucide="check-circle-2"></i> Accepted containers</h3>
+              <ul>
+                <li><i data-lucide="check"></i><span>Clear, green and brown drink bottles</span></li>
+                <li><i data-lucide="check"></i><span>Jam, sauce and pickle jars</span></li>
+                <li><i data-lucide="check"></i><span>Wine and beer bottles</span></li>
+                <li><i data-lucide="check"></i><span>Glass condiment containers, rinsed</span></li>
+              </ul>
+            </div>
+            <div class="guide-list prohibited">
+              <h3><i data-lucide="x-circle"></i> Prohibited glass</h3>
+              <ul>
+                <li><i data-lucide="x"></i><span>Drinking glasses and vases</span></li>
+                <li><i data-lucide="x"></i><span>Window glass and mirrors</span></li>
+                <li><i data-lucide="x"></i><span>Pyrex and other heat-resistant cookware</span></li>
+                <li><i data-lucide="x"></i><span>Ceramics and broken glass</span></li>
+              </ul>
+            </div>
+          </div>
+          <p class="guide-tip"><strong>Tip:</strong> Non-container glass melts at a different temperature and can ruin a whole batch of recycled glass. Wrap broken pieces securely before putting them in the red bin.</p>
+          <div class="row-wrap mt">
+            <a href="waste-search.html?category=Glass" class="btn btn-sm btn-secondary"><i data-lucide="search"></i> See all Glass items</a>
+          </div>
+        </section>
+
+        <section id="metal" class="card guide-section" aria-labelledby="metalHeading">
+          <div class="guide-head">
+            <div class="icon-tile"><i data-lucide="shield"></i></div>
+            <div>
+              <h2 id="metalHeading">Metal &amp; Aluminium Guide</h2>
+              <p class="muted">Aluminium cans, steel tins and clean foil.</p>
+            </div>
+          </div>
+          <div class="guide-lists">
+            <div class="guide-list">
+              <h3><i data-lucide="check-circle-2"></i> Accepted metals</h3>
+              <ul>
+                <li><i data-lucide="check"></i><span>Aluminium drink cans</span></li>
+                <li><i data-lucide="check"></i><span>Steel food tins, rinsed</span></li>
+                <li><i data-lucide="check"></i><span>Clean foil, scrunched into a golf-ball-sized ball</span></li>
+                <li><i data-lucide="check"></i><span>Clean foil trays</span></li>
+              </ul>
+            </div>
+            <div class="guide-list prohibited">
+              <h3><i data-lucide="x-circle"></i> Keep out of the yellow bin</h3>
+              <ul>
+                <li><i data-lucide="x"></i><span>Gas bottles, which can explode in trucks</span></li>
+                <li><i data-lucide="x"></i><span>Pots, pans and scrap metal</span></li>
+                <li><i data-lucide="x"></i><span>Wire coat hangers</span></li>
+                <li><i data-lucide="x"></i><span>Paint tins that are not empty</span></li>
+              </ul>
+            </div>
+          </div>
+          <p class="guide-tip"><strong>Tip:</strong> Empty liquids and rinse tins to prevent odours. Do not crush cans, because sorting machines identify them by shape.</p>
+          <div class="row-wrap mt">
+            <a href="waste-search.html?category=Metal" class="btn btn-sm btn-secondary"><i data-lucide="search"></i> See all Metal items</a>
+          </div>
+        </section>
+
+        <section id="ewaste" class="card guide-section warning" aria-labelledby="ewasteHeading">
+          <div class="guide-head">
+            <div class="icon-tile warning"><i data-lucide="laptop"></i></div>
+            <div>
+              <h2 id="ewasteHeading">E-Waste &amp; Batteries Guide</h2>
+              <p class="muted">Batteries, phones, computers and appliances.</p>
+            </div>
+          </div>
+          <div class="guide-lists">
+            <div class="guide-list">
+              <h3><i data-lucide="check-circle-2"></i> Take to a drop-off point</h3>
+              <ul>
+                <li><i data-lucide="check"></i><span>AA, AAA and button batteries, with terminals taped</span></li>
+                <li><i data-lucide="check"></i><span>Lithium-ion batteries and power banks</span></li>
+                <li><i data-lucide="check"></i><span>Phones, tablets, laptops and accessories</span></li>
+                <li><i data-lucide="check"></i><span>TVs, printers, cables and small appliances</span></li>
+              </ul>
+            </div>
+            <div class="guide-list prohibited">
+              <h3><i data-lucide="x-circle"></i> Never do this</h3>
+              <ul>
+                <li><i data-lucide="x"></i><span>Putting any battery in a household bin (fire hazard)</span></li>
+                <li><i data-lucide="x"></i><span>Leaving TVs or computers out on the kerb</span></li>
+                <li><i data-lucide="x"></i><span>Throwing away a device without wiping your data</span></li>
+                <li><i data-lucide="x"></i><span>Keeping swollen or damaged batteries indoors</span></li>
+              </ul>
+            </div>
+          </div>
+          <p class="guide-tip"><strong>Tip:</strong> E-waste contains valuable metals and hazardous substances. Lithium batteries in bins and trucks are a growing cause of fires.</p>
+          <div class="row-wrap mt">
+            <a href="locations.html?type=E-Waste" class="btn btn-sm btn-primary"><i data-lucide="map-pin"></i> Find E-Waste Drop-off Hubs</a>
+            <a href="locations.html?type=Batteries" class="btn btn-sm btn-secondary"><i data-lucide="battery-charging"></i> Find Battery Drop-off Points</a>
+            <a href="waste-search.html?category=E-Waste" class="btn btn-sm btn-secondary"><i data-lucide="search"></i> See all E-Waste items</a>
+          </div>
+        </section>
+
+        <section id="organics" class="card guide-section" aria-labelledby="organicsHeading">
+          <div class="guide-head">
+            <div class="icon-tile"><i data-lucide="leaf"></i></div>
+            <div>
+              <h2 id="organicsHeading">Organics (FOGO) Guide</h2>
+              <p class="muted">Food organics and garden organics.</p>
+            </div>
+          </div>
+          <div class="guide-lists">
+            <div class="guide-list">
+              <h3><i data-lucide="check-circle-2"></i> Accepted in the green bin</h3>
+              <ul>
+                <li><i data-lucide="check"></i><span>Fruit and vegetable scraps</span></li>
+                <li><i data-lucide="check"></i><span>Cooked food, meat and bones</span></li>
+                <li><i data-lucide="check"></i><span>Coffee grounds and tea leaves</span></li>
+                <li><i data-lucide="check"></i><span>Grass clippings, leaves and prunings</span></li>
+              </ul>
+            </div>
+            <div class="guide-list prohibited">
+              <h3><i data-lucide="x-circle"></i> Not accepted</h3>
+              <ul>
+                <li><i data-lucide="x"></i><span>Plastic bags, including "degradable" ones</span></li>
+                <li><i data-lucide="x"></i><span>Pet waste and kitty litter</span></li>
+                <li><i data-lucide="x"></i><span>Treated timber, soil and rocks</span></li>
+                <li><i data-lucide="x"></i><span>Nappies</span></li>
+              </ul>
+            </div>
+          </div>
+          <p class="guide-tip"><strong>Tip:</strong> FOGO services vary between councils. If yours does not offer one, home composting works for most scraps. Do not add meat to home compost.</p>
+          <div class="row-wrap mt">
+            <a href="waste-search.html?category=Organics" class="btn btn-sm btn-secondary"><i data-lucide="search"></i> See all Organics items</a>
+          </div>
+        </section>
+
+        <section id="general" class="card guide-section" aria-labelledby="generalHeading">
+          <div class="guide-head">
+            <div class="icon-tile"><i data-lucide="trash-2"></i></div>
+            <div>
+              <h2 id="generalHeading">General Waste Guide</h2>
+              <p class="muted">What belongs in the red landfill bin.</p>
+            </div>
+          </div>
+          <div class="guide-lists">
+            <div class="guide-list">
+              <h3><i data-lucide="check-circle-2"></i> Red bin items</h3>
+              <ul>
+                <li><i data-lucide="check"></i><span>Soft plastics, where no collection is available</span></li>
+                <li><i data-lucide="check"></i><span>Nappies, wipes and face masks</span></li>
+                <li><i data-lucide="check"></i><span>Polystyrene foam and cling wrap</span></li>
+                <li><i data-lucide="check"></i><span>Broken crockery, wrapped securely</span></li>
+              </ul>
+            </div>
+            <div class="guide-list prohibited">
+              <h3><i data-lucide="x-circle"></i> Never in the red bin</h3>
+              <ul>
+                <li><i data-lucide="x"></i><span>Batteries and e-waste</span></li>
+                <li><i data-lucide="x"></i><span>Paint, chemicals and motor oil</span></li>
+                <li><i data-lucide="x"></i><span>Gas bottles</span></li>
+                <li><i data-lucide="x"></i><span>Medicines (return these to a pharmacy)</span></li>
+              </ul>
+            </div>
+          </div>
+          <p class="guide-tip"><strong>Tip:</strong> Check the search directory before you bin something. Many items that look like rubbish have a dedicated recycling or drop-off option.</p>
+          <div class="row-wrap mt">
+            <a href="waste-search.html?category=General%20Waste" class="btn btn-sm btn-secondary"><i data-lucide="search"></i> See all General Waste items</a>
+          </div>
+        </section>
+
+        <section id="resin-codes" class="card guide-section" aria-labelledby="resinHeading">
+          <div class="guide-head">
+            <div class="icon-tile"><i data-lucide="recycle"></i></div>
+            <div>
+              <h2 id="resinHeading">Recycling Symbol Decoder</h2>
+              <p class="muted">The number in the triangle identifies the type of plastic. It does not mean an item is recyclable. Choose a code to decode it.</p>
+            </div>
+          </div>
+          <div class="resin-grid" role="group" aria-label="Plastic resin codes 1 to 7" id="resinButtons"></div>
+          <div class="resin-panel" id="resinPanel" aria-live="polite"></div>
+        </section>
       </div>
     </div>
-  </section>
-
-  <!-- RECYCLING GUIDE SECTIONS -->
-  <section class="section">
-    <div class="container" style="display: flex; flex-direction: column; gap: 4rem;">
-      
-      <!-- 1. PLASTIC SECTION -->
-      <div id="plastic" class="card" style="padding: 2.5rem; border-left: 6px solid var(--main-green);">
-        <div style="display: flex; align-items: center; gap: 1rem; margin-bottom: 1.5rem;">
-          <div style="width: 52px; height: 52px; background-color: var(--light-green); color: var(--primary-green); border-radius: var(--radius-md); display: flex; align-items: center; justify-content: center; font-size: 1.5rem;">
-            <i data-lucide="package"></i>
-          </div>
-          <div>
-            <h2 style="font-size: 2rem;">Plastic Waste Guide</h2>
-            <p style="color: var(--secondary-text);">Sorting rigid plastic containers vs soft film plastic.</p>
-          </div>
-        </div>
-
-        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; margin-bottom: 2rem;">
-          <div style="background-color: var(--soft-green); padding: 1.5rem; border-radius: var(--radius-md); border: 1px solid var(--border-green);">
-            <h4 style="color: var(--primary-green); margin-bottom: 1rem; display: flex; align-items: center; gap: 0.5rem;">
-              <i data-lucide="check-circle-2"></i> What CAN Be Recycled
-            </h4>
-            <ul style="list-style: none; display: flex; flex-direction: column; gap: 0.5rem; font-size: 0.95rem;">
-              <li>• Plastic water & soda bottles (PET #1)</li>
-              <li>• Milk jugs & detergent bottles (HDPE #2)</li>
-              <li>• Rigid plastic food containers & punnets</li>
-              <li>• Shampoo & body wash bottles (rinsed)</li>
-            </ul>
-          </div>
-
-          <div style="background-color: var(--error-bg); padding: 1.5rem; border-radius: var(--radius-md); border: 1px solid #FCA5A5;">
-            <h4 style="color: var(--error-text); margin-bottom: 1rem; display: flex; align-items: center; gap: 0.5rem;">
-              <i data-lucide="x-circle"></i> What CANNOT Be Recycled (Kerbside)
-            </h4>
-            <ul style="list-style: none; display: flex; flex-direction: column; gap: 0.5rem; font-size: 0.95rem; color: var(--error-text);">
-              <li>• Plastic grocery bags & soft wrappers</li>
-              <li>• Polystyrene / Styrofoam food boxes</li>
-              <li>• Plastic cutlery & straws</li>
-              <li>• Garden hoses & PVC piping</li>
-            </ul>
-          </div>
-        </div>
-
-        <div style="background-color: #F8FAF8; padding: 1.25rem 1.5rem; border-radius: var(--radius-md); font-size: 0.95rem; border: 1px solid var(--border-light);">
-          <strong>Preparation Tip:</strong> Always empty liquids, rinse food residue, and leave caps screwed on tight so they don't fall through sorting screens.
-        </div>
-      </div>
-
-      <!-- 2. PAPER & CARDBOARD SECTION -->
-      <div id="paper" class="card" style="padding: 2.5rem; border-left: 6px solid var(--primary-green);">
-        <div style="display: flex; align-items: center; gap: 1rem; margin-bottom: 1.5rem;">
-          <div style="width: 52px; height: 52px; background-color: var(--light-green); color: var(--primary-green); border-radius: var(--radius-md); display: flex; align-items: center; justify-content: center; font-size: 1.5rem;">
-            <i data-lucide="file-text"></i>
-          </div>
-          <div>
-            <h2 style="font-size: 2rem;">Paper & Cardboard Guide</h2>
-            <p style="color: var(--secondary-text);">Proper handling of clean paper, boxes, and cartons.</p>
-          </div>
-        </div>
-
-        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; margin-bottom: 2rem;">
-          <div style="background-color: var(--soft-green); padding: 1.5rem; border-radius: var(--radius-md); border: 1px solid var(--border-green);">
-            <h4 style="color: var(--primary-green); margin-bottom: 1rem; display: flex; align-items: center; gap: 0.5rem;">
-              <i data-lucide="check-circle-2"></i> Recyclable Examples
-            </h4>
-            <ul style="list-style: none; display: flex; flex-direction: column; gap: 0.5rem; font-size: 0.95rem;">
-              <li>• Flattened shipping boxes & cereal boxes</li>
-              <li>• Newspapers, magazines & office paper</li>
-              <li>• Milk & juice cartons (liquid paperboard)</li>
-              <li>• Paper bags & greeting cards</li>
-            </ul>
-          </div>
-
-          <div style="background-color: var(--error-bg); padding: 1.5rem; border-radius: var(--radius-md); border: 1px solid #FCA5A5;">
-            <h4 style="color: var(--error-text); margin-bottom: 1rem; display: flex; align-items: center; gap: 0.5rem;">
-              <i data-lucide="x-circle"></i> Non-Recyclable Examples
-            </h4>
-            <ul style="list-style: none; display: flex; flex-direction: column; gap: 0.5rem; font-size: 0.95rem; color: var(--error-text);">
-              <li>• Greasy pizza box bottoms & food wrappers</li>
-              <li>• Used paper towels, napkins & tissues</li>
-              <li>• Waxed paper & thermal receipt paper</li>
-              <li>• Shredded paper (unless bagged properly)</li>
-            </ul>
-          </div>
-        </div>
-
-        <div style="background-color: #F8FAF8; padding: 1.25rem 1.5rem; border-radius: var(--radius-md); font-size: 0.95rem; border: 1px solid var(--border-light);">
-          <strong>Preparation Tip:</strong> Flatten cardboard boxes completely. Keep paper dry; wet paper fibers break down and cannot be remanufactured.
-        </div>
-      </div>
-
-      <!-- 3. GLASS SECTION -->
-      <div id="glass" class="card" style="padding: 2.5rem; border-left: 6px solid var(--main-green);">
-        <div style="display: flex; align-items: center; gap: 1rem; margin-bottom: 1.5rem;">
-          <div style="width: 52px; height: 52px; background-color: var(--light-green); color: var(--primary-green); border-radius: var(--radius-md); display: flex; align-items: center; justify-content: center; font-size: 1.5rem;">
-            <i data-lucide="wine"></i>
-          </div>
-          <div>
-            <h2 style="font-size: 2rem;">Glass Bottles & Jars Guide</h2>
-            <p style="color: var(--secondary-text);">Sorting glass food and beverage containers safely.</p>
-          </div>
-        </div>
-
-        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; margin-bottom: 2rem;">
-          <div style="background-color: var(--soft-green); padding: 1.5rem; border-radius: var(--radius-md); border: 1px solid var(--border-green);">
-            <h4 style="color: var(--primary-green); margin-bottom: 1rem;">Recyclable Containers</h4>
-            <p style="font-size: 0.95rem; line-height: 1.6;">
-              Clear, green, and brown glass drink bottles, condiment jars, and glass sauce containers.
-            </p>
-          </div>
-
-          <div style="background-color: var(--warning-bg); padding: 1.5rem; border-radius: var(--radius-md); border: 1px solid #FDE68A;">
-            <h4 style="color: var(--warning-text); margin-bottom: 1rem; display: flex; align-items: center; gap: 0.5rem;">
-              <i data-lucide="alert-triangle"></i> Broken Glass & Non-Container Glass Warning
-            </h4>
-            <p style="font-size: 0.95rem; color: var(--warning-text); line-height: 1.6;">
-              Do NOT place drinking glasses, window glass, mirrors, Pyrex cookware, or broken light bulbs in recycling bins. They melt at different temperatures and ruin recycled glass batches.
-            </p>
-          </div>
-        </div>
-      </div>
-
-      <!-- 4. METAL SECTION -->
-      <div id="metal" class="card" style="padding: 2.5rem; border-left: 6px solid var(--primary-green);">
-        <div style="display: flex; align-items: center; gap: 1rem; margin-bottom: 1.5rem;">
-          <div style="width: 52px; height: 52px; background-color: var(--light-green); color: var(--primary-green); border-radius: var(--radius-md); display: flex; align-items: center; justify-content: center; font-size: 1.5rem;">
-            <i data-lucide="shield"></i>
-          </div>
-          <div>
-            <h2 style="font-size: 2rem;">Metal & Aluminium Guide</h2>
-            <p style="color: var(--secondary-text);">Aluminium cans, steel tins, and clean foil.</p>
-          </div>
-        </div>
-
-        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem;">
-          <div style="background-color: var(--soft-green); padding: 1.5rem; border-radius: var(--radius-md); border: 1px solid var(--border-green);">
-            <h4 style="color: var(--primary-green); margin-bottom: 0.75rem;">Accepted Metals</h4>
-            <ul style="list-style: none; display: flex; flex-direction: column; gap: 0.5rem; font-size: 0.95rem;">
-              <li>• Aluminium beverage cans (soda, beer, sparkling water)</li>
-              <li>• Steel & tin food cans (soup, pet food, vegetables)</li>
-              <li>• Clean aluminium foil scrunched into a golf ball size</li>
-            </ul>
-          </div>
-          <div style="background-color: var(--soft-green); padding: 1.5rem; border-radius: var(--radius-md); border: 1px solid var(--border-green);">
-            <h4 style="color: var(--primary-green); margin-bottom: 0.75rem;">Preparation & Tips</h4>
-            <p style="font-size: 0.95rem; line-height: 1.6;">
-              Empty liquids completely. Rinse steel food tins to prevent odor. Pull-tabs can stay attached to cans.
-            </p>
-          </div>
-        </div>
-      </div>
-
-      <!-- 5. E-WASTE SECTION -->
-      <div id="ewaste" class="card" style="padding: 2.5rem; border-left: 6px solid var(--warning);">
-        <div style="display: flex; align-items: center; gap: 1rem; margin-bottom: 1.5rem;">
-          <div style="width: 52px; height: 52px; background-color: var(--warning-bg); color: var(--warning-text); border-radius: var(--radius-md); display: flex; align-items: center; justify-content: center; font-size: 1.5rem;">
-            <i data-lucide="laptop"></i>
-          </div>
-          <div>
-            <h2 style="font-size: 2rem;">E-Waste & Electronics Guide</h2>
-            <p style="color: var(--secondary-text);">Batteries, phones, computers, and electrical appliances.</p>
-          </div>
-        </div>
-
-        <p style="font-size: 1.05rem; line-height: 1.7; margin-bottom: 1.5rem;">
-          Electronic waste contains valuable metals (gold, copper, silver) alongside hazardous substances (lithium, lead, mercury). <strong>Never put electronic waste or batteries in regular household bins!</strong>
-        </p>
-
-        <div style="display: flex; gap: 1rem; flex-wrap: wrap;">
-          <a href="locations.html?type=E-Waste" class="btn btn-primary"><i data-lucide="map-pin"></i> Find Nearby E-Waste Drop-off Hub</a>
-          <a href="locations.html?type=Batteries" class="btn btn-secondary"><i data-lucide="battery-charging"></i> Find Battery Drop-off Points</a>
-        </div>
-      </div>
-
-    </div>
-  </section>
-
-  <!-- FOOTER -->
   </main>
 
   <footer class="footer">
