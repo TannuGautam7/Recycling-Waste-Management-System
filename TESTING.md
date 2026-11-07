@@ -5,7 +5,6 @@
 - **Run on:** 7 November 2026
 - **Browser:** Headless Chrome 156.0.8078.80, driven by Playwright, on Windows_NT 10.0.26300
 - **Accessibility scan:** axe-core, WCAG 2.0 and 2.1 levels A and AA
-- **Screenshots:** [docs/screenshots/](docs/screenshots/), desktop (1280px) and mobile (375px) for every page
 
 The "Actual result" column is written by the test script from what it observed during the run. To repeat the run:
 
@@ -14,7 +13,7 @@ npm install --no-save playwright-core axe-core
 node tests/e2e.js
 ```
 
-The script serves the site itself and rewrites this file and the screenshots. Installing those two packages is only needed for testing: the website has no dependencies or build step.
+The script serves the site itself and rewrites this file. Add `--shots` to also save desktop and mobile screenshots to `docs/screenshots/`. Installing those two packages is only needed for testing: the website has no dependencies or build step.
 
 ## Test cases
 

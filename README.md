@@ -144,8 +144,7 @@ Many residents across Australia struggle with conflicting rules about everyday h
 │   ├── contact.html           # Contact details and enquiry form
 │   ├── login.html             # Login and registration
 │   └── dashboard.html         # Resident and administrator dashboards
-├── tests/e2e.js               # Automated browser checks (development only)
-└── docs/screenshots/          # Desktop and mobile screenshots of every page
+└── tests/e2e.js               # Automated browser checks (development only)
 ```
 
 ---
@@ -186,7 +185,7 @@ Many residents across Australia struggle with conflicting rules about everyday h
 
 ## 🧪 9. Testing
 
-See [TESTING.md](TESTING.md) for the test cases and latest results, and [docs/screenshots/](docs/screenshots/) for desktop and mobile screenshots.
+See [TESTING.md](TESTING.md) for the test cases and latest results.
 
 ---
 

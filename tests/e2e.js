@@ -1,6 +1,6 @@
 /*
  * End-to-end checks for EcoRecycle Australia.
- * Writes TESTING.md from what it actually observes, and screenshots to docs/screenshots/.
+ * Writes TESTING.md from what it actually observes; with --shots, also saves screenshots to docs/screenshots/.
  *
  * This is a development tool only: the site itself has no build step or dependencies.
  *   npm install --no-save playwright-core axe-core
@@ -1426,7 +1426,6 @@ function writeReport(chromeVersion) {
 - **Run on:** ${new Date().toLocaleDateString('en-AU', { day: 'numeric', month: 'long', year: 'numeric' })}
 - **Browser:** Headless Chrome ${chromeVersion}, driven by Playwright, on ${os.type()} ${os.release()}
 - **Accessibility scan:** axe-core, WCAG 2.0 and 2.1 levels A and AA
-- **Screenshots:** [docs/screenshots/](docs/screenshots/), desktop (1280px) and mobile (375px) for every page
 
 The "Actual result" column is written by the test script from what it observed during the run. To repeat the run:
 
@@ -1435,7 +1434,7 @@ npm install --no-save playwright-core axe-core
 node tests/e2e.js
 \`\`\`
 
-The script serves the site itself and rewrites this file and the screenshots. Installing those two packages is only needed for testing: the website has no dependencies or build step.
+The script serves the site itself and rewrites this file. Add `--shots` to also save desktop and mobile screenshots to `docs/screenshots/`. Installing those two packages is only needed for testing: the website has no dependencies or build step.
 
 ## Test cases
 
@@ -1483,7 +1482,7 @@ async function main() {
     return 'No console errors or uncaught exceptions recorded.';
   });
 
-  if (!process.argv.includes('--no-shots')) await screenshots();
+  if (process.argv.includes('--shots')) await screenshots();
   const { passed, total } = writeReport(chromeVersion);
   console.log(`\n${passed}/${total} passed`);
   await browser.close();
