@@ -859,25 +859,14 @@ ACTIONS['toggle-password'] = (trigger) => {
   renderIcons();
 };
 
-ACTIONS['use-demo'] = (trigger) => {
-  selectAuthTab('login');
-  clearFormErrors($('#loginForm'));
-  $('#loginEmail').value = trigger.dataset.email;
-  $('#loginPassword').value = trigger.dataset.password;
-  $('#loginForm button[type="submit"]').focus();
-  showToast('Demo details filled in. Press Sign In to continue.', 'info');
-};
-
 function authFailureMessage(error) {
   return error && error.message === 'insecure-context'
     ? 'Secure sign-in needs HTTPS or localhost. Please open the site from one of those addresses.'
     : 'Sign-in is unavailable right now. Please try again.';
 }
-
 function initAuthPage() {
   const loginForm = document.getElementById('loginForm');
   if (!loginForm) return;
-
   if (currentUser()) {
     window.location.replace(sitePath('pages/dashboard.html'));
     return;
@@ -893,17 +882,14 @@ function initAuthPage() {
   const syncTabToHash = () => selectAuthTab(window.location.hash === '#register' ? 'register' : 'login');
   window.addEventListener('hashchange', syncTabToHash);
   syncTabToHash();
-
   const remembered = Store.read(KEYS.rememberedEmail, '');
   if (typeof remembered === 'string' && remembered) {
     $('#loginEmail').value = remembered;
     $('#rememberMe').checked = true;
   }
-
   loginForm.addEventListener('submit', handleLoginSubmit);
   $('#registerForm').addEventListener('submit', handleRegisterSubmit);
 }
-
 async function handleLoginSubmit(event) {
   event.preventDefault();
   const form = event.currentTarget;
@@ -937,7 +923,6 @@ async function handleLoginSubmit(event) {
     submit.disabled = false;
   }
 }
-
 async function handleRegisterSubmit(event) {
   event.preventDefault();
   const form = event.currentTarget;
@@ -945,7 +930,6 @@ async function handleRegisterSubmit(event) {
   const email = $('#regEmail').value.trim();
   const password = $('#regPass').value;
   const confirm = $('#regConfirmPass').value;
-
   const errors = {};
   if (name.length < 2) errors.regName = 'Enter your full name.';
   if (!email) errors.regEmail = 'Enter your email address.';
@@ -981,13 +965,11 @@ function initMobileMenu() {
   const toggle = document.getElementById('mobileMenuToggle');
   const menu = document.getElementById('navCollapse');
   if (!toggle || !menu) return;
-
   const setOpen = (open) => {
     menu.classList.toggle('mobile-active', open);
     toggle.setAttribute('aria-expanded', String(open));
     toggle.setAttribute('aria-label', open ? 'Close navigation menu' : 'Open navigation menu');
   };
-
   toggle.addEventListener('click', () => setOpen(!menu.classList.contains('mobile-active')));
   menu.addEventListener('click', (event) => {
     if (event.target.closest('a')) setOpen(false);
@@ -999,7 +981,6 @@ function initMobileMenu() {
     }
   });
 }
-
 /** Moves focus directly, so the link also works on the 404 page, which uses a <base> tag. */
 function initSkipLink() {
   const link = $('.skip-link');
@@ -1011,7 +992,6 @@ function initSkipLink() {
     main.scrollIntoView();
   });
 }
-
 /** Swaps the Login button for the dashboard and logout controls when signed in. */
 function renderNavActions() {
   const container = document.getElementById('navActions');
@@ -1023,13 +1003,11 @@ function renderNavActions() {
     </a>
     <button type="button" class="btn btn-dark btn-sm" data-action="logout"><i data-lucide="log-out"></i> Logout</button>`;
 }
-
 /* ==========================================================================
    7. SCHEDULE
    Suburb Zone 4: yellow and green bins every Tuesday, red bin on alternate
    Tuesdays. Dates are worked out from today, so the calendar never goes stale.
    ========================================================================== */
-
 const COLLECTION_WEEKDAY = 2; // Tuesday
 const RED_BIN_ANCHOR = new Date(2026, 0, 6); // a Tuesday with a red bin collection
 
@@ -1053,7 +1031,6 @@ function nextCollectionDate(from = new Date()) {
   date.setDate(date.getDate() + days);
   return date;
 }
-
 function upcomingCollections(count) {
   const first = nextCollectionDate();
   return Array.from({ length: count }, (_, index) => {
@@ -1061,15 +1038,12 @@ function upcomingCollections(count) {
     return { date, bins: binsOn(date) };
   });
 }
-
 function nextDateForBin(bin) {
   return upcomingCollections(4).find((collection) => collection.bins.includes(bin)).date;
 }
-
 const LONG_DATE = { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' };
 const SHORT_DATE = { weekday: 'short', day: 'numeric', month: 'short' };
 const formatDateObj = (date, options) => date.toLocaleDateString('en-AU', options);
-
 function collectionRelativeLabel(date) {
   const today = new Date(new Date().getFullYear(), new Date().getMonth(), new Date().getDate());
   const days = Math.round((date - today) / (24 * 60 * 60 * 1000));
@@ -1077,17 +1051,13 @@ function collectionRelativeLabel(date) {
   if (days === 1) return 'Tomorrow';
   return `In ${days} days`;
 }
-
 function binDots(bins) {
   return bins.map((bin) => `<span class="dot ${BIN_INFO[bin].dot}" aria-hidden="true"></span>`).join('');
 }
-
 function binNames(bins) {
   return bins.map((bin) => `<span><span class="dot ${BIN_INFO[bin].dot}" aria-hidden="true"></span>${esc(BIN_INFO[bin].label)}</span>`).join('');
 }
-
 /* ---- Reminders ---- */
-
 const reminderOwner = () => {
   const user = currentUser();
   return user ? user.id : GUEST_KEY;
@@ -1099,7 +1069,6 @@ function reminderButtonHtml(iso) {
     <i data-lucide="${active ? 'bell-ring' : 'bell'}"></i> ${active ? 'Reminder Set' : 'Set Reminder'}
   </button>`;
 }
-
 ACTIONS['toggle-reminder'] = (trigger) => {
   const iso = trigger.dataset.date;
   const owner = reminderOwner();
@@ -1189,13 +1158,10 @@ function renderCollectionWidgets() {
   });
   renderIcons();
 }
-
 /* ==========================================================================
    8. SEARCH
    ========================================================================== */
-
 /* ---- Matching ---- */
-
 function stemWord(word) {
   if (word.length > 4 && word.endsWith('ies')) return `${word.slice(0, -3)}y`;
   if (/(ch|sh|x|ss)es$/.test(word)) return word.slice(0, -2);
@@ -1215,7 +1181,6 @@ function queryTokens(query) {
 
 /** A token matches a word when the word starts with it, so results appear while typing. */
 const tokenMatches = (token, words) => words.some((word) => word.startsWith(token) || stemWord(word) === token);
-
 /** Relevance score: 0 = no match. Every token must match somewhere in the rule. */
 function scoreRule(rule, tokens) {
   const nameWords = wordsOf(rule.name);
@@ -1229,7 +1194,6 @@ function scoreRule(rule, tokens) {
   if (tokens.length && nameWords[0] && nameWords[0].startsWith(tokens[0])) score += 5;
   return score;
 }
-
 function searchRules(query, rules = getRules()) {
   const tokens = queryTokens(query);
   if (!tokens.length) return [];
@@ -1239,9 +1203,7 @@ function searchRules(query, rules = getRules()) {
     .sort((a, b) => b.score - a.score || a.rule.name.localeCompare(b.rule.name))
     .map((entry) => entry.rule);
 }
-
 /* ---- Shared markup ---- */
-
 function statusBadge(status) {
   const info = RULE_STATUS[status] || RULE_STATUS['not-recyclable'];
   return `<span class="badge ${info.badge}"><i data-lucide="${info.icon}"></i> ${esc(info.label)}</span>`;
@@ -1269,13 +1231,10 @@ function itemCardHtml(rule, { open = false, canLog = false } = {}) {
       </div>
     </article>`;
 }
-
 /* ---- Combobox suggestions, on the home page and the search page ---- */
-
 function initSuggestions(input, list, onPick) {
   let options = [];
   let activeIndex = -1;
-
   const close = () => {
     list.hidden = true;
     list.innerHTML = '';
@@ -1349,7 +1308,6 @@ function initSuggestions(input, list, onPick) {
   });
   return { close };
 }
-
 /** Home page: the form submits to pages/waste-search.html?q=... (it works without JS too). */
 function initQuickSearch() {
   const form = document.getElementById('quickSearchForm');
@@ -1369,11 +1327,8 @@ function initHomeStats() {
     el.textContent = rules.filter((rule) => rule.category === el.dataset.categoryCount).length;
   });
 }
-
 /* ---- Waste Search page ---- */
-
 const searchState = { query: '', category: 'all' };
-
 function syncSearchUrl() {
   const params = new URLSearchParams();
   if (searchState.query) params.set('q', searchState.query);
@@ -1381,11 +1336,9 @@ function syncSearchUrl() {
   const qs = params.toString();
   window.history.replaceState(null, '', qs ? `?${qs}` : window.location.pathname);
 }
-
 function renderSearchResults() {
   const grid = document.getElementById('catalogueGrid');
   if (!grid) return;
-
   const rules = getRules();
   const hasQuery = queryTokens(searchState.query).length > 0;
   const matches = hasQuery
@@ -1397,7 +1350,6 @@ function renderSearchResults() {
   const canLog = Boolean(user && user.role === 'resident');
   grid.innerHTML = visible.map((rule) => itemCardHtml(rule, { open: hasQuery && visible.length <= 3, canLog })).join('');
   grid.hidden = visible.length === 0;
-
   const noneAtAll = hasQuery && matches.length === 0;
   const onlyFilteredOut = visible.length === 0 && !noneAtAll;
 
@@ -1409,7 +1361,6 @@ function renderSearchResults() {
       ? `No ${searchState.category} items match "${searchState.query.trim()}", but ${matches.length} ${matches.length === 1 ? 'item matches' : 'items match'} in other categories.`
       : `There are no ${searchState.category} items published at the moment.`;
   }
-
   // One request form: it sits in the no-results panel when needed, otherwise in the banner.
   const form = document.getElementById('requestForm');
   const nameInput = $('#reqName');
@@ -1437,7 +1388,6 @@ function renderSearchResults() {
   $$('[data-action="popular-search"]').forEach((chip) => {
     chip.setAttribute('aria-pressed', String(chip.dataset.search === searchState.query.trim().toLowerCase()));
   });
-
   renderIcons();
 }
 
@@ -1451,7 +1401,6 @@ ACTIONS['filter-category'] = (trigger) => {
   searchState.category = trigger.dataset.category;
   runSearch();
 };
-
 ACTIONS['popular-search'] = (trigger) => {
   searchState.query = trigger.dataset.search;
   $('#wasteSearchInput').value = trigger.dataset.search;

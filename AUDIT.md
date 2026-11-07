@@ -107,7 +107,7 @@ Status after the `final-polish` work. Evidence for each area is in [TESTING.md](
 | F11, F12, F13, F14 | Fixed | Live stats and counters, full log tab, notification toggles, settings, rule status field, and Delete with confirmation |
 | F15, F16 | Fixed | Dates are calculated from today; profile data is rendered only after the guard passes |
 | F17 | Fixed in part | Set Reminder now saves. **Sync with Phone Calendar was removed**, because it is not a README feature |
-| F18 | Fixed in part | Remember me, the password toggle, logout and demo labels work. **Forgot Password was removed**, because no email can be sent |
+| F18 | Fixed in part | Remember me, the password toggle and logout work. **The demo-account panel was later removed from the login page at the owner's request**; the accounts are listed in the README. **Forgot Password was removed**, because no email can be sent |
 | F19, F20, F25 | Fixed | Validated contact form, stored enquiries, live category counts, and details aligned with the README |
 | F21, F22, F23, F24 | Fixed | 7 guide sections, resin decoder, category navigation, ARIA tabs, and reserved fictional phone numbers |
 | S1, S3 | Fixed | All dynamic text is escaped, and inline handlers are replaced by delegated `data-action` events |

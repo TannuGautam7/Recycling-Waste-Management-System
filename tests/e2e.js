@@ -682,15 +682,13 @@ async function authTests() {
     return 'Both demo accounts route to the correct view.';
   });
 
-  await test('AUTH-03', 'Login', 'Inspect the demo account panel.', 'Accounts are labelled as dummy demo accounts; autofill works.', async () => {
+  await test('AUTH-03', 'Login', 'Inspect the login page for demo credentials.', 'No account emails or passwords are shown on the page.', async () => {
     const { context, page } = await session();
     await page.goto(`${BASE}pages/login.html`);
-    const text = await page.textContent('.demo-card');
-    ok(/dummy/i.test(text) && text.includes(ALEX[0]) && text.includes(ADMIN[0]), 'labelling');
-    await page.click('[data-action="use-demo"][data-email="admin@ecorecycle.org"]');
-    ok(await page.inputValue('#loginEmail') === ADMIN[0], 'autofill');
+    const html = await page.content();
+    ok(!html.includes(ALEX[1]) && !html.includes(ADMIN[1]) && !html.includes(ADMIN[0]), 'credentials on page');
     await context.close();
-    return 'Panel says "dummy accounts"; "Use demo" fills the form.';
+    return 'No demo emails or passwords appear in the login page.';
   });
 
   await test('AUTH-04', 'Register', 'Submit empty, then a bad email, weak password, mismatch, and an existing email.', 'A specific inline error for each rule.', async () => {

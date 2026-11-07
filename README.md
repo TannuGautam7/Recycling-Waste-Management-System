@@ -92,7 +92,7 @@ Many residents across Australia struggle with conflicting rules about everyday h
 
 ## 🔑 3. Demo Accounts
 
-**These are dummy accounts for testing only. They do not belong to real people.** The login page also lists them.
+**These are dummy accounts for testing only. They do not belong to real people.**
 
 | Role | Email | Password | Opens |
 |---|---|---|---|

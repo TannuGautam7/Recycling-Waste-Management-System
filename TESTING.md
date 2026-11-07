@@ -2,7 +2,7 @@
 
 **Result: 69 of 69 tests passed.**
 
-- **Run on:** 6 November 2026
+- **Run on:** 7 November 2026
 - **Browser:** Headless Chrome 156.0.8078.80, driven by Playwright, on Windows_NT 10.0.26300
 - **Accessibility scan:** axe-core, WCAG 2.0 and 2.1 levels A and AA
 - **Screenshots:** [docs/screenshots/](docs/screenshots/), desktop (1280px) and mobile (375px) for every page
@@ -51,10 +51,10 @@ The script serves the site itself and rewrites this file and the screenshots. In
 | LOC-08 | Locations | Allow the browser to share a location, then click Use My Location. | Distances recalculate and hubs re-sort. | From Melbourne, the nearest hub becomes "Brunswick Circular Drop-off" (4.8 km). | Pass |
 | CONT-01 | Contact | Submit the empty form. | Inline errors on every required field, with focus on the first. | 6 inline errors, aria-invalid set, focus on Full Name. | Pass |
 | CONT-02 | Contact | Enter a bad email, a bad phone number and a short message. | Specific error for each. | "Your message needs at least 20 characters (9 so far)." | Pass |
-| CONT-03 | Contact | Submit a valid enquiry. | Success confirmation, toast, and the enquiry stored in localStorage. | Confirmation with reference ENQ-869938; enquiry stored. | Pass |
+| CONT-03 | Contact | Submit a valid enquiry. | Success confirmation, toast, and the enquiry stored in localStorage. | Confirmation with reference ENQ-940982; enquiry stored. | Pass |
 | AUTH-01 | Login | Sign in with a wrong password, then an unknown email. | Clear inline error; no session is created. | "Incorrect email or password. Please check your details and try again."; no session. | Pass |
 | AUTH-02 | Login | Sign in with each demo account. | Resident reaches the resident view; admin reaches the admin view. | Both demo accounts route to the correct view. | Pass |
-| AUTH-03 | Login | Inspect the demo account panel. | Accounts are labelled as dummy demo accounts; autofill works. | Panel says "dummy accounts"; "Use demo" fills the form. | Pass |
+| AUTH-03 | Login | Inspect the login page for demo credentials. | No account emails or passwords are shown on the page. | No demo emails or passwords appear in the login page. | Pass |
 | AUTH-04 | Register | Submit empty, then a bad email, weak password, mismatch, and an existing email. | A specific inline error for each rule. | Empty, format, password rule, mismatch and duplicate errors all shown inline. | Pass |
 | AUTH-05 | Register | Create an account; inspect storage; log out; sign back in. | Resident created with a salted SHA-256 hash, and no plain-text password. | Resident stored with 64-hex hash and 32-hex salt, no plain text; can sign back in. | Pass |
 | AUTH-06 | Login | Use the show/hide password toggle. | The input type and the button state and label change. | Type switches between password and text; aria-pressed and label update. | Pass |
@@ -67,7 +67,7 @@ The script serves the site itself and rewrites this file and the screenshots. In
 | DASH-05 | Dashboard | Toggle notification switches and refresh; set a reminder; update settings. | Toggles, reminders and profile changes persist. | SMS toggle, reminder and address all persisted after refresh. | Pass |
 | DASH-06 | Dashboard | Open the schedule tab and check each bin date. | Yellow and green are the next Tuesday; red is within two weeks. | Yellow: Tuesday 10 November 2026; green: Tuesday 10 November 2026; red: Tuesday 10 November 2026. | Pass |
 | ADM-01 | Dashboard (admin) | Create a rule with empty fields, then valid values; search for it publicly. | Validation runs; the rule appears in Waste Search and the counter increases. | Rule counter 58 to 59; "Foam Yoga Mat" live with 2 steps. | Pass |
-| ADM-02 | Dashboard (admin) | Edit a rule's disposal method and search for it publicly. | Change is saved and live, with a verification note. | Public card shows "Green FOGO Bin"; note "Updated by Tanu (Admin) • 6 Nov 2026". | Pass |
+| ADM-02 | Dashboard (admin) | Edit a rule's disposal method and search for it publicly. | Change is saved and live, with a verification note. | Public card shows "Green FOGO Bin"; note "Updated by Tanu (Admin) • 7 Nov 2026". | Pass |
 | ADM-03 | Dashboard (admin) | Click Delete: cancel, press Esc, then confirm. | A confirm dialog appears; only confirmation deletes, and the rule leaves public search. | Cancel and Esc keep the rule; confirming removes it from public search. | Pass |
 | ADM-04 | Dashboard (admin) + Waste Search | With Waste Search open in a second tab, click Approve & Publish on a classified request. | One click publishes it; it appears in the open search tab without a refresh; counters update. | "Empty Aerosol Spray Can" appeared in the open tab; rules 58 to 59, pending 4 to 3. | Pass |
 | ADM-05 | Waste Search + Dashboard (admin) | Guest submits "light bulb" with category Not sure; admin approves, classifies and publishes. | Admin must classify it first, so nothing inaccurate is published; the item is then searchable. | Classification enforced; "light bulb" now public with badge "Not Recyclable". | Pass |
